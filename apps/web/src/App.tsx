@@ -4228,15 +4228,51 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
                             📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
                           </h4>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                            {inspectStudent.subjectGrades?.map((sg) => (
-                              <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
-                                <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
-                                  {sg.score.toFixed(1)} / 20
-                                </span>
-                              </div>
-                            ))}
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "10px" }}>
+                            {inspectStudent.subjectGrades?.map((sg) => {
+                              const isHigh = sg.score >= 12;
+                              const isMedium = sg.score >= 10;
+                              const bgColor = isHigh ? "#f0fdf4" : isMedium ? "#fffbeb" : "#fef2f2";
+                              const textColor = isHigh ? "#15803d" : isMedium ? "#b45309" : "#dc2626";
+                              const borderColor = isHigh ? "#bbf7d0" : isMedium ? "#fde68a" : "#fecaca";
+
+                              return (
+                                <div
+                                  key={sg.subject}
+                                  style={{
+                                    background: "var(--bg-subtle)",
+                                    border: "1px solid var(--border-light)",
+                                    borderLeft: `4px solid ${textColor}`,
+                                    padding: "10px 14px",
+                                    borderRadius: "var(--radius-sm)",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    gap: "12px",
+                                    minHeight: "48px",
+                                  }}
+                                >
+                                  <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", flex: 1, wordBreak: "break-word", lineHeight: 1.25 }}>
+                                    {sg.subject}
+                                  </span>
+                                  <span
+                                    style={{
+                                      background: bgColor,
+                                      color: textColor,
+                                      border: `1px solid ${borderColor}`,
+                                      padding: "3px 8px",
+                                      borderRadius: "12px",
+                                      fontWeight: 800,
+                                      fontSize: "0.82rem",
+                                      whiteSpace: "nowrap",
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {sg.score.toFixed(1)} / 20
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 
