@@ -790,8 +790,11 @@ export default function App() {
             <button
               className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
               onClick={() => setDispatchSubTab("kanban")}
+              disabled={scenarios.length === 0}
+              style={{ opacity: scenarios.length === 0 ? 0.5 : 1, cursor: scenarios.length === 0 ? "not-allowed" : "pointer" }}
+              title={scenarios.length === 0 ? "Générez d'abord des scénarios dans l'Étape 2" : "Consulter les scénarios"}
             >
-              📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : ""}
+              📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : "(0 - à générer)"}
             </button>
           </div>
 
@@ -1012,17 +1015,66 @@ export default function App() {
           {/* SUBTAB 2: PARAMÉTRAGE DES PONDÉRATIONS */}
           {dispatchSubTab === "weights" && (
             <div className="weights-panel">
-              <div className="section-heading">
+              <div className="section-heading" style={{ marginBottom: "18px" }}>
                 <div>
                   <p className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</p>
                   <h3>💡 Réglage des critères d'équilibrage des classes</h3>
                   <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                    Ajustez l'importance relative des 4 objectifs ci-dessous. Le moteur d'IA générera des propositions équilibrées en fonction de vos priorités d'établissement.
+                    Configurez vos cibles d'établissement puis ajustez l'importance relative des critères ci-dessous.
                   </p>
                 </div>
-                <label className="toggle-pill" data-tooltip="Permet de simuler des modifications d'effectifs ou d'options avant validation finale">
-                  <input type="checkbox" checked={isSimulation} onChange={(e) => setIsSimulation(e.target.checked)} /> Mode Simulation "Et si..."
-                </label>
+              </div>
+
+              {/* REGLAGES DE CIBLES EXPLICITES POUR LE PROFESSEUR & LA DIRECTION */}
+              <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 20px", marginBottom: "20px" }}>
+                <h4 style={{ margin: "0 0 12px", fontSize: "0.95rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  🎯 Cibles & Contraintes de Répartition de l'Établissement
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Effectif max / classe
+                    </label>
+                    <select
+                      value={simMaxSize}
+                      onChange={(e) => setSimMaxSize(Number(e.target.value))}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    >
+                      <option value={22}>22 élèves (Effectif réduit REP+)</option>
+                      <option value={24}>24 élèves (Norme collège)</option>
+                      <option value={28}>28 élèves (Classe chargée)</option>
+                      <option value={30}>30 élèves (Capacité max)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Tolérance de Parité F/G
+                    </label>
+                    <select
+                      defaultValue="2"
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    >
+                      <option value="1">Parité stricte (Écart max 1 élève)</option>
+                      <option value="2">Tolérance standard (Écart max 2 élèves)</option>
+                      <option value="3">Souple (Écart max 3 élèves)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Plafond PAP/PPS / classe
+                    </label>
+                    <select
+                      defaultValue="3"
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    >
+                      <option value="2">Max 2 élèves PAP/PPS / classe</option>
+                      <option value="3">Max 3 élèves PAP/PPS / classe</option>
+                      <option value="4">Max 4 élèves PAP/PPS / classe</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="weights-grid">
@@ -1093,6 +1145,34 @@ export default function App() {
                     onChange={(e) => setWeights({ ...weights, optionBalance: Number(e.target.value) })}
                   />
                 </div>
+              </div>
+
+              {/* BOUTON PRINCIPAL DE CALCUL & GÉNERATION DES SCÉNARIOS */}
+              <div style={{ marginTop: "24px", paddingTop: "18px", borderTop: "1px solid var(--border-light)", textAlign: "center" }}>
+                <button
+                  className="primary"
+                  disabled={busy}
+                  onClick={() => {
+                    setBusy(true);
+                    api.generate(weights)
+                      .then((res) => {
+                        setScenarios(res.scenarios);
+                        if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
+                        setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés sous contraintes.`);
+                        setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
+                      })
+                      .catch((err) => {
+                        setNotice(err instanceof Error ? err.message : "Erreur lors de la génération.");
+                      })
+                      .finally(() => setBusy(false));
+                  }}
+                  style={{ padding: "14px 28px", fontSize: "1.05rem", fontWeight: 800, minWidth: "320px", boxShadow: "var(--shadow-md)" }}
+                >
+                  ⚡ Calculer & Générer les Scénarios d'Équilibrage
+                </button>
+                <p style={{ margin: "8px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                  Le moteur combinera la recherche gloutonne et le recuit simulé pour proposer 3 alternatives optimisées.
+                </p>
               </div>
             </div>
           )}
