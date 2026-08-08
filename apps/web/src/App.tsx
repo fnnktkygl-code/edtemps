@@ -995,30 +995,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : "(0 - à générer)"}
               </button>
             </div>
-
-            <button
-              className="primary"
-              disabled={busy}
-              onClick={() => {
-                setBusy(true);
-                setTimeout(() => {
-                  api.generate(weights, dataset)
-                    .then((res) => {
-                      setScenarios(res.scenarios);
-                      if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
-                      setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés.`);
-                      setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
-                    })
-                    .catch((err) => {
-                      setNotice(err instanceof Error ? err.message : "Erreur lors de la génération.");
-                    })
-                    .finally(() => setBusy(false));
-                }, 600);
-              }}
-              style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, boxShadow: "var(--shadow-md)", whiteSpace: "nowrap" }}
-            >
-              ⚡ Générer les 3 Scénarios
-            </button>
           </div>
 
           {importPreview && (
