@@ -1949,7 +1949,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </button>
                   </div>
 
-                  {/* AFFECTATION SUR-MESURE PAR LANGUE / OPTION */}
+                  {/* AFFECTATION SUR-MESURE PAR LANGUE / OPTION & EXCLUSIVITÉ */}
                   {(() => {
                     const uniqueOptions = [...new Set(dataset.students.flatMap((s) => s.options))];
                     if (uniqueOptions.length === 0) return null;
@@ -1981,11 +1981,51 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             >
                               <option value="">🎲 Choix Automatique IA</option>
                               {dataset.classrooms.map((c) => (
-                                <option key={c.id} value={c.id}>📌 Transférer tout {opt} sur {c.label}</option>
+                                <option key={c.id} value={c.id}>📌 Regrouper {opt} sur {c.label}</option>
                               ))}
                             </select>
                           </div>
                         ))}
+
+                        {/* RÈGLE D'EXCLUSIVITÉ (100% DE LA CLASSE) */}
+                        <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px dotted var(--border-light)" }}>
+                          <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#b45309", marginBottom: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span>🛡️</span> Exclusivité Strict (100% de la classe doit faire cette LV2/Option) :
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                            {dataset.classrooms.map((classroom) => {
+                              const currentRequired = weights.exclusiveOptionClassrooms?.[classroom.id] || "";
+                              return (
+                                <div key={classroom.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                                  <span style={{ fontSize: "0.76rem", fontWeight: 700, color: "var(--text-main)" }}>
+                                    Classe <strong>{classroom.label}</strong> :
+                                  </span>
+                                  <select
+                                    value={currentRequired}
+                                    onChange={(e) => {
+                                      const optVal = e.target.value;
+                                      const nextExcl = { ...(weights.exclusiveOptionClassrooms || {}) };
+                                      if (optVal) nextExcl[classroom.id] = optVal;
+                                      else delete nextExcl[classroom.id];
+                                      setWeights({
+                                        ...weights,
+                                        exclusiveOptionClassrooms: nextExcl,
+                                        optionGroupingMode: "STRICT_SINGLE_CLASS",
+                                        optionBalance: Math.max(weights.optionBalance, 9),
+                                      });
+                                    }}
+                                    style={{ padding: "3px 6px", fontSize: "0.75rem", borderRadius: "var(--radius-sm)", border: `1px solid ${currentRequired ? "#f59e0b" : "var(--border-light)"}`, background: currentRequired ? "#fffbeb" : "var(--bg-card)", fontWeight: 700, color: currentRequired ? "#92400e" : "var(--text-muted)" }}
+                                  >
+                                    <option value="">-- Mixte / Sans exclusivité --</option>
+                                    {uniqueOptions.map((opt) => (
+                                      <option key={opt} value={opt}>🔒 Uniquement des élèves en {opt}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                     );
                   })()}

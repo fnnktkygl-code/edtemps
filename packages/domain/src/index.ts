@@ -52,6 +52,7 @@ export type DispatchWeights = {
   optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
   supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
   optionClassroomMap?: Record<string, string>;
+  exclusiveOptionClassrooms?: Record<string, string>; // Ex: { "6e A": "Allemand" } => 100% de la classe 6e A doit faire Allemand (aucun élève sans Allemand)
 };
 
 export type Assignment = Record<string, string>;
@@ -523,6 +524,15 @@ function refineAssignmentWithSimulatedAnnealing(
         const targetClassId = weights.optionClassroomMap[opt];
         const misplacedCount = students.filter((s) => s.options.includes(opt) && assignments[s.id] !== targetClassId).length;
         optionDev += misplacedCount * 500;
+      }
+    }
+
+    if (weights.exclusiveOptionClassrooms) {
+      for (const [classId, requiredOpt] of Object.entries(weights.exclusiveOptionClassrooms)) {
+        if (!requiredOpt) continue;
+        const classMembers = students.filter((s) => assignments[s.id] === classId);
+        const nonMatchingCount = classMembers.filter((s) => !s.options.includes(requiredOpt)).length;
+        optionDev += nonMatchingCount * 800; // Forte pénalité pour les intrus sans cette option
       }
     }
 
