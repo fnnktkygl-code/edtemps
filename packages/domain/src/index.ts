@@ -679,8 +679,61 @@ function refineAssignmentWithSimulatedAnnealing(
   return bestAssignments;
 }
 
+function calculateOptionDeviation(input: DispatchInput, assignments: Assignment, weights?: DispatchWeights): number {
+  const optionLabels = [...new Set(input.students.flatMap((student) => student.options))];
+  if (optionLabels.length === 0) return 0;
+
+  let totalDeviation = 0;
+
+  for (const option of optionLabels) {
+    const optionStudents = input.students.filter((s) => s.options.includes(option));
+    const optionCount = optionStudents.length;
+
+    const reservedClassIds: string[] = [];
+    if (weights?.exclusiveOptionClassrooms) {
+      for (const [cId, reqOpt] of Object.entries(weights.exclusiveOptionClassrooms)) {
+        if (reqOpt === option) reservedClassIds.push(cId);
+      }
+    }
+    if (weights?.optionClassroomMap && weights.optionClassroomMap[option]) {
+      const mapCId = weights.optionClassroomMap[option];
+      if (!reservedClassIds.includes(mapCId)) reservedClassIds.push(mapCId);
+    }
+
+    if (reservedClassIds.length > 0) {
+      for (const classroom of input.classrooms) {
+        const classMembers = getClassStudents(assignments, classroom.id, input.students);
+        if (reservedClassIds.includes(classroom.id)) {
+          const nonMatching = classMembers.filter((s) => !s.options.includes(option)).length;
+          totalDeviation += nonMatching;
+        } else {
+          const misplaced = classMembers.filter((s) => s.options.includes(option)).length;
+          totalDeviation += misplaced;
+        }
+      }
+    } else if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS") {
+      const optionCountsPerClass = input.classrooms.map((c) => {
+        return getClassStudents(assignments, c.id, input.students).filter((s) => s.options.includes(option)).length;
+      }).sort((a, b) => b - a);
+
+      const maxPerClass = input.classrooms[0]?.maxSize ?? 28;
+      const minClassesNeeded = Math.ceil(optionCount / maxPerClass);
+      const dispersedCount = sum(optionCountsPerClass.slice(minClassesNeeded), (count) => count);
+      totalDeviation += dispersedCount;
+    } else {
+      const targetPerClass = optionCount / input.classrooms.length;
+      for (const classroom of input.classrooms) {
+        const count = getClassStudents(assignments, classroom.id, input.students).filter((s) => s.options.includes(option)).length;
+        totalDeviation += Math.abs(count - targetPerClass);
+      }
+    }
+  }
+
+  return totalDeviation;
+}
+
 export function calculateMetrics(input: DispatchInput, assignments: Assignment, weights: DispatchWeights = defaultWeights): ScenarioMetrics {
-  const targets = targetStats(input);
+  const targets = targetStats(input, weights);
   const byClass = input.classrooms.map((classroom) => getClassStudents(assignments, classroom.id, input.students));
   const genderDeviation = sum(byClass, (members) =>
     Math.abs(members.filter((student) => student.gender === "F").length - targets.female) +
@@ -688,9 +741,7 @@ export function calculateMetrics(input: DispatchInput, assignments: Assignment, 
   );
   const academicDeviation = sum(byClass, (members) => Math.abs(average(members.map((student) => student.levelAverage)) - targets.average));
   const supportDeviation = sum(byClass, (members) => Math.abs(members.filter((student) => student.supportFlags.length > 0).length - targets.support));
-  const optionDeviation = sum(byClass, (members) => sum(Object.entries(targets.options), ([option, target]) =>
-    Math.abs(members.filter((student) => student.options.includes(option)).length - target),
-  ));
+  const optionDeviation = calculateOptionDeviation(input, assignments, weights);
   const violations = validateAssignment(input, assignments).length;
 
   const totalStudents = Math.max(1, input.students.length);
