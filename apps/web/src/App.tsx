@@ -2005,6 +2005,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       {getWeightLabel(weights.optionBalance).label}
                     </span>
                   </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={weights.optionBalance}
+                    onChange={(e) => setWeights({ ...weights, optionBalance: Number(e.target.value) })}
+                  />
                 </div>
               </div>
 
