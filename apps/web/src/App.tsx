@@ -572,18 +572,26 @@ export default function App() {
           <div className="weights-panel">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Configuration des intentions pédagogiques</p>
-                <h3>Pondération des facteurs de répartition</h3>
+                <p className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</p>
+                <h3>💡 Réglage des critères d'équilibrage des classes</h3>
+                <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
+                  Ajustez l'importance relative des 4 objectifs ci-dessous. Le moteur d'IA générera des propositions équilibrées en fonction de vos priorités d'établissement.
+                </p>
               </div>
-              <label className="toggle">
+              <label className="toggle-pill" data-tooltip="Permet de simuler des modifications d'effectifs ou d'options avant validation finale">
                 <input type="checkbox" checked={isSimulation} onChange={(e) => setIsSimulation(e.target.checked)} /> Mode Simulation "Et si..."
               </label>
             </div>
+
             <div className="weights-grid">
-              <div className="weight-slider">
-                <label>
-                  <span>Parité F/M</span> <span>{weights.genderBalance}/10</span>
-                </label>
+              <div className="weight-card">
+                <div className="weight-header">
+                  <div className="weight-title">
+                    <span>⚖️ Parité Filles / Garçons</span>
+                    <small>Équilibre 50%/50% du ratio de genre dans chaque classe</small>
+                  </div>
+                  <span className="weight-score">{weights.genderBalance}/10</span>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -592,10 +600,15 @@ export default function App() {
                   onChange={(e) => setWeights({ ...weights, genderBalance: Number(e.target.value) })}
                 />
               </div>
-              <div className="weight-slider">
-                <label>
-                  <span>Mixité des niveaux</span> <span>{weights.academicBalance}/10</span>
-                </label>
+
+              <div className="weight-card">
+                <div className="weight-header">
+                  <div className="weight-title">
+                    <span>📊 Mixité des Niveaux Scolaires</span>
+                    <small>Répartition hétérogène des compétences (forts, moyens, à besoins)</small>
+                  </div>
+                  <span className="weight-score">{weights.academicBalance}/10</span>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -604,10 +617,15 @@ export default function App() {
                   onChange={(e) => setWeights({ ...weights, academicBalance: Number(e.target.value) })}
                 />
               </div>
-              <div className="weight-slider">
-                <label>
-                  <span>Équilibre Besoins (PAP/PPS)</span> <span>{weights.supportBalance}/10</span>
-                </label>
+
+              <div className="weight-card">
+                <div className="weight-header">
+                  <div className="weight-title">
+                    <span>🤝 Besoins Particuliers (PAP / PPS / PAI)</span>
+                    <small>Évite la concentration d'élèves à accompagnement dans la même classe</small>
+                  </div>
+                  <span className="weight-score">{weights.supportBalance}/10</span>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -616,10 +634,15 @@ export default function App() {
                   onChange={(e) => setWeights({ ...weights, supportBalance: Number(e.target.value) })}
                 />
               </div>
-              <div className="weight-slider">
-                <label>
-                  <span>Répartition Options</span> <span>{weights.optionBalance}/10</span>
-                </label>
+
+              <div className="weight-card">
+                <div className="weight-header">
+                  <div className="weight-title">
+                    <span>🎓 Répartition des Options & Langues</span>
+                    <small>Harmonisation des groupes LCE, Bilangue, Latin et EIP</small>
+                  </div>
+                  <span className="weight-score">{weights.optionBalance}/10</span>
+                </div>
                 <input
                   type="range"
                   min="0"
