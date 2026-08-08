@@ -598,9 +598,12 @@ export default function App() {
         </div>
       )}
 
-      <p className="status" aria-live="polite">
-        {notice}
-      </p>
+      {notice && (
+        <div className="status-notice-pill" aria-live="polite">
+          <span className="status-dot"></span>
+          <span>{notice}</span>
+        </div>
+      )}
 
       {/* TAB 1: RÉPARTITION DES CLASSES */}
       {activeTab === "dispatch" && (
@@ -623,50 +626,48 @@ export default function App() {
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px", alignItems: "flex-end" }}>
               <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px" }}>Nombre d'élèves total</label>
-                <select
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
+                  Nombre d'élèves total
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={2000}
                   value={simStudentCount}
-                  onChange={(e) => setSimStudentCount(Number(e.target.value))}
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700 }}
-                >
-                  <option value={30}>30 élèves (Petite cohorte)</option>
-                  <option value={60}>60 élèves (2 classes de test)</option>
-                  <option value={120}>120 élèves (Moyen collège)</option>
-                  <option value={300}>300 élèves (Grand niveau)</option>
-                  <option value={600}>600 élèves (Échelle établissement)</option>
-                  <option value={1200}>1200 élèves (Cité Scolaire / Lycée)</option>
-                </select>
+                  onChange={(e) => setSimStudentCount(Math.max(1, Math.min(2000, Number(e.target.value) || 1)))}
+                  placeholder="Ex: 120"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
+                />
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px" }}>Nombre de classes cibles</label>
-                <select
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
+                  Nombre de classes cibles
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
                   value={simClassCount}
-                  onChange={(e) => setSimClassCount(Number(e.target.value))}
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700 }}
-                >
-                  <option value={2}>2 classes (ex: 6e A, 6e B)</option>
-                  <option value={3}>3 classes (6e A, 6e B, 6e C)</option>
-                  <option value={4}>4 classes (6e A, B, C, D)</option>
-                  <option value={6}>6 classes (A, B, C, D, E, F)</option>
-                  <option value={8}>8 classes</option>
-                  <option value={12}>12 classes</option>
-                </select>
+                  onChange={(e) => setSimClassCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
+                  placeholder="Ex: 4"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
+                />
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px" }}>Effectif max / classe</label>
-                <select
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
+                  Effectif max / classe
+                </label>
+                <input
+                  type="number"
+                  min={5}
+                  max={60}
                   value={simMaxSize}
-                  onChange={(e) => setSimMaxSize(Number(e.target.value))}
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700 }}
-                >
-                  <option value={22}>22 élèves (Effectif réduit REP+)</option>
-                  <option value={24}>24 élèves (Norme collège)</option>
-                  <option value={28}>28 élèves (Classe chargée)</option>
-                  <option value={30}>30 élèves (Capacité max)</option>
-                  <option value={32}>32 élèves (Lycée)</option>
-                </select>
+                  onChange={(e) => setSimMaxSize(Math.max(5, Math.min(60, Number(e.target.value) || 5)))}
+                  placeholder="Ex: 28"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
+                />
               </div>
 
               <div>
@@ -816,7 +817,7 @@ export default function App() {
             <section className="import-preview" aria-labelledby="import-title">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Import institutionnel</p>
+                  <span className="eyebrow">IMPORTATION SIECLE & CONFORME MENJ</span>
                   <h2 id="import-title">Vérifier puis activer l'import SIECLE</h2>
                 </div>
                 <p>Expire à {new Date(importPreview.expiresAt).toLocaleTimeString("fr-FR")}</p>
@@ -1197,8 +1198,8 @@ export default function App() {
               <section aria-labelledby="scenarios-title">
                 <div className="section-heading">
                   <div>
-                    <p className="eyebrow">Étape 1</p>
-                    <h2 id="scenarios-title">Comparer les propositions de répartition</h2>
+                    <span className="eyebrow">MODULE 1 · ÉVALUATION & CHOIX DES SCÉNARIOS</span>
+                    <h2 id="scenarios-title">Variantes Optimisées par l'IA</h2>
                   </div>
                   <p>
                     {dataset.students.length} élèves · {dataset.classrooms.length} classes · niveau {dataset.level}
@@ -1578,7 +1579,12 @@ export default function App() {
 
           {/* PANNEAU DE GESTION DES REMPLACEMENTS */}
           <div className="substitutions-panel">
-            <h3>🚨 Gestion des Absences & Remplacements d'Enseignants</h3>
+            <div style={{ marginBottom: "16px" }}>
+              <span className="eyebrow">URGENCES & CONTINUITÉ PÉDAGOGIQUE</span>
+              <h3 style={{ margin: "2px 0 0", fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
+                🚨 Gestion des Absences & Remplacements d'Enseignants
+              </h3>
+            </div>
             <div className="substitutions-form">
               <label>
                 Enseignant absent
@@ -1607,7 +1613,7 @@ export default function App() {
                 <input value={absenceReason} onChange={(e) => setAbsenceReason(e.target.value)} placeholder="Stage, maladie..." />
               </label>
               <button className="primary" onClick={fetchSubstitutions} disabled={busy || !absenceTeacherId || !absenceTimeSlotId}>
-                Trouver un remplaçant
+                ⚡ Trouver un remplaçant
               </button>
             </div>
 
