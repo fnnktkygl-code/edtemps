@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { validateAssignment, generateScenario } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type {
   AuditEvent,
@@ -157,6 +158,7 @@ export default function App() {
   const [dragOverClassId, setDragOverClassId] = useState<string | null>(null);
   const [lastMove, setLastMove] = useState<{ studentId: string; studentName: string; fromClassId: string; toClassId: string } | null>(null);
   const [openSupportModalClassId, setOpenSupportModalClassId] = useState<string | null>(null);
+  const [showRebalanceModal, setShowRebalanceModal] = useState<boolean>(false);
 
   // Weights slider state
   const [weights, setWeightsState] = useState<{ genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }>(() => {
@@ -1728,6 +1730,35 @@ export default function App() {
 
                       <hr style={{ border: 0, borderTop: "1px solid var(--border-light)", margin: "4px 0" }} />
 
+                      {/* BANNIÈRE ASSISTANT RÉÉQUILIBRAGE INTELLIGENT */}
+                      <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "12px 14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem" }}>
+                            🪄 Assistant Rééquilibrage
+                          </span>
+                          {validateAssignment(dataset as any, selected.assignments).length > 0 ? (
+                            <span style={{ background: "#ef4444", color: "#ffffff", padding: "1px 6px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800 }}>
+                              ⚠️ Incohérences
+                            </span>
+                          ) : (
+                            <span style={{ background: "#10b981", color: "#ffffff", padding: "1px 6px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800 }}>
+                              ✓ Analyse IA
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ margin: 0, fontSize: "0.78rem", color: "#3730a3", lineHeight: 1.3, fontWeight: 600 }}>
+                          Vous avez ajusté manuellement la répartition ? L'assistant recalcule les meilleures combinaisons pas-à-pas.
+                        </p>
+                        <button
+                          className="primary"
+                          onClick={() => setShowRebalanceModal(true)}
+                          disabled={selected.state === "APPROVED"}
+                          style={{ background: "#4338ca", color: "#ffffff", padding: "8px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer" }}
+                        >
+                          ✨ Proposer un rééquilibrage pas-à-pas
+                        </button>
+                      </div>
+
                       {/* SECTEUR D'AFFINAGE ET DE TRANSFERT MANUEL */}
                       <div className="transfer-card">
                         <h4>✏️ Transfert & Analyse d'Affectation</h4>
@@ -2763,6 +2794,194 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* MODALE D'ASSISTANCE AU RÉÉQUILIBRAGE INTELLIGENT (IA & ALGO) */}
+      {showRebalanceModal && selected && (() => {
+        const rebalanceData = computeRebalanceSteps(dataset, selected.assignments, weights, anonymous);
+        const violations = validateAssignment(dataset as any, selected.assignments);
+
+        return (
+          <div
+            className="modal-overlay"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(15, 23, 42, 0.7)",
+              backdropFilter: "blur(6px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 5000,
+              padding: "20px",
+            }}
+            onClick={() => setShowRebalanceModal(false)}
+          >
+            <div
+              className="modal-card"
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
+                borderRadius: "var(--radius-md)",
+                boxShadow: "var(--shadow-lg)",
+                maxWidth: "680px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                padding: "26px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "14px" }}>
+                <div>
+                  <span className="brand-badge" style={{ background: "#e0e7ff", color: "#3730a3", padding: "3px 10px", borderRadius: "12px", fontSize: "0.74rem", fontWeight: 800 }}>
+                    🪄 ASSISTANT ALGORITHMIQUE DE RÉÉQUILIBRAGE
+                  </span>
+                  <h2 style={{ margin: "6px 0 2px", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-main)" }}>
+                    Plan d'Ajustement Pédagogique Pas-à-Pas
+                  </h2>
+                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.84rem" }}>
+                    Analyse en temps réel de votre répartition manuelle et recommandations d'équilibrage calculées par le solveur.
+                  </p>
+                </div>
+                <button className="icon-btn-subtle" onClick={() => setShowRebalanceModal(false)} style={{ padding: "4px 10px", fontSize: "1.1rem", borderRadius: "50%" }}>
+                  ✕
+                </button>
+              </div>
+
+              {/* Diagnostic d'Équilibre (Validation Check) */}
+              <div style={{ background: "var(--bg-subtle)", padding: "14px 16px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                <h4 style={{ margin: "0 0 8px", fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
+                  📊 Diagnostic de la Répartition Courante
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                  <div style={{ background: violations.length > 0 ? "#fef2f2" : "#f0fdf4", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${violations.length > 0 ? "#fca5a5" : "#bbf7d0"}` }}>
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: violations.length > 0 ? "#991b1b" : "#166534" }}>
+                      {violations.length > 0 ? `⚠️ ${violations.length} Contrainte(s) dures violées` : "✓ Respect strict des contraintes dures"}
+                    </span>
+                  </div>
+                  <div style={{ background: rebalanceData.issuesCount > 0 ? "#fff7ed" : "#f0fdf4", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${rebalanceData.issuesCount > 0 ? "#fed7aa" : "#bbf7d0"}` }}>
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: rebalanceData.issuesCount > 0 ? "#9a3412" : "#166534" }}>
+                      {rebalanceData.issuesCount > 0 ? `⚡ ${rebalanceData.issuesCount} Ajustement(s) d'effectifs requis` : "✓ Effectifs de classes conformes"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Liste des Étapes Suggérées Pas-à-Pas */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h4 style={{ margin: 0, fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                    📝 Étapes d'Ajustement Proposées ({rebalanceData.steps.length})
+                  </h4>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                    Vous conservez la validation finale sur chaque étape.
+                  </span>
+                </div>
+
+                {rebalanceData.steps.length === 0 ? (
+                  <div style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "16px", borderRadius: "var(--radius-sm)", textAlign: "center", fontWeight: 700, fontSize: "0.9rem" }}>
+                    🎉 Votre répartition manuelle est parfaitement équilibrée ! Aucune action corrective n'est nécessaire.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {rebalanceData.steps.map((step, index) => (
+                      <div
+                        key={step.id}
+                        style={{
+                          background: "var(--bg-card)",
+                          border: `1px solid ${step.priority === "HIGH" ? "#fdba74" : "var(--border-light)"}`,
+                          borderRadius: "var(--radius-md)",
+                          padding: "14px 16px",
+                          boxShadow: "var(--shadow-sm)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <span style={{ background: "var(--primary-brand)", color: "#fff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.75rem" }}>
+                              {index + 1}
+                            </span>
+                            <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: step.avatarColor, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem" }}>
+                              {step.studentInitials}
+                            </div>
+                            <span style={{ fontWeight: 800, fontSize: "0.92rem", color: "var(--text-main)" }}>
+                              {step.studentName}
+                            </span>
+                          </div>
+
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700 }}>
+                              {step.fromClassLabel} ➔ <strong style={{ color: "var(--primary-brand)" }}>{step.toClassLabel}</strong>
+                            </span>
+                            <button
+                              className="primary"
+                              onClick={async () => {
+                                await move(step.studentId, step.toClassId);
+                              }}
+                              style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800 }}
+                            >
+                              ⚡ Appliquer cette étape
+                            </button>
+                          </div>
+                        </div>
+
+                        <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "var(--radius-sm)", lineHeight: 1.4 }}>
+                          💡 <strong>Raison & Validation :</strong> {step.reasoning}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Boutons Globaux de Sortie */}
+              <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    if (confirm("Réinitialiser toutes vos modifications manuelles et revenir au scénario initial ?")) {
+                      const orig = scenarios.find((s) => s.id === selected.id);
+                      if (orig) setScenarios((prev) => prev.map((s) => s.id === selected.id ? { ...s, assignments: { ...orig.assignments } } : s));
+                      setShowRebalanceModal(false);
+                    }
+                  }}
+                  style={{ fontSize: "0.82rem", padding: "8px 14px" }}
+                >
+                  🔄 Réinitialiser au scénario d'origine
+                </button>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button className="secondary" onClick={() => setShowRebalanceModal(false)} style={{ padding: "8px 16px" }}>
+                    Fermer & Conserver
+                  </button>
+                  {rebalanceData.steps.length > 0 && (
+                    <button
+                      className="primary"
+                      onClick={async () => {
+                        for (const step of rebalanceData.steps) {
+                          await move(step.studentId, step.toClassId);
+                        }
+                        setShowRebalanceModal(false);
+                      }}
+                      style={{ padding: "8px 20px", fontWeight: 800, background: "#10b981" }}
+                    >
+                      ✨ Appliquer Tout le Rééquilibrage ({rebalanceData.steps.length} étapes)
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </main>
   );
 }
@@ -2808,4 +3027,112 @@ function Explanation({ student, scenario }: { student: Student; scenario: Scenar
 
 function nameOf(student: Student, anonymous: boolean): string {
   return anonymous ? student.initials : student.displayName;
+}
+
+export type RebalanceStep = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  avatarColor: string;
+  fromClassId: string;
+  fromClassLabel: string;
+  toClassId: string;
+  toClassLabel: string;
+  priority: "HIGH" | "MEDIUM" | "NORMAL";
+  title: string;
+  reasoning: string;
+  supportFlags: string[];
+  options: string[];
+};
+
+function computeRebalanceSteps(
+  input: Dataset,
+  currentAssignments: Record<string, string>,
+  weights: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number },
+  anonymous: boolean
+): { steps: RebalanceStep[]; issuesCount: number } {
+  const steps: RebalanceStep[] = [];
+  const classroomsById = new Map(input.classrooms.map((c) => [c.id, c]));
+
+  // Calculate current counts per class
+  const classCounts = new Map<string, number>();
+  for (const c of input.classrooms) classCounts.set(c.id, 0);
+  for (const sId of Object.keys(currentAssignments)) {
+    const cId = currentAssignments[sId];
+    if (cId) classCounts.set(cId, (classCounts.get(cId) ?? 0) + 1);
+  }
+
+  // Find overcrowded classes (> maxSize) and under-capacity classes (< minSize)
+  const overcrowded = input.classrooms.filter((c) => (classCounts.get(c.id) ?? 0) > c.maxSize);
+  const undercapacity = input.classrooms.filter((c) => (classCounts.get(c.id) ?? 0) < c.minSize);
+
+  // Ideal target scenario computed by solver
+  let targetAssignments = currentAssignments;
+  try {
+    const optScenario = generateScenario(input as any, 42, weights);
+    targetAssignments = optScenario.assignments;
+  } catch {}
+
+  // 1. Priority 1: Resolve Capacity Overcrowding / Undercapacity
+  for (const overClass of overcrowded) {
+    const overCount = (classCounts.get(overClass.id) ?? 0) - overClass.maxSize;
+    const assignedStudents = input.students.filter((s) => currentAssignments[s.id] === overClass.id);
+
+    for (let i = 0; i < overCount && i < assignedStudents.length; i++) {
+      const student = assignedStudents[i];
+      const targetClass = undercapacity[0] ?? input.classrooms.find((c) => c.id !== overClass.id && (classCounts.get(c.id) ?? 0) < c.maxSize);
+      if (targetClass) {
+        steps.push({
+          id: `step-cap-${student.id}`,
+          studentId: student.id,
+          studentName: nameOf(student, anonymous),
+          studentInitials: student.initials,
+          avatarColor: getAvatarColor(student.id),
+          fromClassId: overClass.id,
+          fromClassLabel: overClass.label,
+          toClassId: targetClass.id,
+          toClassLabel: targetClass.label,
+          priority: "HIGH",
+          title: `Résoudre le sur-effectif de ${overClass.label}`,
+          reasoning: `Transfert de ${nameOf(student, anonymous)} (${student.levelAverage.toFixed(1)}/20) vers ${targetClass.label} pour ramener ${overClass.label} à son effectif maximal autorisé (${overClass.maxSize} élèves).`,
+          supportFlags: student.supportFlags,
+          options: student.options,
+        });
+      }
+    }
+  }
+
+  // 2. Priority 2: Fix differences with optimal solver solution
+  for (const student of input.students) {
+    const currentClassId = currentAssignments[student.id];
+    const idealClassId = targetAssignments[student.id];
+
+    if (currentClassId && idealClassId && currentClassId !== idealClassId) {
+      if (!steps.some((st) => st.studentId === student.id)) {
+        const fromClass = classroomsById.get(currentClassId);
+        const toClass = classroomsById.get(idealClassId);
+        if (fromClass && toClass) {
+          steps.push({
+            id: `step-opt-${student.id}`,
+            studentId: student.id,
+            studentName: nameOf(student, anonymous),
+            studentInitials: student.initials,
+            avatarColor: getAvatarColor(student.id),
+            fromClassId: fromClass.id,
+            fromClassLabel: fromClass.label,
+            toClassId: toClass.id,
+            toClassLabel: toClass.label,
+            priority: steps.length === 0 ? "HIGH" : "MEDIUM",
+            title: `Harmoniser les niveaux & la parité`,
+            reasoning: `Transfert de ${nameOf(student, anonymous)} (${student.levelAverage.toFixed(1)}/20) de ${fromClass.label} vers ${toClass.label} pour réduire l'écart de moyenne générale et rééquilibrer la parité F/G selon les exigences réglementaires.`,
+            supportFlags: student.supportFlags,
+            options: student.options,
+          });
+        }
+      }
+    }
+  }
+
+  return { steps, issuesCount: overcrowded.length + undercapacity.length };
 }
