@@ -871,7 +871,7 @@ export default function App() {
             <section className="roster-section" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", padding: "24px", borderRadius: "var(--radius-md)", marginBottom: "24px" }}>
               <div className="section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
                 <div>
-                  <p className="eyebrow">COHORTE DU NIVEAU {dataset.level.toUpperCase()}</p>
+                  <span className="eyebrow">COHORTE DU NIVEAU {dataset.level.toUpperCase()}</span>
                   <h3 style={{ margin: "4px 0", fontSize: "1.2rem", fontWeight: 800 }}>Effectif complet & Profils des Élèves</h3>
                   <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.88rem" }}>
                     Consultez la liste nominative des élèves, leurs caractéristiques (genre, niveau, accompagnements PAP/PPS, options) et leur classe ciblée.
@@ -1032,7 +1032,7 @@ export default function App() {
             <div className="weights-panel">
               <div className="section-heading" style={{ marginBottom: "18px" }}>
                 <div>
-                  <p className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</p>
+                  <span className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</span>
                   <h3>💡 Réglage des critères d'équilibrage des classes</h3>
                   <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
                     Configurez vos cibles d'établissement puis ajustez l'importance relative des critères ci-dessous.
@@ -1537,7 +1537,7 @@ export default function App() {
         <section aria-labelledby="timetabling-title">
           <div className="section-header">
             <div>
-              <p className="eyebrow">MODULE 2 · MOTEUR D'OPTIMISATION SOUS CONTRAINTES (HEURISTIQUE & RECUIT SIMULÉ)</p>
+              <span className="eyebrow">MODULE 2 · PLANIFICATION HORAIRE & REMPLACEMENTS</span>
               <h2 id="timetabling-title">Emplois du Temps & Planning Semestriel</h2>
             </div>
             <div className="section-controls" style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", flexShrink: 0 }}>
@@ -1713,7 +1713,7 @@ export default function App() {
         <section aria-labelledby="teacher-space-title">
           <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-card)", padding: "20px 24px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)", marginBottom: "24px" }}>
             <div>
-              <p className="eyebrow">Service Numérique Enseignant</p>
+              <span className="eyebrow">SERVICE NUMÉRIQUE ENSEIGNANT</span>
               <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800 }}>👩‍🏫 Espace Personnel Enseignant</h2>
               <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
                 Consultez votre emploi du temps en temps réel, saisissez vos vœux d'aménagement horaire et organisez vos remplacements d'urgence.
@@ -1860,7 +1860,7 @@ export default function App() {
         <section aria-labelledby="compliance-title">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Cadre réglementaire & Homologation Éducation Nationale</p>
+              <span className="eyebrow">CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE</span>
               <h2 id="compliance-title">Registre DPO, Homologation RGS (EBIOS RM) & Accessibilité RGAA</h2>
             </div>
             <button className="secondary" onClick={() => void refreshAudit()}>
@@ -1917,7 +1917,7 @@ export default function App() {
           <section className="audit-section" aria-labelledby="audit-title" style={{ marginTop: "30px" }}>
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Traçabilité légale</p>
+                <span className="eyebrow">TRAÇABILITÉ LÉGALE & SÉCURITÉ</span>
                 <h2 id="audit-title">Journal d'audit immuable</h2>
               </div>
             </div>

@@ -503,39 +503,57 @@ button:disabled {
   margin-bottom: 20px;
 }
 
+.eyebrow {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary-brand);
+  margin: 0 0 4px 0;
+  display: block;
+  white-space: nowrap;
+}
+
 /* Section Header Bar */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  padding: 18px 24px;
+  padding: 16px 24px;
   border-radius: var(--radius-md);
   margin-bottom: 20px;
   box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
 }
 
 .section-header h2 {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 800;
   margin: 0;
   color: var(--text-main);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .section-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .control-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 700;
   color: var(--text-muted);
   white-space: nowrap;
@@ -557,6 +575,7 @@ button:disabled {
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: 0.85rem;
 }
 
 /* Absence Panel */
