@@ -8,7 +8,13 @@ import type {
   TimetablingSchedule,
 } from "./types";
 
-const base = "http://localhost:3001/api/v1/establishments/demo-college";
+const apiOrigin =
+  (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+    ? "https://edtemps-api.onrender.com"
+    : "http://localhost:3001");
+
+const base = `${apiOrigin}/api/v1/establishments/demo-college`;
 const headers = {
   "content-type": "application/json",
   "x-tenant-id": "demo-college",
