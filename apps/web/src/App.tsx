@@ -773,6 +773,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   }, [theme]);
 
   const [importMenuOpen, setImportMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Module 1 : Sous-onglets et filtres Roster élèves persistant
   const [dispatchSubTab, setDispatchSubTabState] = useState<"roster" | "weights" | "kanban">(() => {
@@ -793,10 +794,18 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   return (
     <main className="page">
       <header className="masthead">
-        <div className="brand-section">
+        <div className="brand-section" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <h1>EdTemps</h1>
           <span className="brand-badge" data-tooltip="Conforme aux référentiels du Ministère de l'Éducation Nationale et de la Jeunesse (MENJ)">🏛️ MENJ</span>
         </div>
+
+        <button
+          className="mobile-burger-btn"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Ouvrir le menu mobile"
+        >
+          ☰
+        </button>
 
         {/* NAVIGATION PAR ONGLETS INTÉGRÉE */}
         <nav className="nav-tabs" aria-label="Navigation principale">
@@ -1223,8 +1232,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 </div>
               </div>
 
-              {/* Roster Table */}
-              <div className="table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
+              {/* Roster View (Desktop Table + Mobile Responsive Cards) */}
+              <div className="desktop-only-table table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
                   <thead>
                     <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
@@ -1323,6 +1332,80 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Student Card List */}
+              <div className="mobile-student-cards">
+                {dataset.students
+                  .filter((student) => {
+                    const nameMatches = nameOf(student, anonymous).toLowerCase().includes(rosterSearch.toLowerCase());
+                    const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
+                    if (!nameMatches && !optionMatches) return false;
+                    if (rosterFilter === "PAP") return student.supportFlags.length > 0;
+                    if (rosterFilter === "OPTIONS") return student.options.length > 0;
+                    return true;
+                  })
+                  .map((student) => {
+                    const currentAssignedClassId = selected?.assignments[student.id] ?? dataset.classrooms[0]?.id;
+                    return (
+                      <div key={student.id} className="mobile-student-card-item">
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontWeight: 800, fontSize: "0.98rem" }}>{nameOf(student, anonymous)}</span>
+                          <span style={{ fontWeight: 800, color: "var(--primary-brand)", fontSize: "0.92rem" }}>
+                            {student.levelAverage.toFixed(1)} / 20
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "0.78rem" }}>
+                          <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                            {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
+                          </span>
+                          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>
+                            {"★".repeat(student.behavior?.conductScore ?? 4)} ({student.behavior?.absencesHours ?? 0}h abs)
+                          </span>
+                        </div>
+
+                        {(student.supportFlags.length > 0 || student.options.length > 0) && (
+                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                            {student.supportFlags.map((need) => (
+                              <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
+                                🤝 {need}
+                              </span>
+                            ))}
+                            {student.options.map((opt) => (
+                              <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
+                                🎓 {opt}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px", paddingTop: "8px", borderTop: "1px solid var(--border-light)" }}>
+                          <select
+                            value={currentAssignedClassId}
+                            disabled={selected?.state === "APPROVED"}
+                            onChange={(e) => {
+                              void move(student.id, e.target.value);
+                            }}
+                            style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.82rem" }}
+                          >
+                            {dataset.classrooms.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="secondary"
+                            onClick={() => setInspectStudent(student)}
+                            style={{ padding: "6px 10px", fontSize: "0.82rem", fontWeight: 700 }}
+                          >
+                            📋 Dossier
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </section>
           )}
@@ -4112,6 +4195,131 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           </div>
         );
       })()}
+
+      {/* MOBILE DRAWER OVERLAY & PANEL */}
+      <div
+        className={`mobile-drawer-overlay ${mobileMenuOpen ? "open" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+      <aside className={`mobile-drawer ${mobileMenuOpen ? "open" : ""}`}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontWeight: 800, fontSize: "1.1rem" }}>EdTemps</span>
+            <span className="brand-badge">🏛️ MENJ</span>
+          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ background: "transparent", border: "none", fontSize: "1.4rem", cursor: "pointer", color: "var(--text-muted)" }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Section Rôle RBAC */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <label style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--text-muted)", textTransform: "uppercase" }}>Rôle & Permissions (RBAC)</label>
+          <select
+            value={actorRole}
+            onChange={(e) => {
+              const newRole = e.target.value;
+              setActorRole(newRole);
+              setActorRoleState(newRole);
+              if (newRole === "TEACHER") setActiveTab("teacher");
+              else if (newRole === "DPO") setActiveTab("compliance");
+              else setActiveTab("dispatch");
+              setMobileMenuOpen(false);
+            }}
+            style={{ padding: "10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, width: "100%" }}
+          >
+            <option value="SCHOOL_ADMIN">👨‍💼 Direction</option>
+            <option value="DISPATCH_EDITOR">⚙️ Adjoint</option>
+            <option value="TEACHER">👩‍🏫 Enseignant</option>
+            <option value="CPE">📋 CPE</option>
+            <option value="DPO">🔒 DPO</option>
+          </select>
+        </div>
+
+        {/* Section Protection RGPD */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)" }}>
+          <span style={{ fontWeight: 700, fontSize: "0.88rem" }}>🔒 Mode Pseudonyme RGPD</span>
+          <input
+            type="checkbox"
+            checked={anonymous}
+            onChange={(e) => setAnonymous(e.target.checked)}
+            style={{ width: "20px", height: "20px" }}
+          />
+        </div>
+
+        {/* Section Outillage & Importation */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <label style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--text-muted)", textTransform: "uppercase" }}>Importations & IA</label>
+          <button className="secondary" onClick={() => { setMobileMenuOpen(false); fileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
+            📦 Fichier SIECLE (ZIP)
+          </button>
+          <button className="secondary" onClick={() => { setMobileMenuOpen(false); stsFileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
+            🏛️ Fichier STS-Web (XML)
+          </button>
+          <button className="secondary" onClick={() => { setMobileMenuOpen(false); ocrFileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
+            📷 Mistral OCR (Pixtral)
+          </button>
+          <button className="secondary" onClick={() => { setMobileMenuOpen(false); void triggerVoiceCommand(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
+            🎙️ Dictée Vocale (Voxtral)
+          </button>
+        </div>
+
+        {/* Section IA Souveraine & Thème */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "auto" }}>
+          <button
+            className="secondary"
+            onClick={() => { setMobileMenuOpen(false); setShowAiTransparencyModal(true); }}
+            style={{ padding: "10px", fontSize: "0.82rem", fontWeight: 700, textAlign: "center" }}
+          >
+            🇪🇺 IA Souveraine Mistral & OVHcloud ℹ️
+          </button>
+          <button
+            className="secondary"
+            onClick={() => { setTheme((t) => (t === "light" ? "dark" : "light")); }}
+            style={{ padding: "10px", fontWeight: 700 }}
+          >
+            {theme === "light" ? "🌙 Passer au Mode Sombre" : "☀️ Passer au Mode Clair"}
+          </button>
+        </div>
+      </aside>
+
+      {/* MOBILE STICKY BOTTOM NAVIGATION BAR */}
+      <nav className="mobile-bottom-nav">
+        <button
+          className={`mobile-nav-item ${activeTab === "dispatch" ? "active" : ""}`}
+          onClick={() => setActiveTab("dispatch")}
+        >
+          <span className="nav-icon">🏫</span>
+          <span>Répartition</span>
+        </button>
+        <button
+          className={`mobile-nav-item ${activeTab === "timetabling" ? "active" : ""}`}
+          onClick={() => setActiveTab("timetabling")}
+        >
+          <span className="nav-icon">📅</span>
+          <span>Emplois</span>
+        </button>
+        <button
+          className={`mobile-nav-item ${activeTab === "teacher" ? "active" : ""}`}
+          onClick={() => setActiveTab("teacher")}
+        >
+          <span className="nav-icon">👩‍🏫</span>
+          <span>Enseignant</span>
+        </button>
+        <button
+          className={`mobile-nav-item ${activeTab === "compliance" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("compliance");
+            void refreshAudit();
+          }}
+        >
+          <span className="nav-icon">📋</span>
+          <span>DPO</span>
+        </button>
+      </nav>
     </main>
   );
 }
