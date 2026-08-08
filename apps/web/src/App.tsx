@@ -516,11 +516,6 @@ export default function App() {
             )}
           </div>
 
-          {activeTab === "dispatch" && (
-            <button className="primary" onClick={generate} disabled={busy} data-tooltip="Générer 3 propositions de répartition sous contraintes">
-              {busy ? "Calcul en cours…" : "✨ Générer 3 scénarios"}
-            </button>
-          )}
           {activeTab === "timetabling" && (
             <button className="primary" onClick={generateTimetable} disabled={busy} data-tooltip="Calculer un emploi du temps optimal avec le solveur CP-SAT">
               {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
@@ -702,6 +697,7 @@ export default function App() {
                           setScenarios(res.scenarios);
                           if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
                           setNotice(`Simulation générée avec succès : ${simStudentCount} élèves répartis dans ${simClassCount} classes.`);
+                          setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS LES SCÉNARIOS
                         })
                         .finally(() => setBusy(false));
                     } catch (err) {
@@ -782,27 +778,51 @@ export default function App() {
           </div>
 
           {/* Sub-Navigation for Module 1 */}
-          <div className="sub-nav-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <div className="sub-nav-tabs" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                className={`secondary ${dispatchSubTab === "roster" ? "active-subtab" : ""}`}
+                onClick={() => setDispatchSubTab("roster")}
+              >
+                👥 1. Effectifs & Profils des Élèves ({dataset.students.length})
+              </button>
+              <button
+                className={`secondary ${dispatchSubTab === "weights" ? "active-subtab" : ""}`}
+                onClick={() => setDispatchSubTab("weights")}
+              >
+                ⚙️ 2. Critères & Pondérations IA
+              </button>
+              <button
+                className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
+                onClick={() => setDispatchSubTab("kanban")}
+                disabled={scenarios.length === 0}
+                style={{ opacity: scenarios.length === 0 ? 0.5 : 1, cursor: scenarios.length === 0 ? "not-allowed" : "pointer" }}
+                title={scenarios.length === 0 ? "Générez d'abord des scénarios dans l'Étape 2" : "Consulter les scénarios"}
+              >
+                📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : "(0 - à générer)"}
+              </button>
+            </div>
+
             <button
-              className={`secondary ${dispatchSubTab === "roster" ? "active-subtab" : ""}`}
-              onClick={() => setDispatchSubTab("roster")}
+              className="primary"
+              disabled={busy}
+              onClick={() => {
+                setBusy(true);
+                api.generate(weights)
+                  .then((res) => {
+                    setScenarios(res.scenarios);
+                    if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
+                    setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés.`);
+                    setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
+                  })
+                  .catch((err) => {
+                    setNotice(err instanceof Error ? err.message : "Erreur lors de la génération.");
+                  })
+                  .finally(() => setBusy(false));
+              }}
+              style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, boxShadow: "var(--shadow-md)", whiteSpace: "nowrap" }}
             >
-              👥 1. Effectifs & Profils des Élèves ({dataset.students.length})
-            </button>
-            <button
-              className={`secondary ${dispatchSubTab === "weights" ? "active-subtab" : ""}`}
-              onClick={() => setDispatchSubTab("weights")}
-            >
-              ⚙️ 2. Critères & Pondérations IA
-            </button>
-            <button
-              className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
-              onClick={() => setDispatchSubTab("kanban")}
-              disabled={scenarios.length === 0}
-              style={{ opacity: scenarios.length === 0 ? 0.5 : 1, cursor: scenarios.length === 0 ? "not-allowed" : "pointer" }}
-              title={scenarios.length === 0 ? "Générez d'abord des scénarios dans l'Étape 2" : "Consulter les scénarios"}
-            >
-              📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : "(0 - à générer)"}
+              ⚡ Générer les 3 Scénarios
             </button>
           </div>
 
