@@ -37,6 +37,24 @@ function subjectColorClass(subject: string): string {
   return "";
 }
 
+function getAvatarColor(id: string): string {
+  const colors = [
+    "#8b5cf6",
+    "#06b6d4",
+    "#10b981",
+    "#f59e0b",
+    "#ec4899",
+    "#3b82f6",
+    "#ef4444",
+    "#6366f1",
+  ];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function App() {
   const [activeTab, setActiveTabState] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">(() => {
     const saved = localStorage.getItem("edtemps_activeTab");
@@ -1479,10 +1497,30 @@ export default function App() {
           {(dispatchSubTab === "kanban" || scenarios.length > 0) && (
             <>
               <section aria-labelledby="scenarios-title">
-                <div className="section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
                   <div>
-                    <span className="eyebrow">MODULE 1 · ÉVALUATION & CHOIX DES SCÉNARIOS</span>
-                    <h2 id="scenarios-title">Variantes Optimisées par l'IA</h2>
+                    <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: 800, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
+                      Répartition — {dataset.level}, rentrée 2026
+                    </h2>
+                    <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "4px", fontWeight: 600 }}>
+                      {dataset.classrooms.length} classes · {dataset.students.length} élèves · scénario n°{scenarios.findIndex((s) => s.id === selected?.id) + 1} ({selected?.state === "APPROVED" ? "officialisé" : "brouillon"})
+                    </div>
+                  </div>
+
+                  {/* LÉGENDE INSTITUTIONNELLE DES EFFECTIFS */}
+                  <div style={{ display: "flex", gap: "16px", alignItems: "center", fontSize: "0.78rem", fontWeight: 700, background: "var(--bg-subtle)", padding: "6px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#15803d" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }} />
+                      Effectif conforme
+                    </span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#c2410c" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }} />
+                      Sous-effectif — à surveiller
+                    </span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#b91c1c" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444" }} />
+                      Sur-effectif — bloquant
+                    </span>
                   </div>
 
                   {/* BARRE D'HISTORIQUE UNDO / REDO (ANNULER & RÉTABLIR) */}
@@ -1779,58 +1817,56 @@ export default function App() {
                               }
                             }}
                           >
-                            <header>
+                            <header style={{ background: "var(--bg-card)", padding: "14px 16px", borderRadius: "var(--radius-md) var(--radius-md) 0 0", borderBottom: "1px solid var(--border-light)" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)" }}>{classroom.label}</h3>
-                                <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.88rem" }}>
-                                  {classroom.students.length}/{classroom.maxSize} él.
+                                <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)", fontSize: "1.1rem", fontWeight: 800 }}>{classroom.label}</h3>
+                                <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.9rem", color: "var(--text-muted)" }}>
+                                  {totalCount}/{classroom.maxSize}
                                 </span>
                               </div>
 
-                              {/* Sceau d'Équilibrage Institutionnel avec Infobulle Explicative */}
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span
-                                  className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}
-                                  title={reasonText}
-                                  data-tooltip={reasonText}
-                                >
-                                  {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
-                                </span>
-                                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
-                                  {countF} F / {countM} G
-                                </span>
+                              {/* Pastille de Statut Pill (Sous-effectif - X manquants / Effectif conforme / Sur-effectif) */}
+                              <div style={{ marginTop: "8px" }}>
+                                {totalCount < classroom.minSize ? (
+                                  <span style={{ background: "#fff7ed", color: "#c2410c", border: "1px solid #fdba74", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                    🟠 Sous-effectif · {classroom.minSize - totalCount} manquant{classroom.minSize - totalCount > 1 ? "s" : ""}
+                                  </span>
+                                ) : totalCount > classroom.maxSize ? (
+                                  <span style={{ background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                    🔴 Sur-effectif · {totalCount - classroom.maxSize} en trop
+                                  </span>
+                                ) : (
+                                  <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                    🟢 Effectif conforme
+                                  </span>
+                                )}
                               </div>
 
-                              {/* Bannière explicite des motifs d'ajustement */}
-                              {!isBalanced && (
-                                <div
-                                  style={{
-                                    fontSize: "0.72rem",
-                                    color: "#92400e",
-                                    background: "#fef3c7",
-                                    padding: "4px 8px",
-                                    borderRadius: "var(--radius-sm)",
-                                    border: "1px solid #fcd34d",
-                                    marginTop: "4px",
-                                    fontWeight: 700,
-                                    lineHeight: 1.3,
-                                  }}
-                                  title={reasonText}
-                                >
-                                  ⚠️ {adjustReasons.join(" • ")}
+                              {/* Jauge d'Effectif Graphique (min 17 - cible 24 - max 24) */}
+                              <div style={{ marginTop: "10px" }}>
+                                <div style={{ height: "6px", background: "var(--bg-subtle)", borderRadius: "3px", overflow: "hidden", position: "relative", border: "1px solid var(--border-light)" }}>
+                                  <div
+                                    style={{
+                                      height: "100%",
+                                      width: `${Math.min(100, (totalCount / classroom.maxSize) * 100)}%`,
+                                      background: totalCount < classroom.minSize ? "#f59e0b" : totalCount > classroom.maxSize ? "#ef4444" : "#10b981",
+                                      borderRadius: "3px",
+                                      transition: "width 0.3s ease",
+                                    }}
+                                  />
                                 </div>
-                              )}
-
-                              {/* Barre de Parité Visuelle Bi-couleur */}
-                              <div className="parity-bar" title={`Parité : ${countF} Filles / ${countM} Garçons`}>
-                                <div className="parity-fill-f" style={{ width: `${pctF}%` }} />
-                                <div className="parity-fill-m" style={{ width: `${pctM}%` }} />
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "4px" }}>
+                                  <span>min {classroom.minSize}</span>
+                                  <span>cible {classroom.maxSize}</span>
+                                  <span>max {classroom.maxSize}</span>
+                                </div>
                               </div>
 
-                              {/* Synthèse Moyenne & Besoins */}
-                              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem" }}>
-                                <span>Moy : <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
-                                <span>🤝 <strong>{supportCount}</strong> PAP/PPS</span>
+                              {/* Ligne de Synthèse : ⚖️ 2F / 1G | ∅ 14.4/20 | ✦ X dispositifs */}
+                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-light)" }}>
+                                <span>⚖️ <strong>{countF}F</strong> / <strong>{countM}G</strong></span>
+                                <span>∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
+                                <span>✦ <strong>{supportCount}</strong> dispositif{supportCount > 1 ? "s" : ""}</span>
                               </div>
                             </header>
 
@@ -1845,70 +1881,114 @@ export default function App() {
                                   onClick={() => setSelectedStudentId(student.id)}
                                   style={{
                                     display: "flex",
-                                    flexDirection: "column",
-                                    gap: "8px",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    gap: "10px",
                                     padding: "10px 12px",
-                                    borderLeft: `4px solid ${student.gender === "F" ? "#ec4899" : "#3b82f6"}`,
+                                    background: "var(--bg-card)",
+                                    border: "1px solid var(--border-light)",
+                                    borderRadius: "var(--radius-md)",
+                                    boxShadow: "var(--shadow-sm)",
                                   }}
                                 >
-                                  {/* Ligne 1 : Nom, Fiche & Menu Transfert Compact */}
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
-                                      <span className="drag-handle" title="Glisser-déposer pour déplacer">⋮⋮</span>
-                                      <span style={{ fontWeight: 800, fontSize: "0.9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {nameOf(student, anonymous)}
-                                      </span>
+                                  {/* Gauche : Poignée, Pastille d'Initiales, Nom, Note & Puces */}
+                                  <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                                    <span className="drag-handle" style={{ color: "#94a3b8", cursor: "grab", fontSize: "0.9rem" }} title="Glisser-déposer pour déplacer">::</span>
+
+                                    <div
+                                      style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "50%",
+                                        background: getAvatarColor(student.id),
+                                        color: "#ffffff",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontWeight: 800,
+                                        fontSize: "0.75rem",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {student.initials}
                                     </div>
 
-                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                                      <button
-                                        className="icon-btn-subtle"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setInspectStudent(student);
-                                        }}
-                                        title="Consulter le dossier pédagogique complet"
-                                      >
-                                        🔍 Fiche
-                                      </button>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flexWrap: "wrap" }}>
+                                      <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text-main)", whiteSpace: "nowrap" }}>
+                                        {nameOf(student, anonymous)}
+                                      </span>
+                                      <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600, fontFamily: "var(--font-mono)" }}>
+                                        {student.levelAverage.toFixed(1)}/20
+                                      </span>
 
-                                      {selected.state !== "APPROVED" && (
-                                        <select
-                                          className="compact-move-select"
-                                          value=""
-                                          onClick={(e) => e.stopPropagation()}
-                                          onChange={(e) => {
-                                            e.stopPropagation();
-                                            if (e.target.value) requestMove(student.id, e.target.value);
+                                      {/* Badges d'accompagnement et d'options */}
+                                      {student.supportFlags.map((flag) => (
+                                        <span
+                                          key={flag}
+                                          style={{
+                                            background: flag === "PAP" ? "#ffedd5" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
+                                            color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
+                                            padding: "2px 8px",
+                                            borderRadius: "12px",
+                                            fontSize: "0.7rem",
+                                            fontWeight: 800,
                                           }}
-                                          title="Transférer vers une autre classe"
                                         >
-                                          <option value="" disabled>⇄ Déplacer</option>
-                                          {otherClasses.map((targetC) => (
-                                            <option key={targetC.id} value={targetC.id}>
-                                              Vers {targetC.label}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      )}
+                                          {flag}
+                                        </span>
+                                      ))}
+                                      {student.options.map((opt) => (
+                                        <span
+                                          key={opt}
+                                          style={{
+                                            background: "#f3e8ff",
+                                            color: "#6b21a8",
+                                            padding: "2px 8px",
+                                            borderRadius: "12px",
+                                            fontSize: "0.7rem",
+                                            fontWeight: 800,
+                                          }}
+                                        >
+                                          {opt}
+                                        </span>
+                                      ))}
                                     </div>
                                   </div>
 
-                                  {/* Ligne 2 : Puces de Moyenne, Accompanements & Options */}
-                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                                    <span className="student-grade-pill">
-                                      {student.levelAverage.toFixed(1)}/20
-                                    </span>
-                                    {student.supportFlags.map((flag) => (
-                                      <span key={flag} className="student-support-pill">
-                                        {flag}
-                                      </span>
-                                    ))}
-                                    {student.options.map((opt) => (
-                                      <span key={opt} className="student-option-pill">
-                                        {opt}
-                                      </span>
-                                    ))}
+                                  {/* Droite : Fiche & Menu Transfert Compact */}
+                                  <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                                    <button
+                                      className="icon-btn-subtle"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setInspectStudent(student);
+                                      }}
+                                      title="Consulter le dossier pédagogique complet"
+                                      style={{ padding: "4px 8px", fontSize: "0.78rem" }}
+                                    >
+                                      🔍
+                                    </button>
+
+                                    {selected.state !== "APPROVED" && (
+                                      <select
+                                        className="compact-move-select"
+                                        value=""
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={(e) => {
+                                          e.stopPropagation();
+                                          if (e.target.value) requestMove(student.id, e.target.value);
+                                        }}
+                                        title="Transférer vers une autre classe"
+                                        style={{ padding: "4px 8px", fontSize: "0.78rem" }}
+                                      >
+                                        <option value="" disabled>⇄</option>
+                                        {otherClasses.map((targetC) => (
+                                          <option key={targetC.id} value={targetC.id}>
+                                            Vers {targetC.label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    )}
                                   </div>
                                 </div>
                               ))}
