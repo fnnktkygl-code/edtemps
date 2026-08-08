@@ -1533,9 +1533,9 @@ export default function App() {
               <p className="eyebrow">MODULE 2 · MOTEUR D'OPTIMISATION SOUS CONTRAINTES (HEURISTIQUE & RECUIT SIMULÉ)</p>
               <h2 id="timetabling-title">Emplois du Temps & Planning Semestriel</h2>
             </div>
-            <div className="section-controls">
-              <div className="control-group">
-                <label htmlFor="week-select">Semaines :</label>
+            <div className="section-controls" style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap", flexShrink: 0 }}>
+              <div className="control-group" style={{ display: "flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+                <label htmlFor="week-select" style={{ whiteSpace: "nowrap", flexShrink: 0 }}>Semaines :</label>
                 <select id="week-select" value={selectedWeekFilter} onChange={(e) => setSelectedWeekFilter(e.target.value as "ALL" | "A" | "B")}>
                   <option value="ALL">Toutes les semaines (A/B)</option>
                   <option value="A">Semaine A</option>
@@ -1543,8 +1543,8 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="control-group">
-                <label htmlFor="axis-select">Vue :</label>
+              <div className="control-group" style={{ display: "flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+                <label htmlFor="axis-select" style={{ whiteSpace: "nowrap", flexShrink: 0 }}>Vue :</label>
                 <select id="axis-select" value={timetablingAxisFilter} onChange={(e) => setTimetablingAxisFilter(e.target.value)}>
                   <option value="ALL">Vue globale de l'établissement</option>
                   <option value="6A">Classe 6e A</option>
@@ -1555,7 +1555,12 @@ export default function App() {
                 </select>
               </div>
 
-              <button className="validate" onClick={validateTimetable} disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}>
+              <button
+                className="validate"
+                onClick={validateTimetable}
+                disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}
+                style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, borderRadius: "var(--radius-sm)", whiteSpace: "nowrap", flexShrink: 0, height: "40px", display: "inline-flex", alignItems: "center", gap: "8px" }}
+              >
                 {selectedSchedule?.state === "APPROVED" ? "✓ EDT Scellé" : "⚡ Valider l'Emploi du temps"}
               </button>
             </div>

@@ -404,7 +404,7 @@ h1 span {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.88rem;
-  padding: 9px 16px;
+  padding: 9px 18px;
   border-radius: var(--radius-sm);
   transition: var(--transition-fast);
   display: inline-flex;
@@ -413,24 +413,28 @@ h1 span {
   gap: 8px;
   border: 1px solid transparent;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .primary {
   background: var(--primary-brand);
   color: #ffffff;
-  box-shadow: 0 2px 8px 0 rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 8px 0 rgba(30, 58, 138, 0.25);
 }
 
 .primary:hover:not(:disabled) {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(30, 58, 138, 0.35);
 }
 
 .secondary {
   background: var(--bg-card);
   color: var(--text-main);
   border-color: var(--border-light);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .secondary:hover:not(:disabled) {
@@ -440,14 +444,20 @@ h1 span {
 }
 
 .validate {
-  background: var(--emerald-accent);
+  background: #059669;
   color: #ffffff;
-  box-shadow: 0 2px 8px 0 rgba(16, 185, 129, 0.25);
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px 0 rgba(5, 150, 105, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .validate:hover:not(:disabled) {
+  background: #047857;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.35);
 }
 
 button:disabled {
@@ -504,6 +514,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .control-group {
@@ -513,6 +524,13 @@ button:disabled {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.control-group label {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .control-group select {
@@ -523,6 +541,8 @@ button:disabled {
   color: var(--text-main);
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Absence Panel */
