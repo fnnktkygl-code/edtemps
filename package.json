@@ -6,7 +6,9 @@
   "description": "Socle de répartition des classes et d'emplois du temps pour établissements scolaires français.",
   "packageManager": "npm@10.8.2",
   "workspaces": [
-    "apps/web"
+    "packages/domain",
+    "apps/web",
+    "apps/api"
   ],
   "scripts": {
     "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",

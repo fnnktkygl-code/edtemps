@@ -3668,405 +3668,417 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* En-tête Fixe de la Modale */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", padding: "18px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
-              <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-                <div
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    background: getAvatarColor(inspectStudent.id),
-                    color: "#ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: "1.05rem",
-                    boxShadow: "var(--shadow-sm)",
-                    flexShrink: 0,
-                  }}
-                >
-                  {inspectStudent.initials}
-                </div>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span className="brand-badge" style={{ background: "var(--bg-subtle)", color: "var(--primary-brand)", border: "1px solid var(--border-light)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
-                      DOSSIER PÉDAGOGIQUE ÉLÈVE
-                    </span>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
-                      Sexe : {inspectStudent.gender === "F" ? "Fille ♀" : inspectStudent.gender === "M" ? "Garçon ♂" : "Non spécifié"}
-                    </span>
-                  </div>
-                  <h2 style={{ margin: "2px 0 0", fontSize: "1.3rem", fontWeight: 800, color: "var(--text-main)" }}>
-                    {nameOf(inspectStudent, anonymous)}
-                  </h2>
-                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", fontWeight: 600 }}>
-                    🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "1px 6px", borderRadius: "4px", fontSize: "0.76rem" }}>{anonymous ? `student-` + inspectStudent.id.slice(0, 8) + `… (HMAC)` : inspectStudent.id}</code>
-                    &nbsp;·&nbsp;
-                    Niveau : <strong>{dataset.level}</strong>
-                  </p>
-                </div>
-              </div>
-              <button
-                className="icon-btn-subtle"
-                onClick={() => setInspectStudent(null)}
-                style={{ padding: "6px 12px", fontSize: "1.1rem", borderRadius: "50%", cursor: "pointer", flexShrink: 0 }}
-                title="Fermer la fenêtre"
-              >
-                ✕
-              </button>
-            </div>
+            {(() => {
+              const rawIneId = inspectStudent.id.startsWith("student-") ? inspectStudent.id.slice(8) : inspectStudent.id;
+              const ineDisplay = anonymous ? `INE-SHA256-${rawIneId.slice(0, 8).toUpperCase()}… (HMAC)` : inspectStudent.id;
+              const assignedClassId = selected?.assignments[inspectStudent.id];
+              const assignedClassroom = dataset.classrooms.find((c) => c.id === assignedClassId);
 
-            {/* BARRE DE SÉCURITÉ & HABILITATION RGPD */}
-            <div style={{ background: userRole === "HEADMASTER_ADMIN" ? "#eff6ff" : "#f8fafc", borderBottom: "1px solid var(--border-light)", padding: "10px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.78rem", flexShrink: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "#1e40af" : "#475569" }}>
-                  {userRole === "HEADMASTER_ADMIN" ? "🛡️ Habilitation : Chef d'Établissement (Droits Écriture)" : "🔒 Mode : Consultation Seule"}
-                </span>
-                <button
-                  onClick={() => {
-                    setUserRole(userRole === "HEADMASTER_ADMIN" ? "READONLY_TEACHER" : "HEADMASTER_ADMIN");
-                    if (userRole === "HEADMASTER_ADMIN") setIsEditingStudent(false);
-                  }}
-                  style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", textDecoration: "underline", fontSize: "0.75rem", fontWeight: 700, padding: 0 }}
-                  title="Permuter le rôle d'utilisateur pour tester les permissions de sécurité"
-                >
-                  ({userRole === "HEADMASTER_ADMIN" ? "Tester mode Consultation" : "Activer Droits Chef d'Établissement"})
-                </button>
-              </div>
-              {!isEditingStudent ? (
-                <button
-                  className="primary"
-                  onClick={() => {
-                    if (userRole !== "HEADMASTER_ADMIN") {
-                      alert("🔒 Droits insuffisants : Seul un compte habilité Chef d'Établissement / Admin peut modifier les données d'un élève.");
-                      return;
-                    }
-                    setEditStudentForm({ ...inspectStudent });
-                    setIsEditingStudent(true);
-                  }}
-                  style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "#2563eb" : "#94a3b8" }}
-                >
-                  ✏️ Modifier la fiche élève
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsEditingStudent(false)}
-                  style={{ background: "#cbd5e1", color: "#1e293b", border: "none", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer" }}
-                >
-                  ✕ Annuler l'édition
-                </button>
-              )}
-            </div>
-
-            {/* Corps Déroulant Interne de la Modale */}
-            <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px", flex: 1, WebkitOverflowScrolling: "touch" }}>
-              {isEditingStudent && editStudentForm ? (
-                /* FORMULAIRE D'ÉDITION SÉCURISÉ & TRACÉ */
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "#166534", fontWeight: 700 }}>
-                    ⚖️ <strong>Traçabilité CNIL Active</strong> : Toute modification enregistrée produit un événement d'audit horodaté immuable (`STUDENT_UPDATED`).
-                  </div>
-
-                  {/* Sexe & Moyenne */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px" }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                        Genre / Sexe :
-                      </label>
-                      <select
-                        value={editStudentForm.gender}
-                        onChange={(e) => setEditStudentForm({ ...editStudentForm, gender: e.target.value as Gender })}
-                        style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-card)", color: "var(--text-main)" }}
-                      >
-                        <option value="F">Fille ♀</option>
-                        <option value="M">Garçon ♂</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                        Moyenne Générale (/20) :
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        step="0.1"
-                        value={editStudentForm.levelAverage}
-                        onChange={(e) => setEditStudentForm({ ...editStudentForm, levelAverage: parseFloat(e.target.value) || 0 })}
-                        style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 800, fontSize: "0.95rem", background: "var(--bg-card)", color: "var(--text-main)" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Dispositifs d'Accompagnement (PAP, PPS, PAI, PPRE, ULIS) */}
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                      🤝 Dispositifs & Aménagements Pédagogiques :
-                    </label>
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                      {(["PAP", "PPS", "PAI", "PPRE", "ULIS"] as const).map((flag) => {
-                        const checked = editStudentForm.supportFlags.includes(flag);
-                        return (
-                          <label key={flag} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#eff6ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#93c5fd" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#1e40af" : "var(--text-main)" }}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={(e) => {
-                                const flags = e.target.checked
-                                  ? [...editStudentForm.supportFlags, flag]
-                                  : editStudentForm.supportFlags.filter((f) => f !== flag);
-                                setEditStudentForm({ ...editStudentForm, supportFlags: flags });
-                              }}
-                            />
-                            <span>{flag}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Options Scolaires */}
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                      🎓 Options Scolaires & Langues :
-                    </label>
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                      {(["LCE", "BILANGUE", "LATIN", "CHAM"] as const).map((opt) => {
-                        const checked = editStudentForm.options.includes(opt);
-                        return (
-                          <label key={opt} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={(e) => {
-                                const opts = e.target.checked
-                                  ? [...editStudentForm.options, opt]
-                                  : editStudentForm.options.filter((o) => o !== opt);
-                                setEditStudentForm({ ...editStudentForm, options: opts });
-                              }}
-                            />
-                            <span>{opt}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Observations / Appréciation */}
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                      📝 Appréciation du Conseil de Classe :
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={editStudentForm.teacherComments || ""}
-                      onChange={(e) => setEditStudentForm({ ...editStudentForm, teacherComments: e.target.value })}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.85rem", fontFamily: "var(--font-sans)", background: "var(--bg-card)", color: "var(--text-main)" }}
-                      placeholder="Remarques et appréciations..."
-                    />
-                  </div>
-
-                  {/* Motif de la Modification (CNIL) */}
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#1e40af", marginBottom: "4px" }}>
-                      ⚖️ Motif de l'Ajustement (Obligatoire pour l'Audit) :
-                    </label>
-                    <input
-                      type="text"
-                      value={editReason}
-                      onChange={(e) => setEditReason(e.target.value)}
-                      placeholder="Ex: Décision du conseil de classe / Ajustement du profil d'apprentissage"
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid #bfdbfe", background: "#eff6ff", fontSize: "0.85rem", color: "#1e3a8a", fontWeight: 600 }}
-                    />
-                  </div>
-
-                  <button
-                    className="primary"
-                    onClick={() => handleSaveStudentEdit()}
-                    style={{ padding: "12px", fontWeight: 800, fontSize: "0.95rem", marginTop: "6px" }}
-                  >
-                    💾 Enregistrer & Sceller la Modification (CNIL Audit)
-                  </button>
-                </div>
-              ) : (
-                /* MODE LECTURE CLASSIQUE */
+              return (
                 <>
-                  {/* Synthese Notes par Matiere */}
-                  <div>
-                    <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                      📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
-                    </h4>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                      {inspectStudent.subjectGrades?.map((sg) => (
-                        <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
-                          <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
-                            {sg.score.toFixed(1)} / 20
+                  {/* En-tête Fixe de la Modale */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", padding: "18px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
+                    <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+                      <div
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          background: getAvatarColor(inspectStudent.id),
+                          color: "#ffffff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: "1.1rem",
+                          boxShadow: "var(--shadow-sm)",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {inspectStudent.initials}
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <span className="brand-badge" style={{ background: "var(--bg-subtle)", color: "var(--primary-brand)", border: "1px solid var(--border-light)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
+                            DOSSIER PÉDAGOGIQUE ÉLÈVE
+                          </span>
+                          <span style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
+                            📍 {assignedClassroom ? assignedClassroom.label : "Non affecté"}
+                          </span>
+                          <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                            Sexe : {inspectStudent.gender === "F" ? "Fille ♀" : inspectStudent.gender === "M" ? "Garçon ♂" : "Non spécifié"}
                           </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Vie Scolaire & Comportement */}
-                  <div>
-                    <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                      Vie Scolaire & Consultation Individuelle
-                    </h4>
-                    <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                      <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                      <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
-                        <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduite</span>
-                        <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
-                          {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
-                        </div>
-                      </div>
-                      <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
-                        <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Assiduité & Ponctualité</span>
-                        <div style={{ fontWeight: 800, fontSize: "1rem" }}>
-                          {inspectStudent.behavior?.absencesHours ?? 0}h d'absence · {inspectStudent.behavior?.tardinessCount ?? 0} retards
-                        </div>
+                        <h2 style={{ margin: "3px 0 2px", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-main)" }}>
+                          {nameOf(inspectStudent, anonymous)}
+                        </h2>
+                        <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", fontWeight: 600 }}>
+                          🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.76rem" }}>{ineDisplay}</code>
+                          &nbsp;·&nbsp;
+                          Niveau : <strong>{dataset.level}</strong> (Né(e) en 2015 · 11 ans)
+                        </p>
                       </div>
                     </div>
+                    <button
+                      className="icon-btn-subtle"
+                      onClick={() => setInspectStudent(null)}
+                      style={{ padding: "6px 12px", fontSize: "1.1rem", borderRadius: "50%", cursor: "pointer", flexShrink: 0 }}
+                      title="Fermer la fenêtre"
+                    >
+                      ✕
+                    </button>
                   </div>
 
-                  {/* Remarques & Accompagnements */}
-                  <div>
-                    <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                      📝 Appréciation & Dispositifs Pédagogiques
-                    </h4>
-                    <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
-                      "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
-                    </p>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      {inspectStudent.supportFlags.length === 0 && inspectStudent.options.length === 0 && (
-                        <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Aucun aménagement spécifique ni option particulière.</span>
-                      )}
-                      {inspectStudent.supportFlags.map((flag) => (
-                        <div
-                          key={flag}
-                          style={{
-                            background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
-                            color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
-                            border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
-                            padding: "6px 12px",
-                            borderRadius: "var(--radius-sm)",
-                            fontSize: "0.82rem",
-                            fontWeight: 800,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <span>🤝</span>
-                          <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
-                        </div>
-                      ))}
-                      {inspectStudent.options.map((opt) => (
-                        <div
-                          key={opt}
-                          style={{
-                            background: "#f3e8ff",
-                            color: "#6b21a8",
-                            border: "1px solid #e9d5ff",
-                            padding: "6px 12px",
-                            borderRadius: "var(--radius-sm)",
-                            fontSize: "0.82rem",
-                            fontWeight: 800,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <span>🎓</span>
-                          <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
-                        </div>
-                      ))}
+                  {/* BARRE DE SÉCURITÉ & HABILITATION RGPD */}
+                  <div style={{ background: userRole === "HEADMASTER_ADMIN" ? "#eff6ff" : "#f8fafc", borderBottom: "1px solid var(--border-light)", padding: "10px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.78rem", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "#1e40af" : "#475569" }}>
+                        {userRole === "HEADMASTER_ADMIN" ? "🛡️ Habilitation : Chef d'Établissement (Droits Écriture)" : "🔒 Mode : Consultation Seule"}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setUserRole(userRole === "HEADMASTER_ADMIN" ? "READONLY_TEACHER" : "HEADMASTER_ADMIN");
+                          if (userRole === "HEADMASTER_ADMIN") setIsEditingStudent(false);
+                        }}
+                        style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", textDecoration: "underline", fontSize: "0.75rem", fontWeight: 700, padding: 0 }}
+                        title="Permuter le rôle d'utilisateur pour tester les permissions de sécurité"
+                      >
+                        ({userRole === "HEADMASTER_ADMIN" ? "Tester mode Consultation" : "Activer Droits Chef d'Établissement"})
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Justifications d'affectation & Explication IA */}
-                  {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
-                    <div>
-                      <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                        💡 Motif d'Affectation & Analyse des Contraintes (Explication IA)
-                      </h4>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                        {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
-                          <div
-                            key={idx}
-                            style={{
-                              fontSize: "0.82rem",
-                              padding: "8px 12px",
-                              borderRadius: "6px",
-                              background: hc.includes("⚠️") ? "#fef2f2" : "#f8fafc",
-                              border: `1px solid ${hc.includes("⚠️") ? "#fecaca" : "#e2e8f0"}`,
-                              color: hc.includes("⚠️") ? "#991b1b" : "#334155",
-                              fontWeight: hc.includes("⚠️") ? 700 : 500,
-                            }}
-                          >
-                            {hc}
-                          </div>
-                        ))}
-                        {selected.explanations[inspectStudent.id].softConsiderations.map((sc, idx) => (
-                          <div key={idx} style={{ fontSize: "0.8rem", color: "#64748b", paddingLeft: "8px" }}>
-                            • {sc}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* HISTORIQUE ET TRAÇABILITÉ HORODATÉE DE L'ÉLÈVE */}
-                  <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "12px", marginTop: "6px" }}>
-                    <h4 style={{ margin: "0 0 8px", fontSize: "0.85rem", fontWeight: 800, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
-                      ⏱️ Historique des Modifications (Journal d'Audit Horodaté)
-                    </h4>
-                    {audit.filter((a) => a.details?.studentId === inspectStudent.id || a.details?.displayName === nameOf(inspectStudent, false) || a.details?.displayName === inspectStudent.displayName).length === 0 ? (
-                      <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
-                        Aucune modification enregistrée sur cette fiche élève.
-                      </p>
+                    {!isEditingStudent ? (
+                      <button
+                        className="primary"
+                        onClick={() => {
+                          if (userRole !== "HEADMASTER_ADMIN") {
+                            alert("🔒 Droits insuffisants : Seul un compte habilité Chef d'Établissement / Admin peut modifier les données d'un élève.");
+                            return;
+                          }
+                          setEditStudentForm({ ...inspectStudent });
+                          setIsEditingStudent(true);
+                        }}
+                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "#2563eb" : "#94a3b8" }}
+                      >
+                        ✏️ Modifier la fiche élève
+                      </button>
                     ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "140px", overflowY: "auto" }}>
-                        {audit
-                          .filter((a) => a.details?.studentId === inspectStudent.id || a.details?.displayName === nameOf(inspectStudent, false) || a.details?.displayName === inspectStudent.displayName)
-                          .map((evt) => (
-                            <div key={evt.id} style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.76rem" }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--primary-brand)", fontWeight: 800 }}>
-                                <span>👤 {evt.actorId}</span>
-                                <span>🕒 {new Date(evt.occurredAt).toLocaleString("fr-FR")}</span>
-                              </div>
-                              <div style={{ color: "var(--text-main)", fontWeight: 700, marginTop: "2px" }}>
-                                📝 {String(evt.details?.summary || evt.eventType)}
-                              </div>
-                              {evt.details?.reason && (
-                                <div style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "0.72rem", marginTop: "2px" }}>
-                                  Motif : {String(evt.details.reason)}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                      <button
+                        onClick={() => setIsEditingStudent(false)}
+                        style={{ background: "#cbd5e1", color: "#1e293b", border: "none", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer" }}
+                      >
+                        ✕ Annuler l'édition
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Corps Déroulant Interne de la Modale */}
+                  <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px", flex: 1, WebkitOverflowScrolling: "touch" }}>
+                    {isEditingStudent && editStudentForm ? (
+                      /* FORMULAIRE D'ÉDITION SÉCURISÉ & TRACÉ */
+                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "#166534", fontWeight: 700 }}>
+                          ⚖️ <strong>Traçabilité CNIL Active</strong> : Toute modification enregistrée produit un événement d'audit horodaté immuable (`STUDENT_UPDATED`).
+                        </div>
+
+                        {/* Sexe & Moyenne */}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px" }}>
+                          <div>
+                            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
+                              Genre / Sexe :
+                            </label>
+                            <select
+                              value={editStudentForm.gender}
+                              onChange={(e) => setEditStudentForm({ ...editStudentForm, gender: e.target.value as Gender })}
+                              style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-card)", color: "var(--text-main)" }}
+                            >
+                              <option value="F">Fille ♀</option>
+                              <option value="M">Garçon ♂</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
+                              Moyenne Générale (/20) :
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.1"
+                              value={editStudentForm.levelAverage}
+                              onChange={(e) => setEditStudentForm({ ...editStudentForm, levelAverage: parseFloat(e.target.value) || 0 })}
+                              style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 800, fontSize: "0.95rem", background: "var(--bg-card)", color: "var(--text-main)" }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Dispositifs d'Accompagnement */}
+                        <div>
+                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
+                            🤝 Dispositifs & Aménagements Pédagogiques :
+                          </label>
+                          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                            {(["PAP", "PPS", "PAI", "PPRE", "ULIS"] as const).map((flag) => {
+                              const checked = editStudentForm.supportFlags.includes(flag);
+                              return (
+                                <label key={flag} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#eff6ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#93c5fd" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#1e40af" : "var(--text-main)" }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const flags = e.target.checked
+                                        ? [...editStudentForm.supportFlags, flag]
+                                        : editStudentForm.supportFlags.filter((f) => f !== flag);
+                                      setEditStudentForm({ ...editStudentForm, supportFlags: flags });
+                                    }}
+                                  />
+                                  <span>{flag}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Options Scolaires */}
+                        <div>
+                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
+                            🎓 Options Scolaires & Langues :
+                          </label>
+                          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                            {(["LCE", "BILANGUE", "LATIN", "CHAM"] as const).map((opt) => {
+                              const checked = editStudentForm.options.includes(opt);
+                              return (
+                                <label key={opt} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const opts = e.target.checked
+                                        ? [...editStudentForm.options, opt]
+                                        : editStudentForm.options.filter((o) => o !== opt);
+                                      setEditStudentForm({ ...editStudentForm, options: opts });
+                                    }}
+                                  />
+                                  <span>{opt}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Observations / Appréciation */}
+                        <div>
+                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
+                            📝 Appréciation du Conseil de Classe :
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={editStudentForm.teacherComments || ""}
+                            onChange={(e) => setEditStudentForm({ ...editStudentForm, teacherComments: e.target.value })}
+                            style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.85rem", fontFamily: "var(--font-sans)", background: "var(--bg-card)", color: "var(--text-main)" }}
+                            placeholder="Remarques et appréciations..."
+                          />
+                        </div>
+
+                        {/* Motif de la Modification (CNIL) */}
+                        <div>
+                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#1e40af", marginBottom: "4px" }}>
+                            ⚖️ Motif de l'Ajustement (Obligatoire pour l'Audit) :
+                          </label>
+                          <input
+                            type="text"
+                            value={editReason}
+                            onChange={(e) => setEditReason(e.target.value)}
+                            placeholder="Ex: Décision du conseil de classe / Ajustement du profil d'apprentissage"
+                            style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid #bfdbfe", background: "#eff6ff", fontSize: "0.85rem", color: "#1e3a8a", fontWeight: 600 }}
+                          />
+                        </div>
+
+                        <button
+                          className="primary"
+                          onClick={() => handleSaveStudentEdit()}
+                          style={{ padding: "12px", fontWeight: 800, fontSize: "0.95rem", marginTop: "6px" }}
+                        >
+                          💾 Enregistrer & Sceller la Modification (CNIL Audit)
+                        </button>
                       </div>
+                    ) : (
+                      /* MODE LECTURE CLASSIQUE ENRICHI */
+                      <>
+                        {/* INFOS COMPLÉMENTAIRES ÉTABLISSEMENT & ORIGINE */}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                          <div style={{ background: "var(--bg-subtle)", padding: "10px 12px", borderRadius: "var(--radius-sm)" }}>
+                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", fontWeight: 700 }}>🏫 École d'Origine :</span>
+                            <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>École Élémentaire Jules Ferry</span>
+                          </div>
+                          <div style={{ background: "var(--bg-subtle)", padding: "10px 12px", borderRadius: "var(--radius-sm)" }}>
+                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", fontWeight: 700 }}>📊 IPS Théorique (Social) :</span>
+                            <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>108.5 (Catégorie Moyenne)</span>
+                          </div>
+                        </div>
+
+                        {/* Synthese Notes par Matiere */}
+                        <div>
+                          <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                            📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
+                          </h4>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                            {inspectStudent.subjectGrades?.map((sg) => (
+                              <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
+                                <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
+                                  {sg.score.toFixed(1)} / 20
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Vie Scolaire & Comportement */}
+                        <div>
+                          <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                            Vie Scolaire & Consultation Individuelle
+                          </h4>
+                          <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                            <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont excluses de l'algorithme automatisé de classement et de répartition des classes.
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                            <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                              <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduite</span>
+                              <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
+                                {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
+                              </div>
+                            </div>
+                            <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                              <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Assiduité & Ponctualité</span>
+                              <div style={{ fontWeight: 800, fontSize: "1rem" }}>
+                                {inspectStudent.behavior?.absencesHours ?? 0}h d'absence · {inspectStudent.behavior?.tardinessCount ?? 0} retards
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Remarques & Accompagnements */}
+                        <div>
+                          <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                            📝 Appréciation & Dispositifs Pédagogiques
+                          </h4>
+                          <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
+                            "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
+                          </p>
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                            {inspectStudent.supportFlags.length === 0 && inspectStudent.options.length === 0 && (
+                              <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Aucun aménagement spécifique ni option particulière.</span>
+                            )}
+                            {inspectStudent.supportFlags.map((flag) => (
+                              <div
+                                key={flag}
+                                style={{
+                                  background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
+                                  color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
+                                  border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
+                                  padding: "6px 12px",
+                                  borderRadius: "var(--radius-sm)",
+                                  fontSize: "0.82rem",
+                                  fontWeight: 800,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                }}
+                              >
+                                <span>🤝</span>
+                                <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
+                              </div>
+                            ))}
+                            {inspectStudent.options.map((opt) => (
+                              <div
+                                key={opt}
+                                style={{
+                                  background: "#f3e8ff",
+                                  color: "#6b21a8",
+                                  border: "1px solid #e9d5ff",
+                                  padding: "6px 12px",
+                                  borderRadius: "var(--radius-sm)",
+                                  fontSize: "0.82rem",
+                                  fontWeight: 800,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                }}
+                              >
+                                <span>🎓</span>
+                                <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* CARTE SOUVERAINE IA D'EXPLICATION DES CONTRAINTES */}
+                        {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
+                          <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)", padding: "16px", borderRadius: "var(--radius-md)", color: "#ffffff", boxShadow: "0 4px 16px rgba(49, 46, 129, 0.22)" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                              <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#ffffff", display: "flex", alignItems: "center", gap: "6px" }}>
+                                ✨ Justification Algorithmique & Motif d'Affectation
+                              </h4>
+                              <span style={{ background: "rgba(255, 255, 255, 0.15)", color: "#e0e7ff", padding: "2px 8px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 800, border: "1px solid rgba(255, 255, 255, 0.25)" }}>
+                                🇫🇷 Mistral AI
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                              {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
+                                <div key={idx} style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.2)", padding: "8px 12px", borderRadius: "6px", fontSize: "0.82rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ color: "#a7f3d0", fontWeight: 800 }}>✓</span>
+                                  <span>{hc}</span>
+                                </div>
+                              ))}
+                              {selected.explanations[inspectStudent.id].softConsiderations.map((sc, idx) => (
+                                <div key={idx} style={{ fontSize: "0.78rem", color: "#c7d2fe", paddingLeft: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span>↗</span>
+                                  <span>{sc}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* HISTORIQUE ET TRAÇABILITÉ HORODATÉE DE L'ÉLÈVE */}
+                        <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "12px", marginTop: "6px" }}>
+                          <h4 style={{ margin: "0 0 8px", fontSize: "0.85rem", fontWeight: 800, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+                            ⏱️ Historique des Modifications (Journal d'Audit Horodaté)
+                          </h4>
+                          {audit.filter((a) => a.details?.studentId === inspectStudent.id || a.details?.displayName === nameOf(inspectStudent, false) || a.details?.displayName === inspectStudent.displayName).length === 0 ? (
+                            <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                              Aucune modification enregistrée sur cette fiche élève.
+                            </p>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "140px", overflowY: "auto" }}>
+                              {audit
+                                .filter((a) => a.details?.studentId === inspectStudent.id || a.details?.displayName === nameOf(inspectStudent, false) || a.details?.displayName === inspectStudent.displayName)
+                                .map((evt) => (
+                                  <div key={evt.id} style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.76rem" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", color: "var(--primary-brand)", fontWeight: 800 }}>
+                                      <span>👤 {evt.actorId}</span>
+                                      <span>🕒 {new Date(evt.occurredAt).toLocaleString("fr-FR")}</span>
+                                    </div>
+                                    <div style={{ color: "var(--text-main)", fontWeight: 700, marginTop: "2px" }}>
+                                      📝 {String(evt.details?.summary || evt.eventType)}
+                                    </div>
+                                    {evt.details?.reason && (
+                                      <div style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "0.72rem", marginTop: "2px" }}>
+                                        Motif : {String(evt.details.reason)}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </>
-              )}
-            </div>
-
-            {/* Pied de Modale Fixe */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", padding: "14px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
-              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                🔒 Traitement certifié RGPD - Éducation Nationale
-              </span>
-              <button className="primary" onClick={() => setInspectStudent(null)} style={{ padding: "8px 20px", fontWeight: 800 }}>
-                Fermer le dossier
-              </button>
-            </div>
+              );
+            })()}
           </div>
         </div>
       )}
