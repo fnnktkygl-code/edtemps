@@ -2058,44 +2058,59 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </div>
                         ))}
 
-                        {/* RÈGLE D'EXCLUSIVITÉ (100% DE LA CLASSE) */}
+                        {/* RÈGLE D'EXCLUSIVITÉ MULTI-CLASSES (OPTION PAR OPTION ET CLASSE PAR CLASSE) */}
                         <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px dotted var(--border-light)" }}>
-                          <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#b45309", marginBottom: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span>🛡️</span> Exclusivité Strict (100% de la classe doit faire cette LV2/Option) :
+                          <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#b45309", marginBottom: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span>🛡️</span> Exclusivité Multi-Classes (Sélectionnez 1 ou plusieurs classes réservées par Option) :
                           </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            {dataset.classrooms.map((classroom) => {
-                              const currentRequired = weights.exclusiveOptionClassrooms?.[classroom.id] || "";
-                              return (
-                                <div key={classroom.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                                  <span style={{ fontSize: "0.76rem", fontWeight: 700, color: "var(--text-main)" }}>
-                                    Classe <strong>{classroom.label}</strong> :
+                          
+                          {/* VUE OPTION PAR OPTION (MULTI-SELECT PAR CASES À COCHER) */}
+                          {uniqueOptions.map((opt) => {
+                            const optStudents = dataset.students.filter((s) => s.options.includes(opt));
+                            const optCount = optStudents.length;
+                            const assignedClasses = dataset.classrooms.filter((c) => weights.exclusiveOptionClassrooms?.[c.id] === opt);
+                            const totalCap = assignedClasses.reduce((sum, c) => sum + c.maxSize, 0);
+
+                            return (
+                              <div key={opt} style={{ background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "8px", border: "1px solid var(--border-light)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", flexWrap: "wrap", gap: "6px" }}>
+                                  <strong style={{ fontSize: "0.78rem", color: "var(--primary-brand)" }}>🎓 Option {opt} ({optCount} élève{optCount > 1 ? "s" : ""})</strong>
+                                  <span style={{ fontSize: "0.74rem", fontWeight: 800, color: totalCap >= optCount ? "#15803d" : assignedClasses.length === 0 ? "var(--text-muted)" : "#b45309" }}>
+                                    {assignedClasses.length === 0
+                                      ? "Non réservée (répartition libre)"
+                                      : totalCap >= optCount
+                                      ? `✅ ${assignedClasses.length} classe(s) = ${totalCap} places / ${optCount} élèves`
+                                      : `⚠️ Insuffisant (${totalCap} / ${optCount} places - cochez 1 classe de plus)`}
                                   </span>
-                                  <select
-                                    value={currentRequired}
-                                    onChange={(e) => {
-                                      const optVal = e.target.value;
-                                      const nextExcl = { ...(weights.exclusiveOptionClassrooms || {}) };
-                                      if (optVal) nextExcl[classroom.id] = optVal;
-                                      else delete nextExcl[classroom.id];
-                                      setWeights({
-                                        ...weights,
-                                        exclusiveOptionClassrooms: nextExcl,
-                                        optionGroupingMode: "STRICT_SINGLE_CLASS",
-                                        optionBalance: Math.max(weights.optionBalance, 9),
-                                      });
-                                    }}
-                                    style={{ padding: "3px 6px", fontSize: "0.75rem", borderRadius: "var(--radius-sm)", border: `1px solid ${currentRequired ? "#f59e0b" : "var(--border-light)"}`, background: currentRequired ? "#fffbeb" : "var(--bg-card)", fontWeight: 700, color: currentRequired ? "#92400e" : "var(--text-muted)" }}
-                                  >
-                                    <option value="">-- Mixte / Sans exclusivité --</option>
-                                    {uniqueOptions.map((opt) => (
-                                      <option key={opt} value={opt}>🔒 Uniquement des élèves en {opt}</option>
-                                    ))}
-                                  </select>
                                 </div>
-                              );
-                            })}
-                          </div>
+                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                  {dataset.classrooms.map((c) => {
+                                    const isChecked = weights.exclusiveOptionClassrooms?.[c.id] === opt;
+                                    return (
+                                      <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer", background: isChecked ? "#fef3c7" : "var(--bg-card)", border: `1px solid ${isChecked ? "#fde68a" : "var(--border-light)"}`, padding: "3px 8px", borderRadius: "var(--radius-sm)", color: isChecked ? "#b45309" : "var(--text-main)" }}>
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={(e) => {
+                                            const nextExcl = { ...(weights.exclusiveOptionClassrooms || {}) };
+                                            if (e.target.checked) nextExcl[c.id] = opt;
+                                            else if (nextExcl[c.id] === opt) delete nextExcl[c.id];
+                                            setWeights({
+                                              ...weights,
+                                              exclusiveOptionClassrooms: nextExcl,
+                                              optionGroupingMode: "STRICT_SINGLE_CLASS",
+                                              optionBalance: Math.max(weights.optionBalance, 9),
+                                            });
+                                          }}
+                                        />
+                                        {c.label} ({c.maxSize} max)
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );

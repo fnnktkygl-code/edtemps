@@ -50,3 +50,20 @@ test("validateDispatchFeasibility détecte les impossibilités mathématiques", 
   assert.equal(res.errors[0].code, "TOTAL_CAPACITY_EXCEEDED");
   assert.equal(res.errors[0].suggestedFix?.recommendedClassCount, 4);
 });
+
+test("autorise l'affectation d'une option sur plusieurs classes réservées lorsque la capacité cumulée est suffisante", () => {
+  const input = createSyntheticDemoInput();
+  for (const c of input.classrooms) c.maxSize = 28;
+  const weights = {
+    optionGroupingMode: "STRICT_SINGLE_CLASS" as const,
+    exclusiveOptionClassrooms: {
+      "class-B": "LVB_ESP",
+      "class-C": "LVB_ESP",
+    },
+  };
+  const res = validateDispatchFeasibility(input, weights as any);
+  assert.equal(res.isFeasible, true);
+
+  const scenario = generateScenario(input, 42, weights as any);
+  assert.ok(scenario);
+});

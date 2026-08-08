@@ -109,7 +109,7 @@ function seededRandom(seed: number): Random {
   };
 }
 
-function groupStudents(students: Student[], weights?: DispatchWeights): Student[][] {
+function groupStudents(students: Student[], weights?: DispatchWeights, maxClassSize: number = 28): Student[][] {
   const grouped = new Map<string, Student[]>();
   for (const student of students) {
     let key = student.coLocateGroupId ?? `single:${student.id}`;
@@ -120,7 +120,18 @@ function groupStudents(students: Student[], weights?: DispatchWeights): Student[
     group.push(student);
     grouped.set(key, group);
   }
-  return [...grouped.values()];
+
+  const result: Student[][] = [];
+  for (const group of grouped.values()) {
+    if (group.length > maxClassSize) {
+      for (let i = 0; i < group.length; i += maxClassSize) {
+        result.push(group.slice(i, i + maxClassSize));
+      }
+    } else {
+      result.push(group);
+    }
+  }
+  return result;
 }
 
 function sum<T>(values: T[], project: (value: T) => number): number {
@@ -304,7 +315,7 @@ function explanationFor(
 }
 
 export type FeasibilityError = {
-  code: "TOTAL_CAPACITY_EXCEEDED" | "TOTAL_MIN_CAPACITY_UNREACHED" | "OPTION_SINGLE_CLASS_OVERFLOW";
+  code: "TOTAL_CAPACITY_EXCEEDED" | "TOTAL_MIN_CAPACITY_UNREACHED" | "OPTION_SINGLE_CLASS_OVERFLOW" | "OPTION_ASSIGNED_CAPACITY_EXCEEDED";
   title: string;
   message: string;
   suggestedFix?: {
@@ -372,19 +383,54 @@ export function validateDispatchFeasibility(
     });
   }
 
-  // 3. Regroupement d'option strict dépassant la taille d'une classe
-  if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS") {
-    const optionLabels = [...new Set(input.students.flatMap((student) => student.options))];
-    for (const option of optionLabels) {
-      const optionCount = input.students.filter((s) => s.options.includes(option)).length;
-      if (optionCount > maxPerClass) {
+  // 3. Regroupement d'option strict & Exclusivité multi-classes
+  const optionLabels = [...new Set(input.students.flatMap((student) => student.options))];
+  for (const option of optionLabels) {
+    const optionStudents = input.students.filter((s) => s.options.includes(option));
+    const optionCount = optionStudents.length;
+    if (optionCount === 0) continue;
+
+    const assignedClassIds: string[] = [];
+    if (weights?.exclusiveOptionClassrooms) {
+      for (const [cId, reqOpt] of Object.entries(weights.exclusiveOptionClassrooms)) {
+        if (reqOpt === option && !assignedClassIds.includes(cId)) {
+          assignedClassIds.push(cId);
+        }
+      }
+    }
+    if (weights?.optionClassroomMap && weights.optionClassroomMap[option]) {
+      const mapCId = weights.optionClassroomMap[option];
+      if (!assignedClassIds.includes(mapCId)) assignedClassIds.push(mapCId);
+    }
+
+    if (assignedClassIds.length > 0) {
+      const assignedClassrooms = input.classrooms.filter((c) => assignedClassIds.includes(c.id));
+      const totalAssignedCapacity = sum(assignedClassrooms, (c) => c.maxSize);
+
+      if (optionCount > totalAssignedCapacity) {
+        const classNames = assignedClassrooms.map((c) => c.label).join(", ");
+        errors.push({
+          code: "OPTION_ASSIGNED_CAPACITY_EXCEEDED",
+          title: `🎓 Capacité Insuffisante pour l'Option ${option}`,
+          message: `L'option ${option} concerne ${optionCount} élèves, mais les ${assignedClassrooms.length} classe(s) réservée(s) (${classNames}) ne proposent que ${totalAssignedCapacity} place(s) au total (il manque ${optionCount - totalAssignedCapacity} place(s)).`,
+          suggestedFix: {
+            recommendedClassCount: Math.ceil(optionCount / maxPerClass),
+            recommendedMaxSize: Math.ceil(optionCount / assignedClassrooms.length),
+            label: `Sélectionner une classe supplémentaire pour l'option ${option} OU augmenter la capacité max.`,
+          },
+        });
+      }
+    } else if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS") {
+      const minClassesNeeded = Math.ceil(optionCount / maxPerClass);
+      if (minClassesNeeded > classCount) {
         errors.push({
           code: "OPTION_SINGLE_CLASS_OVERFLOW",
-          title: `🎓 Regroupement d'Option ${option} Impossible sur 1 Classe`,
-          message: `L'option ${option} concerne ${optionCount} élèves, mais l'effectif maximal d'une classe est limité à ${maxPerClass} élèves. L'option ne peut pas être regroupée sur une seule classe.`,
+          title: `🎓 Regroupement d'Option ${option} Impossible`,
+          message: `L'option ${option} concerne ${optionCount} élèves, ce qui nécessite au moins ${minClassesNeeded} classes, mais votre structure ne comporte que ${classCount} classe(s).`,
           suggestedFix: {
-            recommendedMaxSize: optionCount,
-            label: `Passer en mode "Diluer / Équilibrer" OU augmenter la capacité max à ${optionCount} élèves/classe.`,
+            recommendedClassCount: minClassesNeeded,
+            recommendedMaxSize: Math.ceil(optionCount / classCount),
+            label: `Créer ${minClassesNeeded} classes au total OU augmenter l'effectif max.`,
           },
         });
       }
@@ -410,7 +456,8 @@ export function generateScenario(
   const random = seededRandom(seed);
   const targets = targetStats(input, weights);
   const assignments: Assignment = {};
-  const groups = groupStudents(input.students, weights).sort((left, right) => {
+  const maxPerClass = input.classrooms[0]?.maxSize ?? 28;
+  const groups = groupStudents(input.students, weights, maxPerClass).sort((left, right) => {
     const importance = (group: Student[]) => sum(group, (student) => student.conflictsWith.length * 10 + student.supportFlags.length * 2);
     return importance(right) - importance(left) || random() - 0.5;
   });
