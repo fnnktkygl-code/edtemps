@@ -385,9 +385,45 @@ export default function App() {
     <main className="page">
       <header className="masthead">
         <div className="brand-section">
-          <span className="brand-badge">🏛️ Référentiels Éducation Nationale</span>
           <h1>EdTemps</h1>
+          <span className="brand-badge">🏛️ MENJ</span>
         </div>
+
+        {/* NAVIGATION PAR ONGLETS INTÉGRÉE */}
+        <nav className="nav-tabs" aria-label="Navigation principale">
+          <button
+            className={`tab-button ${activeTab === "dispatch" ? "active" : ""}`}
+            onClick={() => setActiveTab("dispatch")}
+            data-tooltip="Module 1 : Répartition équilibrée des élèves"
+          >
+            🏫 Répartition des Élèves
+          </button>
+          <button
+            className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`}
+            onClick={() => setActiveTab("timetabling")}
+            data-tooltip="Module 2 : Emplois du temps & Remplacements"
+          >
+            📅 Emplois du Temps
+          </button>
+          <button
+            className={`tab-button ${activeTab === "teacher" ? "active" : ""}`}
+            onClick={() => setActiveTab("teacher")}
+            data-tooltip="Espace Enseignant personnel"
+          >
+            👩‍🏫 Espace Enseignant
+          </button>
+          <button
+            className={`tab-button ${activeTab === "compliance" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("compliance");
+              void refreshAudit();
+            }}
+            data-tooltip="Module 3 : Conformité CNIL/RGPD & RGS"
+          >
+            📋 Conformité DPO
+          </button>
+        </nav>
+
         <div className="header-actions">
           {/* Sélecteur de Rôle RBAC */}
           <select
@@ -397,18 +433,18 @@ export default function App() {
               setActorRole(newRole);
               setActorRoleState(newRole);
             }}
-            style={{ padding: "6px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.85rem", color: "var(--text-main)" }}
+            style={{ padding: "6px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.84rem", color: "var(--text-main)" }}
             title="Contrôle d'accès par rôle (RBAC)"
           >
-            <option value="SCHOOL_ADMIN">👨‍💼 Chef d'Établissement</option>
-            <option value="DISPATCH_EDITOR">⚙️ Adjoint de Direction</option>
+            <option value="SCHOOL_ADMIN">👨‍💼 Direction</option>
+            <option value="DISPATCH_EDITOR">⚙️ Adjoint</option>
             <option value="TEACHER">👩‍🏫 Enseignant</option>
-            <option value="CPE">📋 CPE / Vie Scolaire</option>
-            <option value="DPO">🔒 DPO / RSSI</option>
+            <option value="CPE">📋 CPE</option>
+            <option value="DPO">🔒 DPO</option>
           </select>
 
-          <label className="toggle-pill" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
-            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser
+          <label className="toggle-pill" title="Protection RGPD — Pseudonymisation immuable">
+            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> RGPD
           </label>
 
           <input
@@ -450,8 +486,9 @@ export default function App() {
               className="secondary"
               onClick={() => setImportMenuOpen(!importMenuOpen)}
               data-tooltip="Menu d'importation des fichiers SIECLE, STS-Web et outils IA Mistral"
+              style={{ padding: "6px 12px", fontSize: "0.84rem" }}
             >
-              📥 Importer & IA ▾
+              📥 Importer ▾
             </button>
             {importMenuOpen && (
               <div
@@ -520,66 +557,26 @@ export default function App() {
             className="theme-toggle-btn"
             onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
             data-tooltip="Basculez entre le mode clair et le mode sombre"
+            style={{ padding: "6px 10px", fontSize: "0.84rem" }}
           >
-            {theme === "light" ? "🌙 Mode Sombre" : "☀️ Mode Clair"}
+            {theme === "light" ? "🌙" : "☀️"}
           </button>
         </div>
       </header>
 
-      {/* NAVIGATION PAR ONGLETS */}
-      <nav className="nav-tabs" aria-label="Navigation principale">
-        <button
-          className={`tab-button ${activeTab === "dispatch" ? "active" : ""}`}
-          onClick={() => setActiveTab("dispatch")}
-          data-tooltip="Module 1 : Répartition équilibrée des élèves dans les classes"
-        >
-          🏫 Répartition des élèves
-        </button>
-        <button
-          className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`}
-          onClick={() => setActiveTab("timetabling")}
-          data-tooltip="Module 2 : Emplois du temps et gestion des remplacements d'urgence"
-        >
-          📅 Emplois du temps & Remplacements
-        </button>
-        <button
-          className={`tab-button ${activeTab === "teacher" ? "active" : ""}`}
-          onClick={() => setActiveTab("teacher")}
-          data-tooltip="Espace Enseignant : consultation de l'EDT personnel, vœux et absence"
-        >
-          👩‍🏫 Espace Enseignant
-        </button>
-        <button
-          className={`tab-button ${activeTab === "compliance" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("compliance");
-            void refreshAudit();
-          }}
-          data-tooltip="Module 3 : Conformité CNIL/RGPD et Dossier d'Homologation RGS"
-        >
-          📋 Conformité, DPO & Homologation RGS
-        </button>
-      </nav>
-
-      {/* BANDEAU DE MODE DÉGRADER HORS LIGNE (Audit RGPD/Souveraineté) */}
-      {isOfflineFallback && (
-        <div style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #f59e0b", padding: "10px 16px", borderRadius: "var(--radius-sm)", marginBottom: "16px", fontWeight: 700, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.88rem" }}>
-          <span>⚠️ <strong>MODE DÉMO HORS-LIGNE ACTIVÉ :</strong> L'API distante est en cours de démarrage ou inaccessible. Les données affichées sont des exemples 100% fictifs générés localement par le navigateur.</span>
-          <span className="chip" style={{ background: "#f59e0b", color: "#ffffff", marginLeft: "12px", whiteSpace: "nowrap" }}>Mode Démo Local</span>
-        </div>
-      )}
-
-      {/* BANDEAU DE STATUT DE PERMISSIONS RBAC */}
-      <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)", padding: "8px 16px", marginBottom: "16px", fontSize: "0.85rem", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span>
-          {actorRole === "SCHOOL_ADMIN" && "👨‍💼 Session Administrateur (Chef d'Établissement / Proviseur Adjoint) : Droits complets de simulation, validation et publication."}
-          {actorRole === "TEACHER" && "👩‍🏫 Session Enseignant (Professeur) : Consultation de l'EDT personnel, vœux et absence (Lecture seule sur la validation globale)."}
-          {actorRole === "CPE" && "📋 Session CPE / Vie Scolaire : Consultation des accompagnements et profils élèves (Lecture seule sur la validation globale)."}
-          {actorRole === "DPO" && "🔒 Session DPO / RSSI : Accès au Registre CNIL, modèle AIPD et journal d'audit immuable."}
+      {/* BANDEAU DE STATUT COMPACT ET UNIFIÉ */}
+      <div className="compact-status-bar">
+        <span className="status-tag">
+          👤 {actorRole === "SCHOOL_ADMIN" ? "Chef d'Établissement" : actorRole === "TEACHER" ? "Enseignant" : actorRole === "CPE" ? "CPE / Vie Scolaire" : actorRole === "DPO" ? "DPO / RSSI" : "Adjoint"}
         </span>
-        <span className="chip approved" style={{ fontSize: "0.75rem" }}>
-          Rôle : {actorRole === "SCHOOL_ADMIN" ? "Chef d'Établissement" : actorRole === "TEACHER" ? "Enseignant" : actorRole === "CPE" ? "CPE / Vie Scolaire" : actorRole === "DPO" ? "DPO / RSSI" : actorRole}
+        <span className="status-text">
+          🛡️ <strong>Décision humaine obligatoire :</strong> Les propositions IA sont explicables et à titre d'aide au pilotage. Seule la direction valide les décisions finales.
         </span>
+        {isOfflineFallback && (
+          <span className="offline-tag">
+            ⚡ Mode Simulation Locale (Données RGPD Fictives)
+          </span>
+        )}
       </div>
 
       {/* SHIMMER BANNER PENDANT LA GÉNÉRATION OU LE CALCUL */}
@@ -589,10 +586,6 @@ export default function App() {
           <span>Calcul et optimisation algorithmique sous contraintes par l'IA en cours... Veuillez patienter quelques instants.</span>
         </div>
       )}
-
-      <section className="safety-banner" aria-label="Information importante">
-        <strong>Décision humaine obligatoire.</strong> Le produit formule des propositions algorithmiques explicables ; seul un professionnel habilité (chef d'établissement / adjoint) peut les valider.
-      </section>
 
       {ocrSummary && (
         <div className="safety-banner" style={{ background: "#e8f5e9", borderColor: "#18753c" }}>
