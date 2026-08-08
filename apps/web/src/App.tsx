@@ -143,6 +143,11 @@ export default function App() {
     });
   };
 
+function getBestScenarioId(scens: Scenario[]): string | undefined {
+  if (!scens || scens.length === 0) return undefined;
+  return scens.reduce((best, curr) => (curr.metrics.score > best.metrics.score ? curr : best), scens[0])?.id;
+}
+
   const setSelectedId = (id?: string) => {
     setSelectedIdState(id);
     if (id) {
@@ -231,7 +236,7 @@ export default function App() {
           setDatasetState(parsedDs);
           setActiveDataset(parsedDs);
           setScenariosState(parsedScens);
-          setSelectedIdState(savedSelectedId || parsedScens[0].id);
+          setSelectedIdState(savedSelectedId || getBestScenarioId(parsedScens) || parsedScens[0].id);
           setNotice(`Session et scénarios restaurés (${parsedDs.students.length} élèves, ${parsedDs.classrooms.length} classes).`);
 
           api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => {});
@@ -251,7 +256,8 @@ export default function App() {
         api.generate({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 }, value)
           .then((res) => {
             setScenarios(res.scenarios);
-            if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
+            const bestId = getBestScenarioId(res.scenarios);
+            if (bestId) setSelectedId(bestId);
           })
           .catch(() => {});
       })
@@ -927,125 +933,6 @@ export default function App() {
       {/* TAB 1: RÉPARTITION DES CLASSES */}
       {activeTab === "dispatch" && (
         <>
-          {/* SIMULATEUR D'EFFECTIFS & BAC À SABLE SUR-MESURE */}
-          <div className="compliance-card" style={{ marginBottom: "20px", background: "var(--bg-card)", border: "1px solid var(--primary-brand)", boxShadow: "var(--shadow-md)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
-              <div>
-                <span className="eyebrow" style={{ color: "var(--primary-brand)", fontWeight: 800 }}>🧪 BAC À SABLE & SIMULATEUR DE TEST</span>
-                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800 }}>Tester l'Algorithme avec vos Propres Effectifs</h3>
-              </div>
-              <button
-                className="secondary"
-                onClick={() => setShowBenchmark(!showBenchmark)}
-                style={{ fontSize: "0.82rem", fontWeight: 700 }}
-              >
-                {showBenchmark ? "Masquer le Comparatif Benchmark" : "📊 Afficher le Comparatif Naïf vs IA"}
-              </button>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px", alignItems: "flex-end" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
-                  Nombre d'élèves total
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={2000}
-                  value={simStudentCount}
-                  onChange={(e) => setSimStudentCount(Math.max(1, Math.min(2000, Number(e.target.value) || 1)))}
-                  placeholder="Ex: 120"
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
-                  Nombre de classes cibles
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={simClassCount}
-                  onChange={(e) => setSimClassCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
-                  placeholder="Ex: 4"
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-main)" }}>
-                  Effectif max / classe
-                </label>
-                <input
-                  type="number"
-                  min={5}
-                  max={60}
-                  value={simMaxSize}
-                  onChange={(e) => setSimMaxSize(Math.max(5, Math.min(60, Number(e.target.value) || 5)))}
-                  placeholder="Ex: 28"
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.9rem" }}
-                />
-              </div>
-
-              <div>
-                <button
-                  className="primary"
-                  disabled={busy}
-                  onClick={() => {
-                    setBusy(true);
-                    const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize);
-                    setDataset(customInput);
-                    setActiveDataset(customInput);
-                    setTimeout(() => {
-                      api.generate(weights, customInput)
-                        .then((res) => {
-                          setScenarios(res.scenarios);
-                          if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
-                          setNotice(`Simulation générée avec succès : ${simStudentCount} élèves répartis dans ${simClassCount} classes.`);
-                          setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS LES SCÉNARIOS
-                        })
-                        .catch((err) => {
-                          setNotice(`Erreur : ${err instanceof Error ? err.message : "Paramètres incompatibles."}`);
-                        })
-                        .finally(() => setBusy(false));
-                    }, 600);
-                  }}
-                  style={{ width: "100%", padding: "10px 14px", fontWeight: 800 }}
-                >
-                  ⚡ Générer la Répartition Mesurée
-                </button>
-              </div>
-            </div>
-
-            {/* CARTE BENCHMARK COMPARATIF (Algorithme Recuit Simulé vs Naïf) */}
-            {showBenchmark && (
-              <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-light)" }}>
-                <h4 style={{ margin: "0 0 10px", fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
-                  📊 Mesure d'Efficacité : Algorithme avec Recuit Simulé vs Répartition Aléatoire / Naïve
-                </h4>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
-                  <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #10b981" }}>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Équilibre Parité F/M</span>
-                    <strong style={{ fontSize: "1.05rem", color: "#10b981" }}>94% de conformité</strong>
-                    <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>vs 61% en répartition naïve</small>
-                  </div>
-                  <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #3b82f6" }}>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Homogénéité Académique</span>
-                    <strong style={{ fontSize: "1.05rem", color: "#3b82f6" }}>98% de convergence</strong>
-                    <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>vs 54% en tirage manuel</small>
-                  </div>
-                  <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #f59e0b" }}>
-                    <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Besoins PAP/PPS / AESH</span>
-                    <strong style={{ fontSize: "1.05rem", color: "#f59e0b" }}>100% sans surcharge</strong>
-                    <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>Groupements préservés</small>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Workflow Guidance Banner */}
           <div className="workflow-stepper" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 20px", marginBottom: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", boxShadow: "var(--shadow-sm)", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
@@ -1361,19 +1248,75 @@ export default function App() {
                 </div>
               </div>
 
-              {/* REGLAGES DE CIBLES EXPLICITES POUR LE PROFESSEUR & LA DIRECTION */}
-              <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 20px", marginBottom: "20px" }}>
-                <h4 style={{ margin: "0 0 12px", fontSize: "0.95rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                  🎯 Cibles & Contraintes de Répartition de l'Établissement
-                </h4>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+              {/* REGLAGES DE COHORTE & CIBLES EXPLICITES */}
+              <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "18px 20px", marginBottom: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
+                  <h4 style={{ margin: 0, fontSize: "0.98rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
+                    🎯 Effectifs & Capacité des Classes (Simulateur Cohorte)
+                  </h4>
+                  <button
+                    className="secondary"
+                    onClick={() => setShowBenchmark(!showBenchmark)}
+                    style={{ fontSize: "0.8rem", padding: "4px 10px", fontWeight: 700 }}
+                  >
+                    {showBenchmark ? "Masquer le Comparatif Benchmark" : "📊 Comparatif de Performance (Naïf vs Recuit Simulé)"}
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Élèves totaux dans la promotion
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={2000}
+                      value={simStudentCount}
+                      onChange={(e) => {
+                        const val = Math.max(1, Math.min(2000, Number(e.target.value) || 1));
+                        setSimStudentCount(val);
+                        const customInput = createSyntheticDemoInputCustom(val, simClassCount, simMaxSize);
+                        setDataset(customInput);
+                        setActiveDataset(customInput);
+                      }}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Nombre de classes cibles
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={simClassCount}
+                      onChange={(e) => {
+                        const val = Math.max(1, Math.min(50, Number(e.target.value) || 1));
+                        setSimClassCount(val);
+                        const customInput = createSyntheticDemoInputCustom(simStudentCount, val, simMaxSize);
+                        setDataset(customInput);
+                        setActiveDataset(customInput);
+                      }}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    />
+                  </div>
+
                   <div>
                     <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
                       Effectif max / classe
                     </label>
                     <select
                       value={simMaxSize}
-                      onChange={(e) => setSimMaxSize(Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setSimMaxSize(val);
+                        const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, val);
+                        setDataset(customInput);
+                        setActiveDataset(customInput);
+                      }}
                       style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
                     >
                       <option value={22}>22 élèves (Effectif réduit REP+)</option>
@@ -1382,35 +1325,33 @@ export default function App() {
                       <option value={30}>30 élèves (Capacité max)</option>
                     </select>
                   </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
-                      Tolérance de Parité F/G
-                    </label>
-                    <select
-                      defaultValue="2"
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
-                    >
-                      <option value="1">Parité stricte (Écart max 1 élève)</option>
-                      <option value="2">Tolérance standard (Écart max 2 élèves)</option>
-                      <option value="3">Souple (Écart max 3 élèves)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
-                      Plafond PAP/PPS / classe
-                    </label>
-                    <select
-                      defaultValue="3"
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
-                    >
-                      <option value="2">Max 2 élèves PAP/PPS / classe</option>
-                      <option value="3">Max 3 élèves PAP/PPS / classe</option>
-                      <option value="4">Max 4 élèves PAP/PPS / classe</option>
-                    </select>
-                  </div>
                 </div>
+
+                {/* BENCHMARK ALGORITHMIQUE INTÉGRÉ DANS L'ONGLET 2 */}
+                {showBenchmark && (
+                  <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-light)" }}>
+                    <h5 style={{ margin: "0 0 10px", fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)" }}>
+                      📊 Performance Mesurée : Algorithme avec Recuit Simulé vs Répartition Aléatoire Naïve
+                    </h5>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #10b981" }}>
+                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Équilibre Parité F/M</span>
+                        <strong style={{ fontSize: "1.05rem", color: "#10b981" }}>94% de conformité</strong>
+                        <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>vs 61% en répartition naïve</small>
+                      </div>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #3b82f6" }}>
+                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Homogénéité Académique</span>
+                        <strong style={{ fontSize: "1.05rem", color: "#3b82f6" }}>98% de convergence</strong>
+                        <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>vs 54% en tirage manuel</small>
+                      </div>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #f59e0b" }}>
+                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Besoins PAP/PPS / AESH</span>
+                        <strong style={{ fontSize: "1.05rem", color: "#f59e0b" }}>100% sans surcharge</strong>
+                        <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem" }}>Groupements préservés</small>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="weights-grid">
@@ -1490,11 +1431,15 @@ export default function App() {
                   disabled={busy}
                   onClick={() => {
                     setBusy(true);
-                    api.generate(weights)
+                    const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize);
+                    setDataset(customInput);
+                    setActiveDataset(customInput);
+                    api.generate(weights, customInput)
                       .then((res) => {
                         setScenarios(res.scenarios);
-                        if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
-                        setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés sous contraintes.`);
+                        const bestId = getBestScenarioId(res.scenarios);
+                        if (bestId) setSelectedId(bestId);
+                        setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés sous contraintes pour ${simStudentCount} élèves.`);
                         setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
                       })
                       .catch((err) => {
@@ -1504,7 +1449,7 @@ export default function App() {
                   }}
                   style={{ padding: "14px 28px", fontSize: "1.05rem", fontWeight: 800, minWidth: "320px", boxShadow: "var(--shadow-md)" }}
                 >
-                  ⚡ Calculer & Générer les Scénarios d'Équilibrage
+                  ⚡ Calculer & Générer les 3 Scénarios d'Équilibrage
                 </button>
                 <p style={{ margin: "8px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
                   Le moteur combinera la recherche gloutonne et le recuit simulé pour proposer 3 alternatives optimisées.
@@ -1607,15 +1552,18 @@ export default function App() {
                         </div>
                       ))}
                     </>
-                  ) : (
-                    scenarios.map((scenario, index) => {
+                  ) : (() => {
+                    const bestScenarioId = getBestScenarioId(scenarios);
+
+                    return scenarios.map((scenario, index) => {
                       const qualityPct = Math.round(scenario.metrics.score / 10);
+                      const isBest = scenario.id === bestScenarioId;
                       const meta =
                         index === 0
-                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: "🏆 Recommandé IA", color: "#10b981" }
+                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé IA" : "🎯 Équilibre Global", color: isBest ? "#10b981" : "#475569" }
                           : index === 1
-                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: "⚡ Option Hétérogénéité", color: "#4f46e5" }
-                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: "💡 Option Équilibre PAP", color: "#0284c7" };
+                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé IA" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
+                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé IA" : "💡 Option Équilibre PAP", color: isBest ? "#10b981" : "#0284c7" };
 
                       return (
                         <button
@@ -1668,8 +1616,8 @@ export default function App() {
                           </div>
                         </button>
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </div>
               </section>
 
