@@ -1568,6 +1568,10 @@ button:disabled {
    RESPONSIVE DESIGN & MEDIA QUERIES (Audit RGAA & Ergonomie Mobile)
    ============================================================ */
 
+/* ============================================================
+   RESPONSIVE DESIGN & MEDIA QUERIES (Audit RGAA & Ergonomie Mobile)
+   ============================================================ */
+
 @media (max-width: 1024px) {
   .page {
     padding: 12px 16px 40px;
@@ -1576,16 +1580,29 @@ button:disabled {
   .masthead {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 14px;
   }
 
   .header-actions {
     flex-wrap: wrap;
     justify-content: flex-start;
+    gap: 8px;
   }
 
   .nav-tabs {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin-bottom: -6px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .nav-tabs button,
+  .nav-tabs .tab-button {
+    scroll-snap-align: start;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .class-columns-grid {
@@ -1602,20 +1619,149 @@ button:disabled {
 }
 
 @media (max-width: 768px) {
+  .page {
+    padding: 10px 12px 48px;
+  }
+
   .brand-section h1 {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+    line-height: 1.25;
   }
 
-  .tab-button {
-    padding: 8px 12px;
-    font-size: 0.85rem;
+  /* Target d'appui tactile RGAA (44px min height pour les doigts sur smartphone) */
+  .tab-button,
+  button,
+  .btn,
+  select,
+  input[type="text"],
+  input[type="number"],
+  input[type="search"] {
+    min-height: 44px;
+    touch-action: manipulation;
   }
 
+  /* Suppression du zoom automatique agaçant sur iOS Safari (font-size >= 16px) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Barre de navigation principale avec défilement tactile fluide */
+  .nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 6px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 6px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .sub-nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-nav-tabs button {
+    scroll-snap-align: start;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Bandeau de statut réorganisé en empilement propre sur smartphone */
+  .compact-status-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .compact-status-bar button {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0 !important;
+  }
+
+  /* Stepper de workflow en colonne sur smartphone */
+  .workflow-stepper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .workflow-stepper > div[style*="height: 1px"] {
+    display: none;
+  }
+
+  /* Grille des scénarios et dossiers sur 1 seule colonne */
   .scenario-card-grid {
     grid-template-columns: 1fr !important;
   }
 
   .dossier-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Tableau Kanban des Classes : Carrousel Swipable à l'horizontale sur Mobile */
+  .class-columns-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 14px !important;
+    padding-bottom: 14px !important;
+    margin-right: -12px;
+    margin-left: -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .classroom-column {
+    flex: 0 0 88vw !important;
+    max-width: 88vw !important;
+    scroll-snap-align: center !important;
+  }
+
+  /* Modales optimisées mobile */
+  .modal-card {
+    padding: 16px 14px !important;
+    max-height: 92vh !important;
+    width: 95vw !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  /* Tableaux scrollables sans casser le layout */
+  .audit-section table,
+  .import-preview table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-section h1 {
+    font-size: 1.2rem;
+  }
+
+  .classroom-column {
+    flex: 0 0 92vw !important;
+    max-width: 92vw !important;
+  }
+
+  .compact-status-bar {
+    font-size: 0.76rem;
   }
 }
