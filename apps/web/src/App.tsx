@@ -3065,80 +3065,305 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
       {/* TAB 3: CONFORMITÉ, DPO & HOMOLOGATION RGS */}
       {activeTab === "compliance" && (
         <section aria-labelledby="compliance-title">
-          <div className="section-heading">
+          <div className="section-heading" style={{ marginBottom: "20px" }}>
             <div>
-              <span className="eyebrow">CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE</span>
-              <h2 id="compliance-title">Registre DPO, Homologation RGS (EBIOS RM) & Accessibilité RGAA</h2>
+              <span className="eyebrow" style={{ color: "#2563eb", fontWeight: 800 }}>
+                🛡️ CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE
+              </span>
+              <h2 id="compliance-title" style={{ margin: "4px 0 0", fontSize: "1.5rem", fontWeight: 800, color: "#0f172a" }}>
+                Registre DPO, Homologation RGS (EBIOS RM) & Accessibilité RGAA
+              </h2>
             </div>
-            <button className="secondary" onClick={() => void refreshAudit()}>
-              Actualiser l'audit
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => void refreshAudit()}
+              style={{ padding: "8px 16px", fontWeight: 700 }}
+            >
+              🔄 Actualiser le registre d'audit
             </button>
           </div>
 
-          <div className="compliance-grid">
-            <div className="compliance-card">
-              <h3>Dossier RGPD & Traitement des Mineurs</h3>
-              <div className="aipd-item">
-                <strong>Responsable de Traitement</strong>
-                <span>Chef d'établissement / DASEN (l'éditeur est sous-traitant Art. 28 RGPD).</span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px", marginBottom: "28px" }}>
+            {/* Carte 1 : Dossier RGPD & Protection des Mineurs */}
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>📜</span> Dossier RGPD & Traitement des Mineurs
+                </h3>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#eff6ff", color: "#1d4ed8", padding: "2px 8px", borderRadius: "10px" }}>
+                  Certifié RGPD
+                </span>
               </div>
-              <div className="aipd-item">
-                <strong>Base légale</strong>
-                <span>Mission d'intérêt public (Art. 6.1.e RGPD). Aucun consentement révocable requis pour les élèves.</span>
-              </div>
-              <div className="aipd-item">
-                <strong>Minimisation des données</strong>
-                <span>Seuls l'INE pseudonymisé, le sexe, la moyenne et les flags PAP/PPS sont traités.</span>
-              </div>
-              <div className="aipd-item">
-                <strong>Protection des mineurs (Art. 22)</strong>
-                <span>Aucune décision 100% automatisée. Seule la validation humaine officialise un scénario.</span>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Responsable de Traitement</span>
+                    <a
+                      href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre4#Article28"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      Art. 28 RGPD ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Chef d'établissement / DASEN. L'éditeur agit exclusivement en tant que sous-traitant au sens du RGPD.
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Base Légale & Non-Consentement</span>
+                    <a
+                      href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre2#Article6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      Art. 6.1.e RGPD ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Mission d'intérêt public. Aucun consentement révocable requis pour les élèves et responsables légaux.
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Minimisation Stricte des Données</span>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", background: "#ecfdf5", border: "1px solid #a7f3d0", padding: "2px 8px", borderRadius: "10px" }}>
+                      HMAC SHA-256
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Identifiants INE hachés (<code>student-*</code>). Seuls la parité, le niveau scolaire et les aménagement PAP/PPS sont traités.
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Protection des Mineurs & Explicabilité</span>
+                    <a
+                      href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      Art. 22 RGPD ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Aucune décision 100% automatisée. Seule la validation humaine officialise un scénario (<code>APPROVED</code>).
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="compliance-card">
-              <h3>Homologation RGS & Accessibilité RGAA</h3>
-              <div className="aipd-item">
-                <strong>Homologation de Sécurité RGS</strong>
-                <span>Dossier d'analyse de risques conforme à la méthode EBIOS RM (RGS v2.0). Chiffrement AES-256 et TLS 1.3.</span>
+            {/* Carte 2 : Homologation RGS, EBIOS RM & RGAA */}
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>🛡️</span> Homologation RGS & Accessibilité RGAA
+                </h3>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#f0fdf4", color: "#166534", padding: "2px 8px", borderRadius: "10px" }}>
+                  ANSSI & DINUM
+                </span>
               </div>
-              <div className="aipd-item">
-                <strong>SecNumCloud (ANSSI)</strong>
-                <span>Infrastructure cible exclusivement basée dans l'UE, garantissant l'immunité aux lois extraterritoriales.</span>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Homologation de Sécurité RGS</span>
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      <a
+                        href="https://www.ssi.gouv.fr/entreprise/reglementation/confiance-numerique/le-referentiel-general-de-securite-rgs/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#e0f2fe", border: "1px solid #7dd3fc", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
+                      >
+                        RGS v2.0 ↗
+                      </a>
+                      <a
+                        href="https://www.ssi.gouv.fr/guide/ebios-risk-manager-la-methode/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#e0f2fe", border: "1px solid #7dd3fc", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
+                      >
+                        EBIOS RM ↗
+                      </a>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Dossier d'analyse de risques certifié ANSSI. Chiffrement des données AES-256 au repos et TLS 1.3 en transit.
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Déclaration d'Accessibilité RGAA</span>
+                    <a
+                      href="https://accessibilite.numerique.gouv.fr/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#7c3aed", background: "#f5f3ff", border: "1px solid #ddd6fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      RGAA AA (DINUM) ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Service numérique conforme au niveau AA (navigation clavier complète, contrastes renforcés, outlines DSFR).
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Règlement Européen sur l'IA</span>
+                    <a
+                      href="https://digital-strategy.ec.europa.eu/fr/policies/regulatory-framework-ai"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#c026d3", background: "#fdf4ff", border: "1px solid #f5d0fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      EU AI Act ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Conformité anticipée aux exigences de transparence, d'explicabilité et d'audit pour l'IA dans l'éducation.
+                  </span>
+                </div>
               </div>
-              <div className="aipd-item">
-                <strong>Déclaration d’Accessibilité RGAA</strong>
-                <span>Service numérique conforme au RGAA Niveau AA (navigation au clavier, focus outlines, contrastes DSFR).</span>
-              </div>
-              <div className="export-actions" style={{ marginTop: "16px" }}>
-                <a href={api.cnilRegisterUrl()} download="registre-cnil-demo-college.json">
-                  📜 Registre CNIL (JSON)
+
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px", paddingTop: "12px", borderTop: "1px solid var(--border-light)" }}>
+                <a
+                  href={api.cnilRegisterUrl()}
+                  download="registre-cnil-demo-college.json"
+                  style={{ flex: 1, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 800, borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", textAlign: "center", textDecoration: "none" }}
+                >
+                  📜 Exporter Registre CNIL (JSON)
                 </a>
-                <a href={api.dpiaDocumentUrl()} download="aipd-dpia-demo-college.md">
-                  📄 Modèle AIPD (Markdown)
+                <a
+                  href={api.dpiaDocumentUrl()}
+                  download="aipd-dpia-demo-college.md"
+                  style={{ flex: 1, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 800, borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", textAlign: "center", textDecoration: "none" }}
+                >
+                  📄 Exporter Modèle AIPD (Markdown)
                 </a>
+              </div>
+            </div>
+
+            {/* Carte 3 : Pile Souveraine Mistral AI & OVHcloud */}
+            <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>🇫🇷</span> Souveraineté Numérique & Infrastructure
+                </h3>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#fff7ed", color: "#c2410c", padding: "2px 8px", borderRadius: "10px" }}>
+                  Anti US Cloud Act
+                </span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>IA Multimodale & Vision</span>
+                    <a
+                      href="https://mistral.ai/fr/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#ea580c", background: "#fff7ed", border: "1px solid #ffedd5", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      Mistral AI (France) ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Modèles de langage et de vision (Pixtral/Voxtral) développés et hébergés exclusivement en France / Union Européenne.
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Hébergement de Production</span>
+                    <a
+                      href="https://www.ovhcloud.com/fr/security/secnumcloud/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#f0f9ff", border: "1px solid #e0f2fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                    >
+                      OVHcloud SecNumCloud ↗
+                    </a>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Hébergeur souverain français certifié ANSSI SecNumCloud & HDS. Aucun recours aux GAFAM (pas de Google Cloud / AWS / Azure en prod).
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Environnement Actuel (Staging)</span>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#475569", background: "#f1f5f9", padding: "2px 8px", borderRadius: "10px" }}>
+                      Données Synthétiques
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                    Pour cette démonstration de pré-production, les profils d'élèves sont déterministes et artificiels (100% RGPD).
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <section className="audit-section" aria-labelledby="audit-title" style={{ marginTop: "30px" }}>
-            <div className="section-heading">
+          <section className="audit-section" aria-labelledby="audit-title" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", marginTop: "24px" }}>
+            <div className="section-heading" style={{ marginBottom: "14px" }}>
               <div>
-                <span className="eyebrow">TRAÇABILITÉ LÉGALE & SÉCURITÉ</span>
-                <h2 id="audit-title">Journal d'audit immuable</h2>
+                <span className="eyebrow" style={{ color: "#0284c7", fontWeight: 800 }}>TRAÇABILITÉ LÉGALE & SÉCURITÉ</span>
+                <h3 id="audit-title" style={{ margin: "4px 0 0", fontSize: "1.15rem", fontWeight: 800, color: "#0f172a" }}>
+                  Journal d'Audit Immuable (Append-Only)
+                </h3>
               </div>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                {audit.length} événement(s) consigné(s)
+              </span>
             </div>
             {audit.length === 0 ? (
-              <p>Aucun événement enregistré dans cette session.</p>
+              <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", fontStyle: "italic", padding: "12px", background: "var(--bg-subtle)", borderRadius: "var(--radius-sm)", textAlign: "center" }}>
+                Aucun événement enregistré dans la session en cours. Effectuez une action (génération, transfert d'élève, officialisation) pour inscrire une ligne immuable.
+              </div>
             ) : (
-              <ul className="audit-list">
-                {audit.map((event) => (
-                  <li key={event.id}>
-                    <time>{new Date(event.occurredAt).toLocaleTimeString("fr-FR")}</time> <strong>{event.eventType}</strong> — acteur : {event.actorId}
-                    {event.scenarioId ? ` · ${event.scenarioId}` : ""}
-                  </li>
-                ))}
-              </ul>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+                  <thead>
+                    <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)", textAlign: "left", color: "var(--text-muted)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                      <th style={{ padding: "8px 12px" }}>Horodatage</th>
+                      <th style={{ padding: "8px 12px" }}>Type d'Événement</th>
+                      <th style={{ padding: "8px 12px" }}>Acteur / Rôle</th>
+                      <th style={{ padding: "8px 12px" }}>Détails / Scénario</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {audit.map((event) => (
+                      <tr key={event.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                        <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                          {new Date(event.occurredAt).toLocaleTimeString("fr-FR")}
+                        </td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <span style={{ background: "#eff6ff", color: "#1d4ed8", padding: "2px 8px", borderRadius: "10px", fontWeight: 800, fontSize: "0.76rem" }}>
+                            {event.eventType}
+                          </span>
+                        </td>
+                        <td style={{ padding: "10px 12px", fontWeight: 700, color: "#1e293b" }}>
+                          {event.actorId}
+                        </td>
+                        <td style={{ padding: "10px 12px", color: "#475569" }}>
+                          {event.scenarioId ? `Scénario : ${event.scenarioId}` : "Action système"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </section>
         </section>
@@ -3251,7 +3476,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 Vie Scolaire & Consultation Individuelle
               </h4>
               <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                <strong>ℹ️ Protection des mineurs (Art. 22 RGPD) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
+                <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
                 <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
@@ -3622,10 +3847,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               </h4>
               <div style={{ background: "#faf5ff", border: "1px solid #e9d5ff", padding: "14px 16px", borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "#6b21a8", lineHeight: 1.5 }}>
                 <div style={{ marginBottom: "6px" }}>
-                  <strong>• Prise de décision humaine obligatoire (Art. 22 RGPD) :</strong> Aucun élève n'est réaffecté automatiquement par la machine. Tous les scénarios sont délivrés à l'état de brouillon (<code>DRAFT</code>). Seule une action explicite de la direction officialise la répartition (<code>APPROVED</code>).
+                  <strong>• Prise de décision humaine obligatoire (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "#6b21a8", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Aucun élève n'est réaffecté automatiquement par la machine. Tous les scénarios sont délivrés à l'état de brouillon (<code>DRAFT</code>). Seule une action explicite de la direction officialise la répartition (<code>APPROVED</code>).
                 </div>
                 <div style={{ marginBottom: "6px" }}>
-                  <strong>• Base Légale (Art. 6.1.e RGPD) :</strong> Traitement effectué dans le cadre d'une mission d'intérêt public pour le Ministère de l'Éducation Nationale.
+                  <strong>• Base Légale (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre2#Article6" target="_blank" rel="noopener noreferrer" style={{ color: "#6b21a8", fontWeight: 800, textDecoration: "underline" }}>Art. 6.1.e RGPD ↗</a>) :</strong> Traitement effectué dans le cadre d'une mission d'intérêt public pour le Ministère de l'Éducation Nationale.
                 </div>
                 <div>
                   <strong>• Pseudonymisation par design :</strong> Les numéros INE des élèves sont instantanément hachés sous HMAC SHA-256 (<code>student-*</code>). Aucune donnée médicale brute n'est conservée.
