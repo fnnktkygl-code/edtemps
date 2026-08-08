@@ -88,6 +88,12 @@ export default function App() {
       .then((value) => {
         setDataset(value);
         setNotice("Données synthétiques de répartition chargées.");
+        api.generate({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 })
+          .then((res) => {
+            setScenarios(res.scenarios);
+            if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
+          })
+          .catch(() => {});
       })
       .catch((error: Error) => setNotice(error.message));
 
@@ -522,6 +528,43 @@ export default function App() {
       {/* TAB 1: RÉPARTITION DES CLASSES */}
       {activeTab === "dispatch" && (
         <>
+          {/* Workflow Guidance Banner */}
+          <div className="workflow-stepper" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 20px", marginBottom: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", boxShadow: "var(--shadow-sm)", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
+              <span className={`step-pill ${dispatchSubTab === "roster" ? "active-step" : "done-step"}`}>
+                1
+              </span>
+              <div>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>1. Profils Élèves</strong>
+                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Vérification des {dataset.students.length} dossiers</small>
+              </div>
+            </div>
+
+            <div style={{ height: "1px", width: "30px", background: "var(--border-light)" }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
+              <span className={`step-pill ${dispatchSubTab === "weights" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>
+                2
+              </span>
+              <div>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>2. Critères IA</strong>
+                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Ajuster les priorités de mixité</small>
+              </div>
+            </div>
+
+            <div style={{ height: "1px", width: "30px", background: "var(--border-light)" }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
+              <span className={`step-pill ${dispatchSubTab === "kanban" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>
+                3
+              </span>
+              <div>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>3. Scénarios & Validation</strong>
+                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>{scenarios.length} variante(s) prêtes</small>
+              </div>
+            </div>
+          </div>
+
           {/* Sub-Navigation for Module 1 */}
           <div className="sub-nav-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
             <button
@@ -539,7 +582,6 @@ export default function App() {
             <button
               className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
               onClick={() => setDispatchSubTab("kanban")}
-              disabled={scenarios.length === 0}
             >
               📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : ""}
             </button>
