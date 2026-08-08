@@ -234,6 +234,19 @@ h1 span {
   box-shadow: var(--shadow-sm);
 }
 
+.active-subtab {
+  background: var(--primary-brand) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-brand) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.active-filter {
+  background: var(--text-main) !important;
+  color: var(--bg-card) !important;
+  border-color: var(--text-main) !important;
+}
+
 /* Tooltip Custom Styled */
 [data-tooltip] {
   position: relative;

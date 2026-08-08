@@ -327,6 +327,11 @@ export default function App() {
 
   const [importMenuOpen, setImportMenuOpen] = useState(false);
 
+  // Module 1 : Sous-onglets et filtres Roster élèves
+  const [dispatchSubTab, setDispatchSubTab] = useState<"roster" | "weights" | "kanban">("roster");
+  const [rosterSearch, setRosterSearch] = useState("");
+  const [rosterFilter, setRosterFilter] = useState<"ALL" | "PAP" | "OPTIONS">("ALL");
+
   return (
     <main className="page">
       <header className="masthead">
@@ -516,6 +521,29 @@ export default function App() {
       {/* TAB 1: RÉPARTITION DES CLASSES */}
       {activeTab === "dispatch" && (
         <>
+          {/* Sub-Navigation for Module 1 */}
+          <div className="sub-nav-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            <button
+              className={`secondary ${dispatchSubTab === "roster" ? "active-subtab" : ""}`}
+              onClick={() => setDispatchSubTab("roster")}
+            >
+              👥 1. Effectifs & Profils des Élèves ({dataset.students.length})
+            </button>
+            <button
+              className={`secondary ${dispatchSubTab === "weights" ? "active-subtab" : ""}`}
+              onClick={() => setDispatchSubTab("weights")}
+            >
+              ⚙️ 2. Critères & Pondérations IA
+            </button>
+            <button
+              className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
+              onClick={() => setDispatchSubTab("kanban")}
+              disabled={scenarios.length === 0}
+            >
+              📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : ""}
+            </button>
+          </div>
+
           {importPreview && (
             <section className="import-preview" aria-labelledby="import-title">
               <div className="section-heading">
@@ -569,93 +597,240 @@ export default function App() {
             </section>
           )}
 
-          {/* PARAMÉTRAGE DES PONDÉRATIONS */}
-          <div className="weights-panel">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</p>
-                <h3>💡 Réglage des critères d'équilibrage des classes</h3>
-                <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                  Ajustez l'importance relative des 4 objectifs ci-dessous. Le moteur d'IA générera des propositions équilibrées en fonction de vos priorités d'établissement.
-                </p>
+          {/* SUBTAB 1: ROSTER & PROFILES */}
+          {dispatchSubTab === "roster" && (
+            <section className="roster-section" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", padding: "24px", borderRadius: "var(--radius-md)", marginBottom: "24px" }}>
+              <div className="section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
+                <div>
+                  <p className="eyebrow">COHORTE DU NIVEAU {dataset.level.toUpperCase()}</p>
+                  <h3 style={{ margin: "4px 0", fontSize: "1.2rem", fontWeight: 800 }}>Effectif complet & Profils des Élèves</h3>
+                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.88rem" }}>
+                    Consultez la liste nominative des élèves, leurs caractéristiques (genre, niveau, accompagnements PAP/PPS, options) et leur classe ciblée.
+                  </p>
+                </div>
+
+                <div className="roster-metrics-pills" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
+                    👥 {dataset.students.length} Élèves
+                  </span>
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
+                    ⚖️ {dataset.students.filter(s => s.gender === 'F').length} F / {dataset.students.filter(s => s.gender === 'M').length} M
+                  </span>
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
+                    🤝 {dataset.students.filter(s => s.supportFlags.length > 0).length} PAP/PPS
+                  </span>
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
+                    🎓 {dataset.students.filter(s => s.options.length > 0).length} Options
+                  </span>
+                </div>
               </div>
-              <label className="toggle-pill" data-tooltip="Permet de simuler des modifications d'effectifs ou d'options avant validation finale">
-                <input type="checkbox" checked={isSimulation} onChange={(e) => setIsSimulation(e.target.checked)} /> Mode Simulation "Et si..."
-              </label>
+
+              {/* Roster Controls */}
+              <div className="roster-controls" style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Rechercher un élève par nom, identifiant ou option..."
+                  value={rosterSearch}
+                  onChange={(e) => setRosterSearch(e.target.value)}
+                  style={{ flex: 1, padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem" }}
+                />
+                <button
+                  className={`secondary ${rosterFilter === "ALL" ? "active-filter" : ""}`}
+                  onClick={() => setRosterFilter("ALL")}
+                >
+                  Tous ({dataset.students.length})
+                </button>
+                <button
+                  className={`secondary ${rosterFilter === "PAP" ? "active-filter" : ""}`}
+                  onClick={() => setRosterFilter("PAP")}
+                >
+                  Besoins PAP/PPS ({dataset.students.filter(s => s.supportFlags.length > 0).length})
+                </button>
+                <button
+                  className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
+                  onClick={() => setRosterFilter("OPTIONS")}
+                >
+                  Options ({dataset.students.filter(s => s.options.length > 0).length})
+                </button>
+              </div>
+
+              {/* Roster Table */}
+              <div className="table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
+                  <thead>
+                    <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Élève</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Genre</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Moyenne Scolaire</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Accompagnements</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Options & Langues</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Classe Cible</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataset.students
+                      .filter((student) => {
+                        const nameMatches = nameOf(student, anonymous).toLowerCase().includes(rosterSearch.toLowerCase());
+                        const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
+                        if (!nameMatches && !optionMatches) return false;
+                        if (rosterFilter === "PAP") return student.supportFlags.length > 0;
+                        if (rosterFilter === "OPTIONS") return student.options.length > 0;
+                        return true;
+                      })
+                      .map((student) => {
+                        const currentAssignedClassId = selected?.assignments[student.id] ?? dataset.classrooms[0]?.id;
+                        return (
+                          <tr key={student.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                            <td style={{ padding: "10px 14px", fontWeight: 700 }}>
+                              {nameOf(student, anonymous)}
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                                {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
+                              </span>
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              <span style={{ fontWeight: 800, color: "var(--primary-brand)" }}>
+                                {student.levelAverage.toFixed(1)} / 20
+                              </span>
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              {student.supportFlags.length > 0 ? (
+                                student.supportFlags.map((need) => (
+                                  <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                    🤝 {need}
+                                  </span>
+                                ))
+                              ) : (
+                                <span style={{ color: "var(--text-light)" }}>—</span>
+                              )}
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              {student.options.length > 0 ? (
+                                student.options.map((opt) => (
+                                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                    🎓 {opt}
+                                  </span>
+                                ))
+                              ) : (
+                                <span style={{ color: "var(--text-light)" }}>—</span>
+                              )}
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              <select
+                                value={currentAssignedClassId}
+                                disabled={selected?.state === "APPROVED"}
+                                onChange={(e) => {
+                                  void move(student.id, e.target.value);
+                                }}
+                                style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700 }}
+                              >
+                                {dataset.classrooms.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {/* SUBTAB 2: PARAMÉTRAGE DES PONDÉRATIONS */}
+          {dispatchSubTab === "weights" && (
+            <div className="weights-panel">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</p>
+                  <h3>💡 Réglage des critères d'équilibrage des classes</h3>
+                  <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
+                    Ajustez l'importance relative des 4 objectifs ci-dessous. Le moteur d'IA générera des propositions équilibrées en fonction de vos priorités d'établissement.
+                  </p>
+                </div>
+                <label className="toggle-pill" data-tooltip="Permet de simuler des modifications d'effectifs ou d'options avant validation finale">
+                  <input type="checkbox" checked={isSimulation} onChange={(e) => setIsSimulation(e.target.checked)} /> Mode Simulation "Et si..."
+                </label>
+              </div>
+
+              <div className="weights-grid">
+                <div className="weight-card">
+                  <div className="weight-header">
+                    <div className="weight-title">
+                      <span>⚖️ Parité Filles / Garçons</span>
+                      <small>Équilibre 50%/50% du ratio de genre dans chaque classe</small>
+                    </div>
+                    <span className="weight-score">{weights.genderBalance}/10</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={weights.genderBalance}
+                    onChange={(e) => setWeights({ ...weights, genderBalance: Number(e.target.value) })}
+                  />
+                </div>
+
+                <div className="weight-card">
+                  <div className="weight-header">
+                    <div className="weight-title">
+                      <span>📊 Mixité des Niveaux Scolaires</span>
+                      <small>Répartition hétérogène des compétences (forts, moyens, à besoins)</small>
+                    </div>
+                    <span className="weight-score">{weights.academicBalance}/10</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={weights.academicBalance}
+                    onChange={(e) => setWeights({ ...weights, academicBalance: Number(e.target.value) })}
+                  />
+                </div>
+
+                <div className="weight-card">
+                  <div className="weight-header">
+                    <div className="weight-title">
+                      <span>🤝 Besoins Particuliers (PAP / PPS / PAI)</span>
+                      <small>Évite la concentration d'élèves à accompagnement dans la même classe</small>
+                    </div>
+                    <span className="weight-score">{weights.supportBalance}/10</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={weights.supportBalance}
+                    onChange={(e) => setWeights({ ...weights, supportBalance: Number(e.target.value) })}
+                  />
+                </div>
+
+                <div className="weight-card">
+                  <div className="weight-header">
+                    <div className="weight-title">
+                      <span>🎓 Répartition des Options & Langues</span>
+                      <small>Harmonisation des groupes LCE, Bilangue, Latin et EIP</small>
+                    </div>
+                    <span className="weight-score">{weights.optionBalance}/10</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={weights.optionBalance}
+                    onChange={(e) => setWeights({ ...weights, optionBalance: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
             </div>
+          )}
 
-            <div className="weights-grid">
-              <div className="weight-card">
-                <div className="weight-header">
-                  <div className="weight-title">
-                    <span>⚖️ Parité Filles / Garçons</span>
-                    <small>Équilibre 50%/50% du ratio de genre dans chaque classe</small>
-                  </div>
-                  <span className="weight-score">{weights.genderBalance}/10</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={weights.genderBalance}
-                  onChange={(e) => setWeights({ ...weights, genderBalance: Number(e.target.value) })}
-                />
-              </div>
-
-              <div className="weight-card">
-                <div className="weight-header">
-                  <div className="weight-title">
-                    <span>📊 Mixité des Niveaux Scolaires</span>
-                    <small>Répartition hétérogène des compétences (forts, moyens, à besoins)</small>
-                  </div>
-                  <span className="weight-score">{weights.academicBalance}/10</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={weights.academicBalance}
-                  onChange={(e) => setWeights({ ...weights, academicBalance: Number(e.target.value) })}
-                />
-              </div>
-
-              <div className="weight-card">
-                <div className="weight-header">
-                  <div className="weight-title">
-                    <span>🤝 Besoins Particuliers (PAP / PPS / PAI)</span>
-                    <small>Évite la concentration d'élèves à accompagnement dans la même classe</small>
-                  </div>
-                  <span className="weight-score">{weights.supportBalance}/10</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={weights.supportBalance}
-                  onChange={(e) => setWeights({ ...weights, supportBalance: Number(e.target.value) })}
-                />
-              </div>
-
-              <div className="weight-card">
-                <div className="weight-header">
-                  <div className="weight-title">
-                    <span>🎓 Répartition des Options & Langues</span>
-                    <small>Harmonisation des groupes LCE, Bilangue, Latin et EIP</small>
-                  </div>
-                  <span className="weight-score">{weights.optionBalance}/10</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={weights.optionBalance}
-                  onChange={(e) => setWeights({ ...weights, optionBalance: Number(e.target.value) })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {scenarios.length > 0 && (
+          {/* SUBTAB 3: SCÉNARIOS & KANBAN */}
+          {(dispatchSubTab === "kanban" || scenarios.length > 0) && (
             <>
               <section aria-labelledby="scenarios-title">
                 <div className="section-heading">
