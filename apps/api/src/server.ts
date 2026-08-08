@@ -23,6 +23,7 @@ import {
 } from "../../../packages/domain/src/index.js";
 import { inputFromSIECLEPreview, parseSIECLEArchive, type SIECLEImportPreview } from "./siecle-import.js";
 import { parseSTSWebXML } from "./sts-import.js";
+import { explainConflictWithMistral } from "./mistral.js";
 import { createStateStore, type AuditEvent } from "./state-store.js";
 
 const establishmentId = "demo-college";
@@ -401,6 +402,15 @@ app.post("/api/v1/establishments/:tenantId/timetabling/substitutions/suggest", a
 
   const suggestions = suggestTeacherSubstitutions(timetablingInput, schedule, absence);
   return { absence, suggestions };
+});
+
+app.post("/api/v1/establishments/:tenantId/timetabling/conflicts/explain", async (request, reply) => {
+  const { tenantId } = request.params as { tenantId: string };
+  if (!assertTenant(request, reply, tenantId)) return;
+  const { conflictMessage } = (request.body as { conflictMessage?: string }) ?? {};
+  if (!conflictMessage) return reply.code(400).send({ error: "INVALID_REQUEST", message: "conflictMessage requis." });
+  const explanation = await explainConflictWithMistral(conflictMessage);
+  return { explanation };
 });
 
 app.post("/api/v1/establishments/:tenantId/dispatch/imports/pronote", async (request, reply) => {
