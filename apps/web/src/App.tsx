@@ -1477,50 +1477,72 @@ export default function App() {
                                   onDragEnd={() => setDraggedStudentId(null)}
                                   className={`student-card ${selectedStudentId === student.id ? "active" : ""}`}
                                   onClick={() => setSelectedStudentId(student.id)}
-                                  style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "8px",
+                                    padding: "10px 12px",
+                                    borderLeft: `4px solid ${student.gender === "F" ? "#ec4899" : "#3b82f6"}`,
+                                  }}
                                 >
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                      <span className="drag-handle" title="Glisser-déposer pour déplacer dans une autre classe">⋮⋮</span>
-                                      <span style={{ fontWeight: 800 }}>{nameOf(student, anonymous)}</span>
+                                  {/* Ligne 1 : Nom, Fiche & Menu Transfert Compact */}
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
+                                      <span className="drag-handle" title="Glisser-déposer pour déplacer">⋮⋮</span>
+                                      <span style={{ fontWeight: 800, fontSize: "0.9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        {nameOf(student, anonymous)}
+                                      </span>
                                     </div>
-                                    <button
-                                      className="secondary"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setInspectStudent(student);
-                                      }}
-                                      style={{ padding: "2px 6px", fontSize: "0.72rem", fontWeight: 700 }}
-                                      title="Consulter le dossier pédagogique complet"
-                                    >
-                                      📋
-                                    </button>
+
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+                                      <button
+                                        className="icon-btn-subtle"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setInspectStudent(student);
+                                        }}
+                                        title="Consulter le dossier pédagogique complet"
+                                      >
+                                        🔍 Fiche
+                                      </button>
+
+                                      {selected.state !== "APPROVED" && (
+                                        <select
+                                          className="compact-move-select"
+                                          value=""
+                                          onClick={(e) => e.stopPropagation()}
+                                          onChange={(e) => {
+                                            e.stopPropagation();
+                                            if (e.target.value) void move(student.id, e.target.value);
+                                          }}
+                                          title="Transférer vers une autre classe"
+                                        >
+                                          <option value="" disabled>⇄ Déplacer</option>
+                                          {otherClasses.map((targetC) => (
+                                            <option key={targetC.id} value={targetC.id}>
+                                              Vers {targetC.label}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    </div>
                                   </div>
 
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <small style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem" }}>
-                                      <strong style={{ color: "var(--primary-brand)" }}>{student.levelAverage.toFixed(1)}/20</strong>{" "}
-                                      {student.supportFlags.length > 0 ? `· ${student.supportFlags.join("/")}` : ""}
-                                    </small>
-
-                                    {/* Puces de transfert rapide 1-clic */}
-                                    {selected.state !== "APPROVED" && (
-                                      <div style={{ display: "flex", gap: "4px" }}>
-                                        {otherClasses.map((targetC) => (
-                                          <button
-                                            key={targetC.id}
-                                            className="quick-move-chip"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              void move(student.id, targetC.id);
-                                            }}
-                                            title={`Transférer directement vers ${targetC.label}`}
-                                          >
-                                            ➡️ {targetC.label}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    )}
+                                  {/* Ligne 2 : Puces de Moyenne, Accompanements & Options */}
+                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                                    <span className="student-grade-pill">
+                                      {student.levelAverage.toFixed(1)}/20
+                                    </span>
+                                    {student.supportFlags.map((flag) => (
+                                      <span key={flag} className="student-support-pill">
+                                        {flag}
+                                      </span>
+                                    ))}
+                                    {student.options.map((opt) => (
+                                      <span key={opt} className="student-option-pill">
+                                        {opt}
+                                      </span>
+                                    ))}
                                   </div>
                                 </div>
                               ))}
