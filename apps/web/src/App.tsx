@@ -2451,11 +2451,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                       {/* ASSISTANT DE RÉÉQUILIBRAGE SOUVERAIN MISTRAL AI */}
                       <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "nowrap" }}>
+                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
                             🪄 Assistant Rééquilibrage
                           </span>
-                          <span style={{ background: "#10b981", color: "#ffffff", padding: "2px 8px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ background: "#059669", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             🇫🇷 Mistral AI
                           </span>
                         </div>

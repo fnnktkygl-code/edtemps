@@ -1555,6 +1555,27 @@ button:disabled {
     border-width: 6px 6px 0 6px;
     border-color: #0f172a transparent transparent transparent;
   }
+
+  /* Infobulles du Panneau d'Inspection Latéral : Empêcher tout rognage sur le bord gauche */
+  .inspector .ui-tooltip::after {
+    left: 0 !important;
+    transform: translateY(-4px) !important;
+    text-align: left !important;
+    max-width: 270px !important;
+    width: 270px !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .inspector .ui-tooltip::before {
+    left: 14px !important;
+    transform: translateY(-4px) !important;
+  }
+
+  .inspector .ui-tooltip:hover::after,
+  .inspector .ui-tooltip:hover::before {
+    transform: translateY(0) !important;
+  }
 }
 
 [data-theme="dark"] .student-support-pill {
