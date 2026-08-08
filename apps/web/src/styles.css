@@ -412,57 +412,6 @@ h1 {
 }
 
 /* Tooltip Custom Styled */
-[data-tooltip] {
-  position: relative;
-}
-
-[data-tooltip]::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: 125%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  background: #0f172a;
-  color: #f8fafc;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: normal;
-  width: max-content;
-  max-width: 250px;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: var(--transition-fast);
-  z-index: 3000;
-  border: 1px solid #334155;
-  line-height: 1.3;
-}
-
-[data-tooltip]:hover::before {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Tooltips dans le header & zone haute -> S'affichent sous l'élément */
-.masthead [data-tooltip]::before,
-.nav-tabs [data-tooltip]::before {
-  top: 125%;
-  bottom: auto;
-}
-
-/* Tooltips pour les éléments proches du bord droit -> Alignement à droite */
-.header-actions [data-tooltip]::before,
-.theme-toggle-btn[data-tooltip]::before {
-  left: auto;
-  right: 0;
-  transform: translateY(-4px);
-}
-
 /* Step-by-Step Workflow Stepper */
 .step-pill {
   width: 28px;
@@ -489,11 +438,6 @@ h1 {
   background: #10b981;
   color: #ffffff;
   border-color: #10b981;
-}
-
-.header-actions [data-tooltip]:hover::before,
-.theme-toggle-btn[data-tooltip]:hover::before {
-  transform: translateY(0);
 }
 
 /* Buttons */
@@ -1550,8 +1494,11 @@ button.validate {
     top: calc(100% + 2px);
     left: 50%;
     transform: translateX(-50%) translateY(-4px);
-    border-width: 0 6px 6px 6px;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
     border-style: solid;
+    border-width: 0 6px 6px 6px;
     border-color: transparent transparent #0f172a transparent;
     pointer-events: none;
     opacity: 0;
@@ -1593,6 +1540,9 @@ button.validate {
   .inspector .ui-tooltip::before {
     left: 14px !important;
     transform: translateY(-4px) !important;
+    background: transparent !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   .inspector .ui-tooltip:hover::after,

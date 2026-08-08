@@ -2699,11 +2699,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <select
                             value={selected.id}
                             onChange={(e) => setSelectedId(e.target.value)}
-                            style={{ width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.86rem", color: "var(--text-main)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", boxSizing: "border-box" }}
+                            style={{ width: "100%", padding: "8px 24px 8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.84rem", color: "var(--text-main)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", boxSizing: "border-box" }}
                           >
                             {scenarios.map((sc, idx) => (
                               <option key={sc.id} value={sc.id}>
-                                {idx === 0 ? "Scénario A (🎯 Équilibre)" : idx === 1 ? "Scénario B (📊 Mixité)" : `Scénario ${String.fromCharCode(65 + idx)} (🤝 Accompagnement)`} — {Math.round(sc.metrics.score / 10)}% {sc.state === "APPROVED" ? "(Officialisé)" : "(Provisoire)"}
+                                {idx === 0 ? "Scénario A · 🎯 Équilibre" : idx === 1 ? "Scénario B · 📊 Mixité" : `Scénario ${String.fromCharCode(65 + idx)} · 🤝 PAP`} ({Math.round(sc.metrics.score / 10)}% Score){sc.state === "APPROVED" ? " ✓" : ""}
                               </option>
                             ))}
                           </select>
