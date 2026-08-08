@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { validateAssignment, generateScenario } from "@edtemps/domain";
+import { validateAssignment, generateScenario, calculateMetrics } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type {
   AuditEvent,
@@ -394,59 +394,73 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
   function requestMove(studentId: string, targetClassroomId: string): void {
     if (!selected) return;
-    const student = dataset.students.find((s) => s.id === studentId);
-    const studentName = student ? nameOf(student, anonymous) : studentId;
     const fromClassId = selected.assignments[studentId];
-    const fromClass = dataset.classrooms.find((c) => c.id === fromClassId);
+    if (fromClassId === targetClassroomId) return;
+
     const toClass = dataset.classrooms.find((c) => c.id === targetClassroomId);
-
-    if (!toClass || fromClassId === targetClassroomId) return;
-
     const currentCount = dataset.students.filter((s) => selected.assignments[s.id] === targetClassroomId).length;
 
-    setPendingMove({
-      studentId,
-      studentName,
-      fromClassLabel: fromClass?.label ?? "Classe actuelle",
-      toClassId: targetClassroomId,
-      toClassLabel: toClass.label,
-      currentCount,
-      maxSize: toClass.maxSize,
-    });
+    // Si la classe cible risque de dépasser la capacité max autorisée, demander confirmation explicite
+    if (toClass && currentCount >= toClass.maxSize) {
+      const student = dataset.students.find((s) => s.id === studentId);
+      const studentName = student ? nameOf(student, anonymous) : studentId;
+      const fromClass = dataset.classrooms.find((c) => c.id === fromClassId);
+
+      setPendingMove({
+        studentId,
+        studentName,
+        fromClassLabel: fromClass?.label ?? "Classe actuelle",
+        toClassId: targetClassroomId,
+        toClassLabel: toClass.label,
+        currentCount,
+        maxSize: toClass.maxSize,
+      });
+    } else {
+      // Transfert instantané direct sans bloquer l'UI
+      move(studentId, targetClassroomId);
+    }
   }
 
   async function confirmMove(): Promise<void> {
     if (!pendingMove || !selected) return;
     const { studentId, toClassId } = pendingMove;
     setPendingMove(null);
-
-    // Enregistrer l'état courant dans l'historique avant modification
-    setHistoryPast((prev) => [...prev, selected]);
-    setHistoryFuture([]); // Vider le futur lors d'une nouvelle action
-
     await move(studentId, toClassId);
   }
 
   async function move(studentId: string, targetClassroomId: string): Promise<void> {
     if (!selected) return;
-    setBusy(true);
     const fromClassId = selected.assignments[studentId];
+    if (fromClassId === targetClassroomId) return;
+
     const student = dataset.students.find((s) => s.id === studentId);
     const studentName = student ? nameOf(student, anonymous) : studentId;
 
-    // Mise à jour immédiate et réactive de l'affectation dans le scénario local
+    // Enregistrer l'état courant dans l'historique avant modification
+    setHistoryPast((prev) => [...prev, selected]);
+    setHistoryFuture([]);
+
+    // ⚡ Mise à jour hyper-réactive et instantanée (< 1ms) des affectations et des métriques de score
     const updatedAssignments = {
       ...selected.assignments,
       [studentId]: targetClassroomId,
     };
+    const updatedMetrics = calculateMetrics(dataset as any, updatedAssignments, weights);
     const updatedScenario: Scenario = {
       ...selected,
       assignments: updatedAssignments,
+      metrics: updatedMetrics,
     };
 
     setScenarios((current) =>
       current.map((scenario) => (scenario.id === selected.id ? updatedScenario : scenario))
     );
+
+    if (fromClassId) {
+      setLastMove({ studentId, studentName, fromClassId, toClassId: targetClassroomId });
+    }
+    const targetLabel = dataset.classrooms.find((c) => c.id === targetClassroomId)?.label ?? targetClassroomId;
+    setNotice(`Élève ${studentName} transféré immédiatement en ${targetLabel}.`);
 
     try {
       const response = await api.move(selected.id, studentId, targetClassroomId);
@@ -458,15 +472,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           );
         }
       }
-      if (fromClassId && fromClassId !== targetClassroomId) {
-        setLastMove({ studentId, studentName, fromClassId, toClassId: targetClassroomId });
-      }
-      setNotice(`Élève ${studentName} transféré avec succès en ${dataset.classrooms.find((c) => c.id === targetClassroomId)?.label ?? targetClassroomId}.`);
-      await refreshAudit();
+      refreshAudit().catch(() => {});
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Déplacement refusé.");
-    } finally {
-      setBusy(false);
+      setNotice(error instanceof Error ? error.message : "Déplacement refusé par l'API.");
     }
   }
 
