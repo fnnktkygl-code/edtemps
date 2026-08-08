@@ -3,7 +3,7 @@ services:
     name: edtemps-api
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npm run build:api
     startCommand: npx tsx apps/api/src/server.ts
     envVars:
       - key: NODE_ENV
