@@ -2137,8 +2137,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 800, width: "180px" }}>OPTION</th>
                             <th style={{ textAlign: "center", padding: "10px 14px", fontWeight: 800, width: "100px" }}>EFFECTIF</th>
                             {dataset.classrooms.map((c) => (
-                              <th key={c.id} style={{ textAlign: "center", padding: "10px 14px", fontWeight: 800 }}>
-                                {c.label} <small style={{ fontWeight: 600, color: "var(--text-muted)" }}>({c.maxSize} MAX)</small>
+                              <th key={c.id} style={{ textAlign: "center", padding: "10px 14px", fontWeight: 800, textTransform: "uppercase" }}>
+                                {c.label.toUpperCase()} <small style={{ fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>({c.maxSize} MAX)</small>
                               </th>
                             ))}
                             <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 800, width: "220px" }}>STATUT</th>
@@ -2487,8 +2487,31 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </span>
                   </div>
 
-                  {/* BARRE D'HISTORIQUE UNDO / REDO (ANNULER & RÉTABLIR) */}
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  {/* BARRE D'HISTORIQUE UNDO / REDO + AUDIT RÈGLES COMPACT */}
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                    {ruleAuditList.length > 0 && (
+                      <span
+                        className="ui-tooltip"
+                        data-tooltip={`Audit des Règles Individuelles :\n` + ruleAuditList.map((a) => `${a.type === "CONFLICT" ? "⛔ Séparation" : "🤝 Association"} : ${a.studentAName} (${a.classALabel}) ⬄ ${a.studentBName} (${a.classBLabel}) -> ${a.isViolated ? "❌ VIOLATION (Même classe !)" : "✅ RESPECTÉ"}`).join("\n")}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "0.8rem",
+                          fontWeight: 800,
+                          background: ruleAuditList.some((a) => a.isViolated) ? "#fef2f2" : "#f0fdf4",
+                          border: `1px solid ${ruleAuditList.some((a) => a.isViolated) ? "#fecaca" : "#bbf7d0"}`,
+                          color: ruleAuditList.some((a) => a.isViolated) ? "#991b1b" : "#166534",
+                          cursor: "help",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        {ruleAuditList.some((a) => a.isViolated)
+                          ? `⚠️ ${ruleAuditList.filter((a) => a.isViolated).length} Conflit de Séparation (Survoler pour détails)`
+                          : `✅ ${ruleAuditList.length}/${ruleAuditList.length} Règles Respectées ℹ️`}
+                      </span>
+                    )}
                     <button
                       className={`icon-btn-subtle ui-tooltip ${historyPast.length > 0 ? "" : "disabled"}`}
                       data-tooltip="Annuler le dernier déplacement d'élève (Ctrl+Z / Cmd+Z)"
@@ -2534,54 +2557,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   </div>
                 </div>
 
-                {/* PANNEAU AUDIT & VÉRIFICATEUR DES RÈGLES D'ÉLÈVES */}
-                {selected && (
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "12px 16px", marginBottom: "16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ fontSize: "1rem" }}>🔍</span>
-                        <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "#1e293b" }}>
-                          Audit & Vérificateur de Conformité des Règles (Séparations & Binômes d'Élèves)
-                        </h4>
-                      </div>
-                      <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                        {ruleAuditList.length} règle{ruleAuditList.length > 1 ? "s" : ""} active{ruleAuditList.length > 1 ? "s" : ""} · {ruleAuditList.filter((a) => a.isViolated).length} conflit(s) détecté(s)
-                      </span>
-                    </div>
-
-                    {ruleAuditList.length === 0 ? (
-                      <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
-                        Aucune règle de séparation ou d'association enregistrée. Définissez vos paires d'élèves dans l'onglet "Pondération & Cohorte" pour les auditer ici.
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                        {ruleAuditList.map((audit) => (
-                          <div
-                            key={audit.id}
-                            style={{
-                              padding: "6px 12px",
-                              borderRadius: "12px",
-                              fontSize: "0.78rem",
-                              fontWeight: 700,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              background: audit.isViolated ? "#fef2f2" : "#f0fdf4",
-                              border: `1px solid ${audit.isViolated ? "#fecaca" : "#bbf7d0"}`,
-                              color: audit.isViolated ? "#991b1b" : "#166534",
-                            }}
-                          >
-                            <span>{audit.isViolated ? "❌ VIOLATION (Même classe !)" : "✅ RESPECTÉ (Bien séparés)"}</span>
-                            <span>
-                              {audit.type === "CONFLICT" ? "⛔ Séparation :" : "🤝 Association :"} <strong>{audit.studentAName}</strong> ({audit.classALabel}) ⬄ <strong>{audit.studentBName}</strong> ({audit.classBLabel})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 <div className="scenario-grid">
                   {busy ? (
                     <>
@@ -2602,6 +2577,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </>
                   ) : (() => {
                     const bestScenarioId = getBestScenarioId(scenarios);
+                    const femaleCount = dataset.students.filter((s) => s.gender === "F").length;
+                    const maleCount = dataset.students.filter((s) => s.gender === "M").length;
+                    const avgGrade = dataset.students.length > 0 ? dataset.students.reduce((acc, st) => acc + st.levelAverage, 0) / dataset.students.length : 12;
 
                     return scenarios.map((scenario, index) => {
                       const qualityPct = Math.round(scenario.metrics.score / 10);
@@ -2610,7 +2588,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         index === 0
                           ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé IA" : "🎯 Équilibre Global", color: isBest ? "#10b981" : "#475569" }
                           : index === 1
-                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé IA" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
+                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictly les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé IA" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
                           : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé IA" : "💡 Option Équilibre PAP", color: isBest ? "#10b981" : "#0284c7" };
 
                       return (
@@ -2634,7 +2612,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               <strong style={{ fontSize: "1.6rem", fontWeight: 800, color: meta.color, fontFamily: "var(--font-mono)", display: "block", lineHeight: 1 }}>
                                 {qualityPct}%
                               </strong>
-                              <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700 }}>Conformité IA</small>
+                              <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700, display: "block" }}>Conformité IA</small>
+                              <span
+                                className="ui-tooltip"
+                                data-tooltip={`📌 Origine des Métriques du Scénario :\n• Parité (${weights.genderBalance}/10) : Équilibre F/M vs cohorte (${femaleCount}F/${maleCount}M).\n• Niveaux (${weights.academicBalance}/10) : Écart inter-classes ≤ 0.3pt vs moyenne globale ${avgGrade.toFixed(1)}/20.\n• PAP/PPS (${weights.supportBalance}/10) : ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "Mutualisation AESH sur 1-2 classes" : "Dispersion équilibrée"}.\n• Options (${weights.optionBalance}/10) : Respect des réservations multi-classes et regroupements.`}
+                                style={{ fontSize: "0.70rem", color: "var(--primary-brand)", fontWeight: 800, marginTop: "4px", textDecoration: "underline", cursor: "help", display: "inline-block" }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                ℹ️ Origine des métriques
+                              </span>
                             </div>
                           </div>
 
@@ -2643,14 +2629,33 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </p>
 
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px" }}>
-                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                              ⚖️ Parité {scenario.metrics.genderBalance ?? 90}%
+                            <span
+                              className="ui-tooltip"
+                              data-tooltip={`Équilibre Parité F/M (Poids ${weights.genderBalance}/10) : ${scenario.metrics.genderBalance}%`}
+                              style={{ background: weights.genderBalance === 0 ? "var(--bg-subtle)" : "#ecfdf5", color: weights.genderBalance === 0 ? "var(--text-muted)" : "#047857", border: `1px solid ${weights.genderBalance === 0 ? "var(--border-light)" : "#a7f3d0"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                            >
+                              ⚖️ Parité {weights.genderBalance === 0 ? "Ignorée" : `${scenario.metrics.genderBalance}%`}
                             </span>
-                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                              📊 Niveaux {scenario.metrics.academicBalance ?? 90}%
+                            <span
+                              className="ui-tooltip"
+                              data-tooltip={`Hétérogénéité des Niveaux (Poids ${weights.academicBalance}/10) : ${scenario.metrics.academicBalance}%`}
+                              style={{ background: weights.academicBalance === 0 ? "var(--bg-subtle)" : "#eff6ff", color: weights.academicBalance === 0 ? "var(--text-muted)" : "#1e40af", border: `1px solid ${weights.academicBalance === 0 ? "var(--border-light)" : "#bfdbfe"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                            >
+                              📊 Niveaux {weights.academicBalance === 0 ? "Ignorés" : `${scenario.metrics.academicBalance}%`}
                             </span>
-                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                              🤝 PAP {scenario.metrics.supportBalance ?? 90}%
+                            <span
+                              className="ui-tooltip"
+                              data-tooltip={`Accompagnements PAP/PPS (Poids ${weights.supportBalance}/10) : ${scenario.metrics.supportBalance}%`}
+                              style={{ background: weights.supportBalance === 0 ? "var(--bg-subtle)" : "#fef3c7", color: weights.supportBalance === 0 ? "var(--text-muted)" : "#b45309", border: `1px solid ${weights.supportBalance === 0 ? "var(--border-light)" : "#fde68a"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                            >
+                              🤝 PAP {weights.supportBalance === 0 ? "Ignorés" : `${scenario.metrics.supportBalance}%`}
+                            </span>
+                            <span
+                              className="ui-tooltip"
+                              data-tooltip={`Regroupement d'Options (Poids ${weights.optionBalance}/10) : ${scenario.metrics.optionBalance}%`}
+                              style={{ background: weights.optionBalance === 0 ? "var(--bg-subtle)" : "#f3e8ff", color: weights.optionBalance === 0 ? "var(--text-muted)" : "#6b21a8", border: `1px solid ${weights.optionBalance === 0 ? "var(--border-light)" : "#e9d5ff"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                            >
+                              🎓 Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}%`}
                             </span>
                           </div>
 
