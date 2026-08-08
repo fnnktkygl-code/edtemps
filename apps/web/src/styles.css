@@ -1955,6 +1955,34 @@ html, body {
     flex-shrink: 0;
   }
 
+  /* Carrousel Swipable des Cartes de Scénario sur Mobile */
+  .scenario-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    scrollbar-width: none;
+  }
+
+  .scenario-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scenario {
+    flex: 0 0 84vw !important;
+    max-width: 84vw !important;
+    scroll-snap-align: center !important;
+    padding: 16px !important;
+    min-height: auto !important;
+    border-radius: var(--radius-md) !important;
+  }
+
   /* Bandeau de statut réorganisé en empilement propre sur smartphone */
   .compact-status-bar {
     flex-direction: column;
