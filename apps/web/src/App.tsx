@@ -2393,6 +2393,28 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           {/* SUBTAB 3: SCÉNARIOS & KANBAN */}
           {dispatchSubTab === "kanban" && (
             <>
+              {/* BANDEAU PERMANENT D'ACTION ET DE VALIDATION HUMAINE EN HAUT DE PAGE */}
+              <div style={{ background: selected?.state === "APPROVED" ? "#f0fdf4" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "#bbf7d0" : "var(--primary-brand)"}`, padding: "14px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
+                <div>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    ⚖️ ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
+                  </div>
+                  <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", marginTop: "2px" }}>
+                    Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "#15803d" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Conformité IA</span>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <button
+                    className="validate"
+                    onClick={validate}
+                    disabled={busy || selected?.state === "APPROVED"}
+                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "#166534" : "#15803d", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "0 2px 8px rgba(21, 128, 61, 0.3)", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                  >
+                    {selected?.state === "APPROVED" ? "✓ Scénario Officialisé (CNIL Traçable)" : "🔒 Valider Humainement & Officialiser Ce Scénario"}
+                  </button>
+                </div>
+              </div>
               <section aria-labelledby="scenarios-title">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
                   <div>
@@ -2867,7 +2889,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                 </div>
                                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "4px" }}>
                                   <span>min {classroom.minSize}</span>
-                                  <span>cible {classroom.maxSize}</span>
+                                  <span>cible {Math.round(dataset.students.length / Math.max(1, dataset.classrooms.length))}</span>
                                   <span>max {classroom.maxSize}</span>
                                 </div>
                               </div>
