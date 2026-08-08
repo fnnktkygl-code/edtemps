@@ -76,6 +76,16 @@ export const api = {
         body: JSON.stringify({ scheduleId, teacherId, timeSlotId, reason: reason ?? "Absence déclarée" }),
       }
     ),
+  scanDocumentOCR: (file: File) => {
+    const form = new FormData();
+    form.append("archive", file);
+    return request<{ ocrResult: { rawText: string; summary: string; extractedPreferences: { teacherName?: string; subject?: string; unavailableDays?: string[] } } }>("/timetabling/ocr/scan", { method: "POST", body: form });
+  },
+  sendVoiceCommand: (file?: File) => {
+    const form = new FormData();
+    if (file) form.append("archive", file);
+    return request<{ voiceResult: { transcription: string; explanation: string; structuredConstraint: { targetType: string; targetLabel: string; action: string; details: string } } }>("/timetabling/voice/command", { method: "POST", body: form });
+  },
 
   audit: () => request<{ events: AuditEvent[] }>("/audit-events"),
   importSIECLE: (file: File) => {

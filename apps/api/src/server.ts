@@ -24,7 +24,7 @@ import {
 } from "../../../packages/domain/src/index.js";
 import { inputFromSIECLEPreview, parseSIECLEArchive, type SIECLEImportPreview } from "./siecle-import.js";
 import { parseSTSWebXML } from "./sts-import.js";
-import { explainConflictWithMistral } from "./mistral.js";
+import { explainConflictWithMistral, processDocumentOCRWithMistral, transcribeAndParseAudioCommand } from "./mistral.js";
 import { createStateStore, type AuditEvent } from "./state-store.js";
 
 const establishmentId = "demo-college";
@@ -412,6 +412,38 @@ app.post("/api/v1/establishments/:tenantId/timetabling/conflicts/explain", async
   if (!conflictMessage) return reply.code(400).send({ error: "INVALID_REQUEST", message: "conflictMessage requis." });
   const explanation = await explainConflictWithMistral(conflictMessage);
   return { explanation };
+});
+
+app.post("/api/v1/establishments/:tenantId/timetabling/ocr/scan", async (request, reply) => {
+  const { tenantId } = request.params as { tenantId: string };
+  if (!assertTenant(request, reply, tenantId) || !requireRole(request, reply, ["SCHOOL_ADMIN", "DISPATCH_EDITOR"])) return;
+  const upload = await request.file();
+  if (!upload) return reply.code(400).send({ error: "FILE_REQUIRED", message: "Document scanné (Image/PDF) requis." });
+  const buffer = await upload.toBuffer();
+  const result = await processDocumentOCRWithMistral(buffer, upload.mimetype);
+  await audit({
+    tenantId,
+    actorId: getActor(request).id,
+    eventType: "SIECLE_IMPORTED",
+    details: { ocrSuccess: true, teacherExtracted: result.extractedPreferences.teacherName ?? "Détecté" },
+  });
+  return { ocrResult: result };
+});
+
+app.post("/api/v1/establishments/:tenantId/timetabling/voice/command", async (request, reply) => {
+  const { tenantId } = request.params as { tenantId: string };
+  if (!assertTenant(request, reply, tenantId)) return;
+  const upload = await request.file();
+  const buffer = upload ? await upload.toBuffer() : Buffer.from("dummy-audio");
+  const mimeType = upload ? upload.mimetype : "audio/webm";
+  const result = await transcribeAndParseAudioCommand(buffer, mimeType);
+  await audit({
+    tenantId,
+    actorId: getActor(request).id,
+    eventType: "COURSE_MOVED",
+    details: { voiceCommandTranscribed: result.transcription },
+  });
+  return { voiceResult: result };
 });
 
 app.post("/api/v1/establishments/:tenantId/dispatch/imports/pronote", async (request, reply) => {

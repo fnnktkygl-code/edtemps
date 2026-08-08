@@ -75,6 +75,11 @@ export default function App() {
   const [absenceReason, setAbsenceReason] = useState<string>("Stage formation académique");
   const [substitutions, setSubstitutions] = useState<SubstitutionSuggestion[] | null>(null);
 
+  // OCR & Voice Mistral AI state
+  const ocrFileInput = useRef<HTMLInputElement>(null);
+  const [ocrSummary, setOcrSummary] = useState<string | null>(null);
+  const [voiceSummary, setVoiceSummary] = useState<string | null>(null);
+
   // Audit state
   const [audit, setAudit] = useState<AuditEvent[]>([]);
 
@@ -239,6 +244,35 @@ export default function App() {
     }
   }
 
+  async function scanOCRDocument(file: File): Promise<void> {
+    setBusy(true);
+    try {
+      const res = await api.scanDocumentOCR(file);
+      setOcrSummary(`${res.ocrResult.summary} (Enseignant : ${res.ocrResult.extractedPreferences.teacherName ?? "Détecté"})`);
+      setNotice("Document scanné analysé avec succès par Mistral OCR (Pixtral).");
+      await refreshAudit();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Scan OCR impossible.");
+    } finally {
+      setBusy(false);
+      if (ocrFileInput.current) ocrFileInput.current.value = "";
+    }
+  }
+
+  async function triggerVoiceCommand(): Promise<void> {
+    setBusy(true);
+    try {
+      const res = await api.sendVoiceCommand();
+      setVoiceSummary(`Transcription Voxtral : "${res.voiceResult.transcription}" → ${res.voiceResult.explanation}`);
+      setNotice("Instruction vocale enregistrée et convertie en contrainte pour le solveur.");
+      await refreshAudit();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Commande vocale impossible.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function activateImport(): Promise<void> {
     if (!importPreview) return;
     setBusy(true);
@@ -318,11 +352,28 @@ export default function App() {
               if (file) void importSTSWeb(file);
             }}
           />
+          <input
+            ref={ocrFileInput}
+            className="visually-hidden"
+            type="file"
+            accept="image/*,application/pdf"
+            aria-label="Document scanné OCR"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void scanOCRDocument(file);
+            }}
+          />
           <button className="secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
             Importer SIECLE
           </button>
           <button className="secondary" onClick={() => stsFileInput.current?.click()} disabled={busy}>
             Importer STS-Web
+          </button>
+          <button className="secondary" onClick={() => ocrFileInput.current?.click()} disabled={busy} title="Scanner une fiche de vœux papier (Mistral OCR)">
+            📷 OCR Vœux (Pixtral)
+          </button>
+          <button className="secondary" onClick={() => void triggerVoiceCommand()} disabled={busy} title="Dicter une contrainte à la voix (Mistral Voxtral)">
+            🎙️ Dictée Vocale (Voxtral)
           </button>
           {activeTab === "dispatch" && (
             <button className="primary" onClick={generate} disabled={busy}>
@@ -359,6 +410,18 @@ export default function App() {
       <section className="safety-banner" aria-label="Information importante">
         <strong>Décision humaine obligatoire.</strong> Le produit formule des propositions algorithmiques explicables ; seul un professionnel habilité (chef d'établissement / adjoint) peut les valider.
       </section>
+
+      {ocrSummary && (
+        <div className="safety-banner" style={{ background: "#e8f5e9", borderColor: "#18753c" }}>
+          <strong>📷 Analyse OCR Mistral Pixtral :</strong> {ocrSummary}
+        </div>
+      )}
+
+      {voiceSummary && (
+        <div className="safety-banner" style={{ background: "#e3f2fd", borderColor: "#0288d1" }}>
+          <strong>🎙️ Dictée Vocale Mistral Voxtral :</strong> {voiceSummary}
+        </div>
+      )}
 
       <p className="status" aria-live="polite">
         {notice}
