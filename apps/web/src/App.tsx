@@ -1193,32 +1193,34 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               </div>
 
               {/* Roster Controls */}
-              <div className="roster-controls" style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+              <div className="roster-controls" style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
                 <input
                   type="text"
                   placeholder="🔍 Rechercher un élève par nom, identifiant ou option..."
                   value={rosterSearch}
                   onChange={(e) => setRosterSearch(e.target.value)}
-                  style={{ flex: 1, padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem" }}
+                  style={{ flex: "1 1 240px", padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem", minWidth: "200px" }}
                 />
-                <button
-                  className={`secondary ${rosterFilter === "ALL" ? "active-filter" : ""}`}
-                  onClick={() => setRosterFilter("ALL")}
-                >
-                  Tous ({dataset.students.length})
-                </button>
-                <button
-                  className={`secondary ${rosterFilter === "PAP" ? "active-filter" : ""}`}
-                  onClick={() => setRosterFilter("PAP")}
-                >
-                  Besoins PAP/PPS ({dataset.students.filter(s => s.supportFlags.length > 0).length})
-                </button>
-                <button
-                  className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
-                  onClick={() => setRosterFilter("OPTIONS")}
-                >
-                  Options ({dataset.students.filter(s => s.options.length > 0).length})
-                </button>
+                <div className="roster-filter-btns" style={{ display: "flex", gap: "8px", flexWrap: "wrap", flexShrink: 0 }}>
+                  <button
+                    className={`secondary ${rosterFilter === "ALL" ? "active-filter" : ""}`}
+                    onClick={() => setRosterFilter("ALL")}
+                  >
+                    Tous ({dataset.students.length})
+                  </button>
+                  <button
+                    className={`secondary ${rosterFilter === "PAP" ? "active-filter" : ""}`}
+                    onClick={() => setRosterFilter("PAP")}
+                  >
+                    Besoins PAP/PPS ({dataset.students.filter(s => s.supportFlags.length > 0).length})
+                  </button>
+                  <button
+                    className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
+                    onClick={() => setRosterFilter("OPTIONS")}
+                  >
+                    Options ({dataset.students.filter(s => s.options.length > 0).length})
+                  </button>
+                </div>
               </div>
 
               {/* Roster Table */}
