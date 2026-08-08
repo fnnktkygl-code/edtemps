@@ -386,7 +386,7 @@ export default function App() {
       <header className="masthead">
         <div className="brand-section">
           <h1>EdTemps</h1>
-          <span className="brand-badge">🏛️ MENJ</span>
+          <span className="brand-badge" data-tooltip="Conforme aux référentiels du Ministère de l'Éducation Nationale et de la Jeunesse (MENJ)">🏛️ MENJ</span>
         </div>
 
         {/* NAVIGATION PAR ONGLETS INTÉGRÉE */}
