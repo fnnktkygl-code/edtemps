@@ -38,41 +38,118 @@ function subjectColorClass(subject: string): string {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">("dispatch");
+  const [activeTab, setActiveTabState] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">(() => {
+    const saved = localStorage.getItem("edtemps_activeTab");
+    if (saved === "dispatch" || saved === "timetabling" || saved === "compliance" || saved === "teacher") {
+      return saved;
+    }
+    return "dispatch";
+  });
+
+  const setActiveTab = (tab: "dispatch" | "timetabling" | "compliance" | "teacher") => {
+    setActiveTabState(tab);
+    localStorage.setItem("edtemps_activeTab", tab);
+  };
+
   const [actorRole, setActorRoleState] = useState<string>(() => getActiveActor().role);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("prof-math-1");
 
-  // Simulator state
-  const [simStudentCount, setSimStudentCount] = useState<number>(60);
-  const [simClassCount, setSimClassCount] = useState<number>(3);
-  const [simMaxSize, setSimMaxSize] = useState<number>(24);
+  // Simulator state persistant
+  const [simStudentCount, setSimStudentCountState] = useState<number>(() => {
+    const saved = localStorage.getItem("edtemps_simStudentCount");
+    return saved ? Number(saved) : 60;
+  });
+  const setSimStudentCount = (val: number) => {
+    setSimStudentCountState(val);
+    localStorage.setItem("edtemps_simStudentCount", String(val));
+  };
+
+  const [simClassCount, setSimClassCountState] = useState<number>(() => {
+    const saved = localStorage.getItem("edtemps_simClassCount");
+    return saved ? Number(saved) : 3;
+  });
+  const setSimClassCount = (val: number) => {
+    setSimClassCountState(val);
+    localStorage.setItem("edtemps_simClassCount", String(val));
+  };
+
+  const [simMaxSize, setSimMaxSizeState] = useState<number>(() => {
+    const saved = localStorage.getItem("edtemps_simMaxSize");
+    return saved ? Number(saved) : 24;
+  });
+  const setSimMaxSize = (val: number) => {
+    setSimMaxSizeState(val);
+    localStorage.setItem("edtemps_simMaxSize", String(val));
+  };
+
   const [showBenchmark, setShowBenchmark] = useState<boolean>(true);
 
-  // Synchronisation dynamique de la vue selon le rôle utilisateur RBAC sélectionné
-  useEffect(() => {
-    if (actorRole === "TEACHER") {
-      setActiveTab("teacher");
-    } else if (actorRole === "CPE") {
-      setActiveTab("dispatch");
-    } else if (actorRole === "DPO") {
-      setActiveTab("compliance");
-    }
-  }, [actorRole]);
+  // Module 1 State (Dispatch) avec persistance LocalStorage
+  const [dataset, setDatasetState] = useState<Dataset>(emptyDataset);
+  const [scenarios, setScenariosState] = useState<Scenario[]>([]);
+  const [selectedId, setSelectedIdState] = useState<string>();
 
-  // Module 1 State (Dispatch)
-  const [dataset, setDataset] = useState<Dataset>(emptyDataset);
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
-  const [selectedId, setSelectedId] = useState<string>();
+  const setDataset = (ds: Dataset) => {
+    setDatasetState(ds);
+    setActiveDataset(ds);
+    try {
+      localStorage.setItem("edtemps_savedDataset", JSON.stringify(ds));
+    } catch {}
+  };
+
+  const setScenarios = (scens: Scenario[] | ((prev: Scenario[]) => Scenario[])) => {
+    setScenariosState((prev) => {
+      const next = typeof scens === "function" ? scens(prev) : scens;
+      try {
+        localStorage.setItem("edtemps_savedScenarios", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const setSelectedId = (id?: string) => {
+    setSelectedIdState(id);
+    if (id) {
+      localStorage.setItem("edtemps_selectedScenarioId", id);
+    }
+  };
+
   const [anonymous, setAnonymous] = useState(true);
   const [selectedStudentId, setSelectedStudentId] = useState<string>();
-  const [notice, setNotice] = useState("Chargement des données de démonstration…");
+  const [notice, setNotice] = useState("Chargement des données de session…");
   const [busy, setBusy] = useState(false);
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
   const [dragOverClassId, setDragOverClassId] = useState<string | null>(null);
   const [lastMove, setLastMove] = useState<{ studentId: string; studentName: string; fromClassId: string; toClassId: string } | null>(null);
 
   // Weights slider state
-  const [weights, setWeights] = useState({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 });
+  const [weights, setWeightsState] = useState<{ genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }>(() => {
+    const saved = localStorage.getItem("edtemps_weights");
+    if (saved) {
+      try {
+        return JSON.parse(saved) as { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number };
+      } catch {}
+    }
+    return { genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 };
+  });
+
+  const setWeights = (
+    newWeights:
+      | { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }
+      | ((prev: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) => {
+          genderBalance: number;
+          academicBalance: number;
+          supportBalance: number;
+          optionBalance: number;
+        })
+  ) => {
+    setWeightsState((prev) => {
+      const next = typeof newWeights === "function" ? newWeights(prev) : newWeights;
+      localStorage.setItem("edtemps_weights", JSON.stringify(next));
+      return next;
+    });
+  };
+
   const [isSimulation, setIsSimulation] = useState(false);
 
   // SIECLE & STS-Web Import state
@@ -104,11 +181,36 @@ export default function App() {
   const [audit, setAudit] = useState<AuditEvent[]>([]);
 
   useEffect(() => {
+    const savedDatasetStr = localStorage.getItem("edtemps_savedDataset");
+    const savedScenariosStr = localStorage.getItem("edtemps_savedScenarios");
+    const savedSelectedId = localStorage.getItem("edtemps_selectedScenarioId");
+
+    if (savedDatasetStr && savedScenariosStr) {
+      try {
+        const parsedDs = JSON.parse(savedDatasetStr) as Dataset;
+        const parsedScens = JSON.parse(savedScenariosStr) as Scenario[];
+        if (parsedDs && parsedDs.students && parsedDs.students.length > 0 && parsedScens && parsedScens.length > 0) {
+          setDatasetState(parsedDs);
+          setActiveDataset(parsedDs);
+          setScenariosState(parsedScens);
+          setSelectedIdState(savedSelectedId || parsedScens[0].id);
+          setNotice(`Session et scénarios restaurés (${parsedDs.students.length} élèves, ${parsedDs.classrooms.length} classes).`);
+
+          api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => {});
+          api.timetablingSchedules().then((res) => {
+            setSchedules(res.schedules);
+            if (res.schedules.length > 0) setSelectedScheduleId(res.schedules[0].id);
+          }).catch(() => {});
+          return;
+        }
+      } catch {}
+    }
+
     api.dataset()
       .then((value) => {
         setDataset(value);
         setNotice("Données synthétiques de répartition chargées.");
-        api.generate({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 })
+        api.generate({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 }, value)
           .then((res) => {
             setScenarios(res.scenarios);
             if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
@@ -117,16 +219,11 @@ export default function App() {
       })
       .catch((error: Error) => setNotice(error.message));
 
-    api.timetablingDataset()
-      .then((data) => setTimetablingData(data))
-      .catch(() => {});
-
-    api.timetablingSchedules()
-      .then((res) => {
-        setSchedules(res.schedules);
-        if (res.schedules.length > 0) setSelectedScheduleId(res.schedules[0].id);
-      })
-      .catch(() => {});
+    api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => {});
+    api.timetablingSchedules().then((res) => {
+      setSchedules(res.schedules);
+      if (res.schedules.length > 0) setSelectedScheduleId(res.schedules[0].id);
+    }).catch(() => {});
   }, []);
 
   const selected = scenarios.find((scenario) => scenario.id === selectedId) ?? scenarios[0];
@@ -375,8 +472,18 @@ export default function App() {
 
   const [importMenuOpen, setImportMenuOpen] = useState(false);
 
-  // Module 1 : Sous-onglets et filtres Roster élèves
-  const [dispatchSubTab, setDispatchSubTab] = useState<"roster" | "weights" | "kanban">("roster");
+  // Module 1 : Sous-onglets et filtres Roster élèves persistant
+  const [dispatchSubTab, setDispatchSubTabState] = useState<"roster" | "weights" | "kanban">(() => {
+    const saved = localStorage.getItem("edtemps_dispatchSubTab");
+    if (saved === "roster" || saved === "weights" || saved === "kanban") return saved;
+    return "roster";
+  });
+
+  const setDispatchSubTab = (subTab: "roster" | "weights" | "kanban") => {
+    setDispatchSubTabState(subTab);
+    localStorage.setItem("edtemps_dispatchSubTab", subTab);
+  };
+
   const [rosterSearch, setRosterSearch] = useState("");
   const [rosterFilter, setRosterFilter] = useState<"ALL" | "PAP" | "OPTIONS">("ALL");
   const [inspectStudent, setInspectStudent] = useState<Student | null>(null);
@@ -432,6 +539,15 @@ export default function App() {
               const newRole = e.target.value;
               setActorRole(newRole);
               setActorRoleState(newRole);
+              if (newRole === "TEACHER") {
+                setActiveTab("teacher");
+              } else if (newRole === "CPE") {
+                setActiveTab("dispatch");
+              } else if (newRole === "DPO") {
+                setActiveTab("compliance");
+              } else {
+                setActiveTab("dispatch");
+              }
             }}
             style={{ padding: "6px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.84rem", color: "var(--text-main)" }}
             title="Contrôle d'accès par rôle (RBAC)"
