@@ -317,6 +317,14 @@ export default function App() {
     "15h05 - 16h00",
   ];
 
+  // Thème adaptatif (Clair / Sombre)
+  const [theme, setTheme] = useState<"light" | "dark">(() => (localStorage.getItem("theme") as "light" | "dark") || "light");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   return (
     <main className="page">
       <header className="masthead">
@@ -327,8 +335,15 @@ export default function App() {
           </h1>
         </div>
         <div className="header-actions">
-          <label className="toggle">
-            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser les noms
+          <button
+            className="theme-toggle-btn"
+            onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
+            data-tooltip="Basculez entre le mode clair et le mode sombre haute lisibilité"
+          >
+            {theme === "light" ? "🌙 Mode Sombre" : "☀️ Mode Clair"}
+          </button>
+          <label className="toggle" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
+            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser les élèves
           </label>
           <input
             ref={fileInput}
@@ -363,25 +378,45 @@ export default function App() {
               if (file) void scanOCRDocument(file);
             }}
           />
-          <button className="secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
-            📦 SIECLE
+          <button
+            className="secondary"
+            onClick={() => fileInput.current?.click()}
+            disabled={busy}
+            data-tooltip="Importer SIECLE : Fichier officiel ministériel d'import des élèves et options"
+          >
+            📦 SIECLE (Élèves)
           </button>
-          <button className="secondary" onClick={() => stsFileInput.current?.click()} disabled={busy}>
-            🏛️ STS-Web
+          <button
+            className="secondary"
+            onClick={() => stsFileInput.current?.click()}
+            disabled={busy}
+            data-tooltip="Importer STS-Web : Fichier ministériel d'import des services enseignants et barrettes"
+          >
+            🏛️ STS-Web (Profs)
           </button>
-          <button className="secondary" onClick={() => ocrFileInput.current?.click()} disabled={busy} title="Scanner une fiche de vœux papier (Mistral OCR)">
-            📷 OCR (Pixtral)
+          <button
+            className="secondary"
+            onClick={() => ocrFileInput.current?.click()}
+            disabled={busy}
+            data-tooltip="Mistral OCR (Pixtral) : Scanner une fiche de vœux papier d'enseignant imprimée ou manuscrite"
+          >
+            📷 OCR Vœux (Pixtral)
           </button>
-          <button className="secondary" onClick={() => void triggerVoiceCommand()} disabled={busy} title="Dicter une contrainte à la voix (Mistral Voxtral)">
-            🎙️ Voxtral
+          <button
+            className="secondary"
+            onClick={() => void triggerVoiceCommand()}
+            disabled={busy}
+            data-tooltip="Mistral Dictée Vocale (Voxtral) : Formuler une contrainte ou une absence oralement au micro"
+          >
+            🎙️ Dictée Vocale (Voxtral)
           </button>
           {activeTab === "dispatch" && (
-            <button className="primary" onClick={generate} disabled={busy}>
+            <button className="primary" onClick={generate} disabled={busy} data-tooltip="Lancer l'algorithme d'optimisation sous contraintes pour générer 3 propositions équilibrées">
               {busy ? "Calcul en cours…" : "✨ Générer 3 scénarios"}
             </button>
           )}
           {activeTab === "timetabling" && (
-            <button className="primary" onClick={generateTimetable} disabled={busy}>
+            <button className="primary" onClick={generateTimetable} disabled={busy} data-tooltip="Calculer un emploi du temps optimal anti-collision avec le solveur de contraintes CP-SAT">
               {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
             </button>
           )}
@@ -390,10 +425,18 @@ export default function App() {
 
       {/* NAVIGATION PAR ONGLETS */}
       <nav className="nav-tabs" aria-label="Navigation principale">
-        <button className={`tab-button ${activeTab === "dispatch" ? "active" : ""}`} onClick={() => setActiveTab("dispatch")}>
-          🏫 Répartition des classes
+        <button
+          className={`tab-button ${activeTab === "dispatch" ? "active" : ""}`}
+          onClick={() => setActiveTab("dispatch")}
+          data-tooltip="Module 1 : Répartition équilibrée des élèves par niveau et options dans les classes"
+        >
+          🏫 Répartition des élèves
         </button>
-        <button className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`} onClick={() => setActiveTab("timetabling")}>
+        <button
+          className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`}
+          onClick={() => setActiveTab("timetabling")}
+          data-tooltip="Module 2 : Emplois du temps des classes/enseignants et gestion des remplacements d'urgence"
+        >
           📅 Emplois du temps & Remplacements
         </button>
         <button
@@ -402,8 +445,9 @@ export default function App() {
             setActiveTab("compliance");
             void refreshAudit();
           }}
+          data-tooltip="Module 3 : Dossier CNIL/RGPD, Analyse d'Impact (AIPD) et Homologation de Sécurité (RGS)"
         >
-          📋 Conformité, DPO & Homologation RGS
+          📋 Protection des données (DPO) & RGS
         </button>
       </nav>
 
