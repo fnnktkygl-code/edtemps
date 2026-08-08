@@ -158,15 +158,17 @@ function candidatePenalty(
   const optionPenalty = sum(Object.entries(targets.options), ([option, target]) =>
     Math.abs(after.filter((student) => student.options.includes(option)).length - target),
   );
+
+  const sizeDeviation = Math.abs(after.length - targets.size);
+
   return (
     Math.abs(female - targets.female) * weights.genderBalance +
     Math.abs(male - targets.male) * weights.genderBalance +
     Math.abs(average(after.map((student) => student.levelAverage)) - targets.average) * weights.academicBalance +
     Math.abs(support - targets.support) * weights.supportBalance +
     optionPenalty * weights.optionBalance +
-    // La charge courante est volontairement prépondérante pendant la construction
-    // gloutonne : cela évite de remplir une classe avant de considérer les autres.
-    after.length * 5
+    sizeDeviation * 35 +
+    after.length * 2
   );
 }
 
@@ -326,7 +328,7 @@ function refineAssignmentWithSimulatedAnnealing(
   initialAssignments: Assignment,
   weights: DispatchWeights,
   random: () => number,
-  iterations = 2000
+  iterations = 2500
 ): Assignment {
   const current = { ...initialAssignments };
   const students = input.students;
@@ -336,6 +338,17 @@ function refineAssignmentWithSimulatedAnnealing(
 
   function evalPenalty(assignments: Assignment): number {
     const byClass = input.classrooms.map((c) => getClassStudents(assignments, c.id, students));
+    
+    // Pénalités strictes d'écart d'effectifs pour égaliser les tailles de classes
+    const sizeDev = sum(byClass, (members) => Math.pow(members.length - targets.size, 2));
+    const capacityViolations = sum(input.classrooms, (c) => {
+      const count = getClassStudents(assignments, c.id, students).length;
+      let penalty = 0;
+      if (count > c.maxSize) penalty += (count - c.maxSize) * 300;
+      if (count < c.minSize) penalty += (c.minSize - count) * 200;
+      return penalty;
+    });
+
     const genderDev = sum(byClass, (members) =>
       Math.abs(members.filter((s) => s.gender === "F").length - targets.female) +
       Math.abs(members.filter((s) => s.gender === "M").length - targets.male)
@@ -346,12 +359,15 @@ function refineAssignmentWithSimulatedAnnealing(
       sum(Object.entries(targets.options), ([opt, target]) => Math.abs(members.filter((s) => s.options.includes(opt)).length - target))
     );
     const hardViolations = validateAssignment(input, assignments).length;
+
     return (
-      genderDev * weights.genderBalance +
-      academicDev * weights.academicBalance +
-      supportDev * weights.supportBalance +
-      optionDev * weights.optionBalance +
-      hardViolations * 1000
+      sizeDev * 25 +
+      capacityViolations * 15 +
+      genderDev * weights.genderBalance * 5 +
+      academicDev * weights.academicBalance * 10 +
+      supportDev * weights.supportBalance * 5 +
+      optionDev * weights.optionBalance * 3 +
+      hardViolations * 2000
     );
   }
 
@@ -366,6 +382,34 @@ function refineAssignmentWithSimulatedAnnealing(
     temperature *= coolingRate;
     if (temperature < 0.1) break;
 
+    // 40% des itérations : tenter un déplacement direct d'un élève vers une autre classe (équilibrage d'effectifs)
+    if (random() < 0.4) {
+      const idxA = Math.floor(random() * students.length);
+      const studentA = students[idxA];
+      const classA = current[studentA.id];
+      const targetClassObj = input.classrooms[Math.floor(random() * input.classrooms.length)];
+
+      if (targetClassObj && targetClassObj.id !== classA) {
+        const candidateAssignments = { ...current, [studentA.id]: targetClassObj.id };
+        const targetCount = getClassStudents(candidateAssignments, targetClassObj.id, students).length;
+        if (targetCount <= targetClassObj.maxSize) {
+          const candidatePenalty = evalPenalty(candidateAssignments);
+          const delta = candidatePenalty - currentPenalty;
+
+          if (delta < 0 || random() < Math.exp(-delta / temperature)) {
+            current[studentA.id] = targetClassObj.id;
+            currentPenalty = candidatePenalty;
+            if (currentPenalty < bestPenalty) {
+              bestPenalty = currentPenalty;
+              bestAssignments = { ...current };
+            }
+          }
+        }
+      }
+      continue;
+    }
+
+    // 60% des itérations : permuter 2 élèves entre 2 classes
     const idxA = Math.floor(random() * students.length);
     const idxB = Math.floor(random() * students.length);
     if (idxA === idxB) continue;
@@ -543,7 +587,7 @@ export function createSyntheticDemoInput(): DispatchInput {
   };
 }
 
-export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3, maxSize = 24): DispatchInput {
+export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3, maxSize = 24, minSize?: number): DispatchInput {
   const firstNames = ["Léa", "Thomas", "Camille", "Hugo", "Manon", "Lucas", "Chloé", "Enzo", "Inès", "Nathan", "Sarah", "Antoine", "Emma", "Julien", "Jade", "Mathis"];
   const lastInitials = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
 
@@ -582,12 +626,15 @@ export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3
     };
   });
 
+  const defaultMin = Math.max(1, Math.floor(studentCount / classCount) - 4);
+  const effectiveMin = minSize !== undefined ? minSize : defaultMin;
+
   const classrooms: Classroom[] = Array.from({ length: classCount }, (_, idx) => {
     const letter = String.fromCharCode(65 + idx);
     return {
       id: `class-${letter}`,
       label: `Classe ${letter}`,
-      minSize: Math.max(10, Math.floor(studentCount / classCount) - 3),
+      minSize: effectiveMin,
       maxSize,
     };
   });

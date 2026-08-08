@@ -109,9 +109,18 @@ export default function App() {
     localStorage.setItem("edtemps_simClassCount", String(val));
   };
 
+  const [simMinSize, setSimMinSizeState] = useState<number>(() => {
+    const saved = localStorage.getItem("edtemps_simMinSize");
+    return saved ? Number(saved) : 18;
+  });
+  const setSimMinSize = (val: number) => {
+    setSimMinSizeState(val);
+    localStorage.setItem("edtemps_simMinSize", String(val));
+  };
+
   const [simMaxSize, setSimMaxSizeState] = useState<number>(() => {
     const saved = localStorage.getItem("edtemps_simMaxSize");
-    return saved ? Number(saved) : 24;
+    return saved ? Number(saved) : 28;
   });
   const setSimMaxSize = (val: number) => {
     setSimMaxSizeState(val);
@@ -1247,7 +1256,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   </button>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
                       Élèves totaux dans la promotion
@@ -1260,7 +1269,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       onChange={(e) => {
                         const val = Math.max(1, Math.min(2000, Number(e.target.value) || 1));
                         setSimStudentCount(val);
-                        const customInput = createSyntheticDemoInputCustom(val, simClassCount, simMaxSize);
+                        const customInput = createSyntheticDemoInputCustom(val, simClassCount, simMaxSize, simMinSize);
                         setDataset(customInput);
                         setActiveDataset(customInput);
                       }}
@@ -1280,7 +1289,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       onChange={(e) => {
                         const val = Math.max(1, Math.min(50, Number(e.target.value) || 1));
                         setSimClassCount(val);
-                        const customInput = createSyntheticDemoInputCustom(simStudentCount, val, simMaxSize);
+                        const customInput = createSyntheticDemoInputCustom(simStudentCount, val, simMaxSize, simMinSize);
                         setDataset(customInput);
                         setActiveDataset(customInput);
                       }}
@@ -1290,24 +1299,44 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                   <div>
                     <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
-                      Effectif max / classe
+                      Effectif min / classe (Seuil)
                     </label>
-                    <select
-                      value={simMaxSize}
+                    <input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={simMinSize}
                       onChange={(e) => {
-                        const val = Number(e.target.value);
-                        setSimMaxSize(val);
-                        const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, val);
+                        const val = Math.max(1, Math.min(60, Number(e.target.value) || 1));
+                        setSimMinSize(val);
+                        const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize, val);
                         setDataset(customInput);
                         setActiveDataset(customInput);
                       }}
+                      placeholder="ex: 18 ou 20"
                       style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
-                    >
-                      <option value={22}>22 élèves (Effectif réduit REP+)</option>
-                      <option value={24}>24 élèves (Norme collège)</option>
-                      <option value={28}>28 élèves (Classe chargée)</option>
-                      <option value={30}>30 élèves (Capacité max)</option>
-                    </select>
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px", color: "var(--text-muted)" }}>
+                      Effectif max / classe (Plafond)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={simMaxSize}
+                      onChange={(e) => {
+                        const val = Math.max(1, Math.min(60, Number(e.target.value) || 1));
+                        setSimMaxSize(val);
+                        const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, val, simMinSize);
+                        setDataset(customInput);
+                        setActiveDataset(customInput);
+                      }}
+                      placeholder="ex: 28 ou 30"
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.88rem" }}
+                    />
                   </div>
                 </div>
 
@@ -1494,7 +1523,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   disabled={busy}
                   onClick={() => {
                     setBusy(true);
-                    const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize);
+                    const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize, simMinSize);
                     setDataset(customInput);
                     setActiveDataset(customInput);
                     api.generate(weights, customInput)
