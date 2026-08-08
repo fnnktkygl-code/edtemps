@@ -190,10 +190,12 @@ a:focus-visible,
   padding: 4px 10px;
   border-radius: var(--radius-full);
   font-family: var(--font-heading);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 h1 {
@@ -206,6 +208,8 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 h1 span {
@@ -219,6 +223,8 @@ h1 span {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Toggle Control Switch */

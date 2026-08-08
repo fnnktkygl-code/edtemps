@@ -385,7 +385,7 @@ export default function App() {
     <main className="page">
       <header className="masthead">
         <div className="brand-section">
-          <span className="brand-badge">CONFORME RÉFÉRENTIELS ÉDUCATION NATIONALE</span>
+          <span className="brand-badge">🏛️ Référentiels Éducation Nationale</span>
           <h1>EdTemps</h1>
         </div>
         <div className="header-actions">
@@ -516,18 +516,12 @@ export default function App() {
             )}
           </div>
 
-          {activeTab === "timetabling" && (
-            <button className="primary" onClick={generateTimetable} disabled={busy} data-tooltip="Calculer un emploi du temps optimal avec le solveur CP-SAT">
-              {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
-            </button>
-          )}
-
           <button
             className="theme-toggle-btn"
             onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
             data-tooltip="Basculez entre le mode clair et le mode sombre"
           >
-            {theme === "light" ? "🌙" : "☀️"}
+            {theme === "light" ? "🌙 Mode Sombre" : "☀️ Mode Clair"}
           </button>
         </div>
       </header>
@@ -1575,13 +1569,17 @@ export default function App() {
                 </select>
               </div>
 
+              <button className="primary" onClick={generateTimetable} disabled={busy} style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
+                {busy ? "Calcul en cours…" : "⚡ Calculer l'EDT"}
+              </button>
+
               <button
                 className="validate"
                 onClick={validateTimetable}
                 disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}
                 style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, borderRadius: "var(--radius-sm)", whiteSpace: "nowrap", flexShrink: 0, height: "40px", display: "inline-flex", alignItems: "center", gap: "8px" }}
               >
-                {selectedSchedule?.state === "APPROVED" ? "✓ EDT Scellé" : "⚡ Valider l'Emploi du temps"}
+                {selectedSchedule?.state === "APPROVED" ? "✓ EDT Scellé" : "✓ Valider & Sceller l'EDT"}
               </button>
             </div>
           </div>
