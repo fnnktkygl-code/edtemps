@@ -1980,8 +1980,8 @@ export default function App() {
                                   }}
                                 >
                                   {/* Ligne 1 : Poignée, Avatar, Nom + Note côte-à-côte & Boutons d'Action */}
-                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", width: "100%" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", width: "100%" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0, flex: 1 }}>
                                       <span className="drag-handle" style={{ color: "#94a3b8", cursor: "grab", fontSize: "0.85rem", flexShrink: 0 }} title="Glisser-déposer">::</span>
 
                                       <div
@@ -1998,15 +1998,19 @@ export default function App() {
                                           fontSize: "0.72rem",
                                           flexShrink: 0,
                                         }}
+                                        title={`Initiales : ${student.initials}`}
                                       >
                                         {student.initials}
                                       </div>
 
-                                      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", minWidth: 0, overflow: "hidden" }}>
-                                        <span style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", minWidth: 0, flex: 1, overflow: "hidden" }}>
+                                        <span
+                                          style={{ fontWeight: 800, fontSize: "0.86rem", color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
+                                          title={nameOf(student, anonymous)}
+                                        >
                                           {nameOf(student, anonymous)}
                                         </span>
-                                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600, fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", flexShrink: 0 }}>
                                           {student.levelAverage.toFixed(1)}/20
                                         </span>
                                       </div>
@@ -2036,7 +2040,6 @@ export default function App() {
                                             if (e.target.value) requestMove(student.id, e.target.value);
                                           }}
                                           title="Transférer vers une autre classe"
-                                          style={{ padding: "3px 6px", fontSize: "0.75rem", maxWidth: "56px", textOverflow: "ellipsis" }}
                                         >
                                           <option value="" disabled>⇄</option>
                                           {otherClasses.map((targetC) => (
@@ -2048,13 +2051,14 @@ export default function App() {
                                       )}
                                     </div>
                                   </div>
-
-                                  {/* Ligne 2 : Badges d'accompagnement et d'options sous le nom */}
+                              {/* Ligne 2 : Badges d'accompagnement et d'options sous le nom */}
                                   {(student.supportFlags.length > 0 || student.options.length > 0) && (
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap", paddingLeft: "36px" }}>
                                       {student.supportFlags.map((flag) => (
                                         <span
                                           key={flag}
+                                          className="badge-tooltip"
+                                          data-tooltip={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           title={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           style={{
                                             background: flag === "PAP" ? "#ffedd5" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
@@ -2064,7 +2068,7 @@ export default function App() {
                                             fontSize: "0.68rem",
                                             fontWeight: 800,
                                             lineHeight: 1.2,
-                                            cursor: "help",
+                                            cursor: "pointer",
                                           }}
                                         >
                                           {flag}
@@ -2073,6 +2077,8 @@ export default function App() {
                                       {student.options.map((opt) => (
                                         <span
                                           key={opt}
+                                          className="badge-tooltip"
+                                          data-tooltip={OPTION_TITLES[opt] || `Option : ${opt}`}
                                           title={OPTION_TITLES[opt] || `Option linguistique ou artistique : ${opt}`}
                                           style={{
                                             background: "#f3e8ff",
