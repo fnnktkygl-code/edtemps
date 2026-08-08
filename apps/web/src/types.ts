@@ -20,6 +20,8 @@ export type Student = {
   levelAverage: number;
   subjectGrades?: SubjectGrade[];
   behavior?: StudentBehavior;
+  lv1?: string;
+  lv2?: string;
   options: string[];
   supportFlags: string[];
   conflictsWith: string[];

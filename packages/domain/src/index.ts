@@ -20,6 +20,8 @@ export type Student = {
   levelAverage: number;
   subjectGrades?: SubjectGrade[];
   behavior?: StudentBehavior;
+  lv1?: string; // Ex: "LVA_ANG" (Anglais) ou "LVA_ALL" (Allemand)
+  lv2?: string; // Ex: "LVB_ESP" (Espagnol), "LVB_ALL" (Allemand), "LVB_ITA" (Italien)
   options: string[];
   supportFlags: ("PAP" | "PPRE" | "PPS" | "PAI" | "ULIS")[];
   conflictsWith: string[];

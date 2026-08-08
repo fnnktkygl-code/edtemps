@@ -66,45 +66,77 @@ const SUPPORT_FLAG_TITLES: Record<string, string> = {
   ULIS: "Unité Localisée pour l'Inclusion Scolaire (Dispositif d'inclusion)",
 };
 
-const OFFICIAL_LANGUAGES_OPTIONS: { code: string; label: string; group: string }[] = [
-  { code: "ANG", label: "Anglais (LVA / LVB)", group: "Langues Vivantes" },
-  { code: "ALL", label: "Allemand (LVA / LVB / Bilangue)", group: "Langues Vivantes" },
-  { code: "ESP", label: "Espagnol (LVB)", group: "Langues Vivantes" },
-  { code: "ITA", label: "Italien (LVB)", group: "Langues Vivantes" },
-  { code: "POR", label: "Portugais (LVB)", group: "Langues Vivantes" },
-  { code: "ARA", label: "Arabe (LVA / LVB)", group: "Langues Vivantes" },
-  { code: "CHI", label: "Chinois (LVB / LVC)", group: "Langues Vivantes" },
-  { code: "RUS", label: "Russe (LVB)", group: "Langues Vivantes" },
-  { code: "JAP", label: "Japonais (LVB / LVC)", group: "Langues Vivantes" },
-  { code: "LATIN", label: "Latin (LCA - Langues & Cultures Antiquité)", group: "LCA & Antiquité" },
-  { code: "GREC", label: "Grec Ancien (LCA - Langues & Cultures Antiquité)", group: "LCA & Antiquité" },
-  { code: "LCR", label: "Langues & Cultures Régionales (Occitan, Basque, Breton, etc.)", group: "Régionales" },
-  { code: "BILANGUE", label: "Section Bilangue (LVA + LVB précoce)", group: "Parcours" },
-  { code: "LCE", label: "LCE (Langues et Cultures Européennes)", group: "Parcours" },
-  { code: "CHAM", label: "CHAM / CHAD / CHAT (Musique / Danse / Théâtre)", group: "Parcours" },
-  { code: "SEL", label: "Section Européenne & Langues Orientales", group: "Parcours" },
+const OFFICIAL_NATIONAL_SUBJECTS = [
+  "Français",
+  "Mathématiques",
+  "Histoire-Géographie & EMC",
+  "Physique-Chimie",
+  "SVT (Sciences de la Vie et de la Terre)",
+  "Technologie",
+  "Anglais (LVA / LV1)",
+  "Allemand (LVB / LV2)",
+  "Espagnol (LVB / LV2)",
+  "Italien (LVB / LV2)",
+  "Arts Plastiques",
+  "Éducation Musicale",
+  "EPS (Éducation Physique et Sportive)",
+  "Philosophie",
+  "SES (Sciences Économiques et Sociales)",
+  "Sciences Numériques et Technologie (SNT)",
+  "Enseignement Scientifique",
+];
+
+const OFFICIAL_LV1_LIST = [
+  { code: "LVA_ANG", label: "Anglais (LVA / LV1)" },
+  { code: "LVA_ALL", label: "Allemand (LVA / LV1 - Bilangue)" },
+  { code: "LVA_ARA", label: "Arabe (LVA / LV1)" },
+  { code: "LVA_ESP", label: "Espagnol (LVA / LV1)" },
+  { code: "LVA_POR", label: "Portugais (LVA / LV1)" },
+];
+
+const OFFICIAL_LV2_LIST = [
+  { code: "LVB_ESP", label: "Espagnol (LVB / LV2)" },
+  { code: "LVB_ALL", label: "Allemand (LVB / LV2)" },
+  { code: "LVB_ITA", label: "Italien (LVB / LV2)" },
+  { code: "LVB_ANG", label: "Anglais (LVB / LV2)" },
+  { code: "LVB_ARA", label: "Arabe (LVB / LV2)" },
+  { code: "LVB_CHI", label: "Chinois (LVB / LV2)" },
+  { code: "LVB_POR", label: "Portugais (LVB / LV2)" },
+  { code: "LVB_RUS", label: "Russe (LVB / LV2)" },
+  { code: "LVB_JAP", label: "Japonais (LVB / LV2)" },
+];
+
+const OFFICIAL_OPTIONS_ONLY = [
+  { code: "LATIN", label: "Latin (LCA - Langues & Cultures Antiquité)" },
+  { code: "GREC", label: "Grec Ancien (LCA - Langues & Cultures Antiquité)" },
+  { code: "LCR", label: "Langues & Cultures Régionales (Occitan, Basque, Breton, etc.)" },
+  { code: "LCE", label: "LCE (Langues et Cultures Européennes)" },
+  { code: "CHAM", label: "CHAM / CHAD / CHAT (Musique / Danse / Théâtre)" },
+  { code: "SEL", label: "Section Européenne & Langues Orientales" },
 ];
 
 const OPTION_TITLES: Record<string, string> = {
-  ANG: "Langue Vivante : Anglais (LVA / LVB)",
-  Anglais: "Langue Vivante : Anglais (LVA)",
-  ALL: "Langue Vivante : Allemand (LVA / LVB / Bilangue)",
-  Allemand: "Langue Vivante : Allemand (LVA / LVB)",
-  ESP: "Langue Vivante : Espagnol (LVB)",
-  Espagnol: "Langue Vivante : Espagnol (LVB)",
-  ITA: "Langue Vivante : Italien (LVB)",
-  POR: "Langue Vivante : Portugais (LVB)",
-  ARA: "Langue Vivante : Arabe (LVA / LVB)",
-  CHI: "Langue Vivante : Chinois (LVB / LVC)",
-  RUS: "Langue Vivante : Russe (LVB)",
-  JAP: "Langue Vivante : Japonais (LVB / LVC)",
-  LATIN: "Option LCA : Latin (Langues et Cultures de l'Antiquité)",
-  Latin: "Option LCA : Latin (Langues et Cultures de l'Antiquité)",
-  GREC: "Option LCA : Grec Ancien (Langues et Cultures de l'Antiquité)",
-  LCR: "Option : Langue et Culture Régionale (Occitan, Basque, Breton...)",
-  BILANGUE: "Section Bilangue (Apprentissage précoce LVA + LVB)",
+  LVA_ANG: "LVA / LV1 : Anglais",
+  LVA_ALL: "LVA / LV1 : Allemand (Bilangue)",
+  LVA_ARA: "LVA / LV1 : Arabe",
+  LVA_ESP: "LVA / LV1 : Espagnol",
+  LVA_POR: "LVA / LV1 : Portugais",
+  LVB_ESP: "LVB / LV2 : Espagnol",
+  LVB_ALL: "LVB / LV2 : Allemand",
+  LVB_ITA: "LVB / LV2 : Italien",
+  LVB_ANG: "LVB / LV2 : Anglais",
+  LVB_ARA: "LVB / LV2 : Arabe",
+  LVB_CHI: "LVB / LV2 : Chinois",
+  LVB_POR: "LVB / LV2 : Portugais",
+  LVB_RUS: "LVB / LV2 : Russe",
+  LVB_JAP: "LVB / LV2 : Japonais",
+  LATIN: "Option LCA : Latin",
+  Latin: "Option LCA : Latin",
+  GREC: "Option LCA : Grec Ancien",
+  LCR: "Option : Langue et Culture Régionale",
+  BILANGUE: "Section Bilangue",
   LCE: "LCE : Langues et Cultures Européennes",
-  CHAM: "CHAM : Classe à Horaires Aménagés Musique / Danse / Théâtre",
+  CHAM: "CHAM : Classes à Horaires Aménagés",
   SEL: "Section Européenne et de Langues Orientales",
 };
 
@@ -3894,61 +3926,67 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary-brand)", margin: 0 }}>
                               📐 Édition des Notes par Matière (/20) :
                             </label>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const currentGrades = editStudentForm.subjectGrades || [
-                                  { subject: "Mathématiques", score: 12.0 },
-                                  { subject: "Français", score: 12.0 },
-                                  { subject: "Histoire-Géo", score: 12.0 },
-                                  { subject: "Sciences", score: 12.0 },
-                                  { subject: "Anglais", score: 12.0 },
-                                ];
-                                const newGrades = [...currentGrades, { subject: "Nouvelle matière", score: 10.0 }];
-                                const avg = newGrades.reduce((sum, g) => sum + g.score, 0) / newGrades.length;
-                                setEditStudentForm({ ...editStudentForm, subjectGrades: newGrades, levelAverage: parseFloat(avg.toFixed(1)) });
-                              }}
-                              style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontSize: "0.76rem", fontWeight: 800, cursor: "pointer" }}
-                            >
-                              ➕ Ajouter une matière
-                            </button>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const default9 = [
+                                    { subject: "Mathématiques", score: 12.5 },
+                                    { subject: "Français", score: 13.0 },
+                                    { subject: "Histoire-Géographie & EMC", score: 12.0 },
+                                    { subject: "SVT (Sciences de la Vie et de la Terre)", score: 14.0 },
+                                    { subject: "Physique-Chimie", score: 11.5 },
+                                    { subject: "Technologie", score: 13.5 },
+                                    { subject: "Anglais (LVA / LV1)", score: 14.0 },
+                                    { subject: "EPS (Éducation Physique et Sportive)", score: 15.0 },
+                                    { subject: "Arts Plastiques", score: 14.5 },
+                                  ];
+                                  const avg = default9.reduce((sum, g) => sum + g.score, 0) / default9.length;
+                                  setEditStudentForm({ ...editStudentForm, subjectGrades: default9, levelAverage: parseFloat(avg.toFixed(1)) });
+                                }}
+                                style={{ background: "#2563eb", color: "#ffffff", border: "none", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                              >
+                                📋 9 Matières Officieuses
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentGrades = editStudentForm.subjectGrades || [];
+                                  const newGrades = [...currentGrades, { subject: OFFICIAL_NATIONAL_SUBJECTS[0], score: 10.0 }];
+                                  const avg = newGrades.reduce((sum, g) => sum + g.score, 0) / newGrades.length;
+                                  setEditStudentForm({ ...editStudentForm, subjectGrades: newGrades, levelAverage: parseFloat(avg.toFixed(1)) });
+                                }}
+                                style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                              >
+                                ➕ Ajouter une matière
+                              </button>
+                            </div>
                           </div>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", maxHeight: "200px", overflowY: "auto" }}>
+                          <datalist id="official-national-subjects-list">
+                            {OFFICIAL_NATIONAL_SUBJECTS.map((s) => (
+                              <option key={s} value={s} />
+                            ))}
+                          </datalist>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", maxHeight: "220px", overflowY: "auto" }}>
                             {(!editStudentForm.subjectGrades || editStudentForm.subjectGrades.length === 0) ? (
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
-                                  Aucune note individuelle enregistrée.
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const defaultGrades = [
-                                      { subject: "Mathématiques", score: 12.0 },
-                                      { subject: "Français", score: 12.0 },
-                                      { subject: "Histoire-Géo", score: 12.0 },
-                                      { subject: "Sciences", score: 12.0 },
-                                      { subject: "Anglais", score: 12.0 },
-                                    ];
-                                    setEditStudentForm({ ...editStudentForm, subjectGrades: defaultGrades, levelAverage: 12.0 });
-                                  }}
-                                  style={{ background: "#2563eb", color: "#ffffff", border: "none", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontSize: "0.74rem", fontWeight: 800, cursor: "pointer" }}
-                                >
-                                  Générer le bulletin type (5 matières)
-                                </button>
-                              </div>
+                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                                Aucune note individuelle enregistrée. Cliquez sur "9 Matières Officieuses" ou "Ajouter une matière" ci-dessus.
+                              </span>
                             ) : (
                               editStudentForm.subjectGrades.map((sg, idx) => (
                                 <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 90px 32px", gap: "8px", alignItems: "center" }}>
                                   <input
                                     type="text"
+                                    list="official-national-subjects-list"
                                     value={sg.subject}
                                     onChange={(e) => {
                                       const updated = [...(editStudentForm.subjectGrades || [])];
                                       updated[idx] = { ...updated[idx], subject: e.target.value };
                                       setEditStudentForm({ ...editStudentForm, subjectGrades: updated });
                                     }}
-                                    placeholder="Intitulé de la matière"
+                                    placeholder="Choisir ou saisir une matière officielle"
                                     style={{ padding: "6px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.82rem", fontWeight: 700, background: "var(--bg-card)", color: "var(--text-main)" }}
                                   />
                                   <input
@@ -3984,6 +4022,64 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </div>
                         </div>
 
+                        {/* SÉLECTION EXPLICITE LV1 (LVA) & LV2 (LVB) */}
+                        <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                          <div style={{ fontSize: "0.82rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span>🌍</span> Langues Vivantes Réglementaires (Programme Officiel MEN) :
+                          </div>
+
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+                            {/* Langue Vivante 1 (LVA) */}
+                            <div>
+                              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
+                                🔵 Langue Vivante 1 (LVA) :
+                              </label>
+                              <select
+                                value={editStudentForm.lv1 || editStudentForm.options.find((o) => o.startsWith("LVA_")) || "LVA_ANG"}
+                                onChange={(e) => {
+                                  const newLv1 = e.target.value;
+                                  const filteredOptions = editStudentForm.options.filter((o) => !o.startsWith("LVA_"));
+                                  setEditStudentForm({
+                                    ...editStudentForm,
+                                    lv1: newLv1,
+                                    options: [...filteredOptions, newLv1],
+                                  });
+                                }}
+                                style={{ width: "100%", padding: "7px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, fontSize: "0.82rem", background: "var(--bg-card)", color: "var(--text-main)" }}
+                              >
+                                {OFFICIAL_LV1_LIST.map((item) => (
+                                  <option key={item.code} value={item.code}>{item.label}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Langue Vivante 2 (LVB) */}
+                            <div>
+                              <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
+                                🟢 Langue Vivante 2 (LVB) :
+                              </label>
+                              <select
+                                value={editStudentForm.lv2 || editStudentForm.options.find((o) => o.startsWith("LVB_")) || "LVB_ESP"}
+                                onChange={(e) => {
+                                  const newLv2 = e.target.value;
+                                  const filteredOptions = editStudentForm.options.filter((o) => !o.startsWith("LVB_"));
+                                  setEditStudentForm({
+                                    ...editStudentForm,
+                                    lv2: newLv2,
+                                    options: [...filteredOptions, newLv2],
+                                  });
+                                }}
+                                style={{ width: "100%", padding: "7px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700, fontSize: "0.82rem", background: "var(--bg-card)", color: "var(--text-main)" }}
+                              >
+                                <option value="">-- Aucune LV2 --</option>
+                                {OFFICIAL_LV2_LIST.map((item) => (
+                                  <option key={item.code} value={item.code}>{item.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Dispositifs d'Accompagnement */}
                         <div>
                           <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
@@ -4011,21 +4107,21 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </div>
                         </div>
 
-                        {/* Options Scolaires & Langues (Programme National Officiel) */}
+                        {/* Options Scolaires, LCA & Sections */}
                         <div>
                           <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                            🎓 Options Scolaires, LV1, LV2 & Sections (Programme National Officiel) :
+                            🎓 Options Facultatives, LCA & Sections Particulières :
                           </label>
-                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", maxHeight: "180px", overflowY: "auto", padding: "10px", background: "var(--bg-subtle)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
-                            {OFFICIAL_LANGUAGES_OPTIONS.map((item) => {
-                              const checked = editStudentForm.options.includes(item.code) || editStudentForm.options.includes(item.code.toLowerCase());
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", padding: "10px", background: "var(--bg-subtle)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                            {OFFICIAL_OPTIONS_ONLY.map((item) => {
+                              const checked = editStudentForm.options.includes(item.code);
                               return (
                                 <label key={item.code} title={item.label} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-card)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "5px 10px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.78rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
                                   <input
                                     type="checkbox"
                                     checked={checked}
                                     onChange={(e) => {
-                                      const currentOpts = editStudentForm.options.filter((o) => o !== item.code && o.toLowerCase() !== item.code.toLowerCase());
+                                      const currentOpts = editStudentForm.options.filter((o) => o !== item.code);
                                       const newOpts = e.target.checked ? [...currentOpts, item.code] : currentOpts;
                                       setEditStudentForm({ ...editStudentForm, options: newOpts });
                                     }}
