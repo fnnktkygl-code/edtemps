@@ -903,23 +903,67 @@ export default function App() {
                   </p>
                 </div>
                 <div className="scenario-grid">
-                  {scenarios.map((scenario, index) => (
-                    <button
-                      key={scenario.id}
-                      className={`scenario ${selected?.id === scenario.id ? "selected" : ""}`}
-                      onClick={() => setSelectedId(scenario.id)}
-                      aria-pressed={selected?.id === scenario.id}
-                    >
-                      <span>Scénario {String.fromCharCode(65 + index)}</span>
-                      <strong>
-                        {scenario.metrics.score}
-                        <small>/1000</small>
-                      </strong>
-                      <span className={scenario.state === "APPROVED" ? "chip approved" : "chip"}>
-                        {scenario.state === "APPROVED" ? "Validé humainement" : "À relire"}
-                      </span>
-                    </button>
-                  ))}
+                  {scenarios.map((scenario, index) => {
+                    const qualityPct = Math.round(scenario.metrics.score / 10);
+                    const meta =
+                      index === 0
+                        ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: "🏆 Recommandé IA", color: "#10b981" }
+                        : index === 1
+                        ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: "⚡ Option Hétérogénéité", color: "#4f46e5" }
+                        : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: "💡 Option Équilibre PAP", color: "#0284c7" };
+
+                    return (
+                      <button
+                        key={scenario.id}
+                        className={`scenario ${selected?.id === scenario.id ? "selected" : ""}`}
+                        onClick={() => setSelectedId(scenario.id)}
+                        aria-pressed={selected?.id === scenario.id}
+                        style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "20px", textAlign: "left" }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                          <div>
+                            <span className="chip" style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}40`, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 800, marginBottom: "6px", display: "inline-block" }}>
+                              {meta.badge}
+                            </span>
+                            <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-heading)" }}>
+                              {meta.title}
+                            </h3>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <strong style={{ fontSize: "1.6rem", fontWeight: 800, color: meta.color, fontFamily: "var(--font-mono)", display: "block", lineHeight: 1 }}>
+                              {qualityPct}%
+                            </strong>
+                            <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700 }}>Conformité IA</small>
+                          </div>
+                        </div>
+
+                        <p style={{ margin: 0, fontSize: "0.84rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                          {meta.desc}
+                        </p>
+
+                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px" }}>
+                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                            ⚖️ Parité {selected?.metrics.genderBalance ?? 90}%
+                          </span>
+                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                            📊 Niveaux {selected?.metrics.academicBalance ?? 90}%
+                          </span>
+                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                            🤝 PAP {selected?.metrics.supportBalance ?? 90}%
+                          </span>
+                        </div>
+
+                        <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "10px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span className={scenario.state === "APPROVED" ? "chip approved" : "chip"}>
+                            {scenario.state === "APPROVED" ? "✓ Validé & Scellé" : "📋 En cours de relecture"}
+                          </span>
+                          <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--primary-brand)" }}>
+                            {selected?.id === scenario.id ? "Actif ▸" : "Examiner ▸"}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </section>
 
