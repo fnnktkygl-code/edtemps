@@ -1451,6 +1451,47 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         );
                       })}
                     </div>
+
+                    {/* BARRE DE PAGINATION (BAS) */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", fontSize: "0.82rem", flexWrap: "wrap", gap: "10px", borderTop: "1px solid var(--border-light)", paddingTop: "12px" }}>
+                      <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
+                        Affichage <strong>{filteredStudents.length > 0 ? (currentPage - 1) * rosterPageSize + 1 : 0}–{Math.min(currentPage * rosterPageSize, filteredStudents.length)}</strong> sur <strong>{filteredStudents.length}</strong> élèves
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <button
+                          className="secondary"
+                          disabled={currentPage === 1}
+                          onClick={() => setRosterPage((p) => Math.max(1, p - 1))}
+                          style={{ padding: "4px 10px", fontSize: "0.78rem", fontWeight: 700 }}
+                        >
+                          ◄ Précédent
+                        </button>
+                        <span style={{ fontWeight: 800, padding: "0 6px" }}>
+                          Page {currentPage} / {totalPages}
+                        </span>
+                        <button
+                          className="secondary"
+                          disabled={currentPage === totalPages}
+                          onClick={() => setRosterPage((p) => Math.min(totalPages, p + 1))}
+                          style={{ padding: "4px 10px", fontSize: "0.78rem", fontWeight: 700 }}
+                        >
+                          Suivant ►
+                        </button>
+                        <select
+                          value={rosterPageSize}
+                          onChange={(e) => {
+                            setRosterPageSize(Number(e.target.value));
+                            setRosterPage(1);
+                          }}
+                          style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.78rem", fontWeight: 700, marginLeft: "6px" }}
+                        >
+                          <option value={15}>15 par page</option>
+                          <option value={25}>25 par page</option>
+                          <option value={50}>50 par page</option>
+                          <option value={100}>100 par page</option>
+                        </select>
+                      </div>
+                    </div>
                   </>
                 );
               })()}
