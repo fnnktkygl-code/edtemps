@@ -736,30 +736,35 @@ export default function App() {
       {/* TAB 2: EMPLOIS DU TEMPS & REMPLACEMENTS */}
       {activeTab === "timetabling" && (
         <section aria-labelledby="timetabling-title">
-          <div className="timetabling-header">
+          <div className="section-header">
             <div>
-              <p className="eyebrow">Module 2 — Recherche Opérationnelle</p>
-              <h2 id="timetabling-title">Génération & Gestion des Emplois du Temps</h2>
+              <p className="eyebrow">MODULE 2 · SOLVEUR DE CONTRAINTES CP-SAT</p>
+              <h2 id="timetabling-title">Emplois du Temps & Planning Semestriel</h2>
             </div>
-            <div className="axis-selector">
-              <label htmlFor="week-select">Rythme :</label>
-              <select id="week-select" value={selectedWeekFilter} onChange={(e) => setSelectedWeekFilter(e.target.value as "ALL" | "A" | "B")}>
-                <option value="ALL">Toutes les semaines</option>
-                <option value="A">Semaine A uniquement</option>
-                <option value="B">Semaine B uniquement</option>
-              </select>
+            <div className="section-controls">
+              <div className="control-group">
+                <label htmlFor="week-select">Semaines :</label>
+                <select id="week-select" value={selectedWeekFilter} onChange={(e) => setSelectedWeekFilter(e.target.value as "ALL" | "A" | "B")}>
+                  <option value="ALL">Toutes les semaines (A/B)</option>
+                  <option value="A">Semaine A</option>
+                  <option value="B">Semaine B</option>
+                </select>
+              </div>
 
-              <label htmlFor="axis-select">Axe :</label>
-              <select id="axis-select" value={timetablingAxisFilter} onChange={(e) => setTimetablingAxisFilter(e.target.value)}>
-                <option value="ALL">Vue globale des cours</option>
-                <option value="6A">Classe 6e A</option>
-                <option value="6B">Classe 6e B</option>
-                <option value="prof-math-1">Mme Martin (Maths)</option>
-                <option value="prof-fra-1">M. Dubois (Français)</option>
-                <option value="room-101">Salle 101</option>
-              </select>
-              <button className="validate" style={{ margin: 0, width: "auto" }} onClick={validateTimetable} disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}>
-                {selectedSchedule?.state === "APPROVED" ? "Validé" : "Valider l'EDT"}
+              <div className="control-group">
+                <label htmlFor="axis-select">Vue :</label>
+                <select id="axis-select" value={timetablingAxisFilter} onChange={(e) => setTimetablingAxisFilter(e.target.value)}>
+                  <option value="ALL">Vue globale de l'établissement</option>
+                  <option value="6A">Classe 6e A</option>
+                  <option value="6B">Classe 6e B</option>
+                  <option value="prof-math-1">Mme Martin (Maths)</option>
+                  <option value="prof-fra-1">M. Dubois (Français)</option>
+                  <option value="room-101">Salle 101 (Standard)</option>
+                </select>
+              </div>
+
+              <button className="validate" onClick={validateTimetable} disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}>
+                {selectedSchedule?.state === "APPROVED" ? "✓ EDT Scellé" : "⚡ Valider l'Emploi du temps"}
               </button>
             </div>
           </div>
