@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole } from "./api";
+import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type {
   AuditEvent,
   Classroom,
@@ -676,22 +676,22 @@ export default function App() {
                   disabled={busy}
                   onClick={() => {
                     setBusy(true);
-                    try {
-                      const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize);
-                      setDataset(customInput);
-                      api.generate(weights)
+                    const customInput = createSyntheticDemoInputCustom(simStudentCount, simClassCount, simMaxSize);
+                    setDataset(customInput);
+                    setActiveDataset(customInput);
+                    setTimeout(() => {
+                      api.generate(weights, customInput)
                         .then((res) => {
                           setScenarios(res.scenarios);
                           if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
                           setNotice(`Simulation générée avec succès : ${simStudentCount} élèves répartis dans ${simClassCount} classes.`);
                           setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS LES SCÉNARIOS
                         })
+                        .catch((err) => {
+                          setNotice(`Erreur : ${err instanceof Error ? err.message : "Paramètres incompatibles."}`);
+                        })
                         .finally(() => setBusy(false));
-                    } catch (err) {
-                      setNotice(`Erreur : ${err instanceof Error ? err.message : "Paramètres incompatibles."}`);
-                    } finally {
-                      setBusy(false);
-                    }
+                    }, 600);
                   }}
                   style={{ width: "100%", padding: "10px 14px", fontWeight: 800 }}
                 >
@@ -795,17 +795,19 @@ export default function App() {
               disabled={busy}
               onClick={() => {
                 setBusy(true);
-                api.generate(weights)
-                  .then((res) => {
-                    setScenarios(res.scenarios);
-                    if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
-                    setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés.`);
-                    setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
-                  })
-                  .catch((err) => {
-                    setNotice(err instanceof Error ? err.message : "Erreur lors de la génération.");
-                  })
-                  .finally(() => setBusy(false));
+                setTimeout(() => {
+                  api.generate(weights, dataset)
+                    .then((res) => {
+                      setScenarios(res.scenarios);
+                      if (res.scenarios.length > 0) setSelectedId(res.scenarios[0].id);
+                      setNotice(`${res.scenarios.length} scénarios d'équilibrage ont été générés.`);
+                      setDispatchSubTab("kanban"); // BASCULE AUTOMATIQUE VERS L'ONGLET 3
+                    })
+                    .catch((err) => {
+                      setNotice(err instanceof Error ? err.message : "Erreur lors de la génération.");
+                    })
+                    .finally(() => setBusy(false));
+                }, 600);
               }}
               style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, boxShadow: "var(--shadow-md)", whiteSpace: "nowrap" }}
             >
@@ -1304,16 +1306,19 @@ export default function App() {
 
                   <section className="workspace" aria-labelledby="assignment-title">
                     <aside className="inspector">
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div>
-                          <span className="eyebrow">🎛️ PANNEAU D'INSPECTION & AJUSTEMENT</span>
-                          <h2 id="assignment-title" style={{ margin: "4px 0 0", fontSize: "1.2rem", fontWeight: 800 }}>
+                      <div>
+                        <span className="eyebrow">🎛️ PANNEAU D'INSPECTION & AJUSTEMENT</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px", flexWrap: "wrap" }}>
+                          <h2 id="assignment-title" style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800 }}>
                             Scénario Sélectionné
                           </h2>
+                          <span
+                            className={selected.state === "APPROVED" ? "chip approved" : "chip"}
+                            style={{ whiteSpace: "nowrap", flexShrink: 0, padding: "2px 10px", fontSize: "0.75rem" }}
+                          >
+                            {selected.state === "APPROVED" ? "✓ Scellé" : "📋 Provisoire"}
+                          </span>
                         </div>
-                        <span className={selected.state === "APPROVED" ? "chip approved" : "chip"}>
-                          {selected.state === "APPROVED" ? "✓ Scellé" : "📋 Scénario d'Étape"}
-                        </span>
                       </div>
 
                       <dl className="metrics">

@@ -85,38 +85,70 @@ const fallbackTimetablingDataset = createSyntheticTimetablingDemoInput();
 let fallbackScenarios = generateDomainScenarios(fallbackDataset, 3);
 let fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
 
+let activeDataset: Dataset = fallbackDataset;
+
+export function setActiveDataset(ds: Dataset) {
+  activeDataset = ds;
+}
+
 export const api = {
   dataset: async () => {
     try {
       const data = await request<Dataset>("/dispatch/dataset");
       isOfflineFallback = false;
+      activeDataset = data;
       return data;
     } catch {
       isOfflineFallback = true;
-      return { ...fallbackDataset, dataClassification: "SYNTHETIC_DEMO_ONLY" as const };
+      return { ...activeDataset, dataClassification: "SYNTHETIC_DEMO_ONLY" as const };
     }
   },
-  generate: async (weights?: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) => {
+  generate: async (
+    weights?: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number },
+    overrideDataset?: Dataset
+  ) => {
+    const ds = overrideDataset || activeDataset || fallbackDataset;
     try {
       return await request<{ scenarios: Scenario[] }>("/dispatch/generate", {
         method: "POST",
         body: JSON.stringify({ scenarioCount: 3, weights }),
       });
     } catch {
-      fallbackScenarios = generateDomainScenarios(fallbackDataset, 3, weights) as unknown as Scenario[];
+      fallbackScenarios = generateDomainScenarios(ds as unknown as Parameters<typeof generateDomainScenarios>[0], 3, weights) as unknown as Scenario[];
       return { scenarios: fallbackScenarios };
     }
   },
-  move: (scenarioId: string, studentId: string, targetClassroomId: string) =>
-    request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/move`, {
-      method: "POST",
-      body: JSON.stringify({ studentId, targetClassroomId }),
-    }),
-  validate: (scenarioId: string) =>
-    request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/validate`, {
-      method: "POST",
-      body: JSON.stringify({ confirmation: true }),
-    }),
+  move: async (scenarioId: string, studentId: string, targetClassroomId: string) => {
+    try {
+      return await request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/move`, {
+        method: "POST",
+        body: JSON.stringify({ studentId, targetClassroomId }),
+      });
+    } catch {
+      const targetScenario = fallbackScenarios.find((s) => s.id === scenarioId);
+      if (targetScenario) {
+        targetScenario.assignments = {
+          ...targetScenario.assignments,
+          [studentId]: targetClassroomId,
+        };
+      }
+      return { scenario: targetScenario || fallbackScenarios[0] };
+    }
+  },
+  validate: async (scenarioId: string) => {
+    try {
+      return await request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/validate`, {
+        method: "POST",
+        body: JSON.stringify({ confirmation: true }),
+      });
+    } catch {
+      const targetScenario = fallbackScenarios.find((s) => s.id === scenarioId);
+      if (targetScenario) {
+        targetScenario.state = "APPROVED";
+      }
+      return { scenario: targetScenario || fallbackScenarios[0] };
+    }
+  },
   exportCsvUrl: (scenarioId: string) => `${base}/dispatch/scenarios/${scenarioId}/export/csv`,
   exportPronoteUrl: (scenarioId: string) => `${base}/dispatch/scenarios/${scenarioId}/export/pronote`,
   cnilRegisterUrl: () => `${base}/compliance/cnil-register`,
