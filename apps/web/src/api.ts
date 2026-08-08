@@ -1,10 +1,12 @@
 import {
   createSyntheticDemoInput,
+  createSyntheticDemoInputCustom,
   createSyntheticTimetablingDemoInput,
   generateScenarios as generateDomainScenarios,
   generateSchedule as generateDomainSchedule,
   suggestTeacherSubstitutions as suggestDomainSubstitutions,
 } from "@edtemps/domain";
+export { createSyntheticDemoInputCustom };
 import type {
   AuditEvent,
   Classroom,

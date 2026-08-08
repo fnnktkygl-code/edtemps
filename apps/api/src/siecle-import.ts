@@ -183,5 +183,5 @@ export function inputFromSIECLEPreview(preview: SIECLEImportPreview, targetClass
   if (targetClassrooms.length === 0) throw new Error("Au moins une classe cible doit être configurée.");
   const capacity = targetClassrooms.reduce((total, classroom) => total + classroom.maxSize, 0);
   if (capacity < preview.students.length) throw new Error("La capacité des classes cibles est insuffisante pour cet import.");
-  return { establishmentId: "imported-establishment", level, students: preview.students, classrooms: targetClassrooms };
+  return { establishmentId: "imported-establishment", level, students: preview.students, classrooms: targetClassrooms, dataClassification: "PSEUDONYMIZED_IMPORT" as const };
 }

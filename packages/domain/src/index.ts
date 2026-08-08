@@ -39,6 +39,7 @@ export type DispatchInput = {
   level: string;
   students: Student[];
   classrooms: Classroom[];
+  dataClassification: "SYNTHETIC_DEMO_ONLY" | "PSEUDONYMIZED_IMPORT";
 };
 
 export type DispatchWeights = {
@@ -517,6 +518,65 @@ export function createSyntheticDemoInput(): DispatchInput {
       { id: "6C", label: "6e C", minSize: 18, maxSize: 22 },
       { id: "6D", label: "6e D", minSize: 18, maxSize: 22 }
     ],
+    dataClassification: "SYNTHETIC_DEMO_ONLY" as const,
+  };
+}
+
+export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3, maxSize = 24): DispatchInput {
+  const firstNames = ["Léa", "Thomas", "Camille", "Hugo", "Manon", "Lucas", "Chloé", "Enzo", "Inès", "Nathan", "Sarah", "Antoine", "Emma", "Julien", "Jade", "Mathis"];
+  const lastInitials = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
+
+  const students: Student[] = Array.from({ length: studentCount }, (_, idx) => {
+    const number = idx + 1;
+    const firstName = firstNames[number % firstNames.length];
+    const lastInitial = lastInitials[number % lastInitials.length];
+    const supportFlags: ("PAP" | "PPS" | "PPRE")[] = [];
+    if (number % 9 === 0) supportFlags.push("PAP");
+    if (number % 13 === 0) supportFlags.push("PPS");
+    if (number % 11 === 0) supportFlags.push("PPRE");
+
+    return {
+      id: `student-${number}`,
+      displayName: `${firstName} ${lastInitial}.`,
+      initials: `${firstName.slice(0, 1)}.${lastInitial}`,
+      gender: number % 2 === 0 ? "M" : "F",
+      levelAverage: Number((8.5 + ((number * 17) % 115) / 10).toFixed(1)),
+      subjectGrades: [
+        { subject: "Mathématiques", score: Number((7 + ((number * 13) % 125) / 10).toFixed(1)) },
+        { subject: "Français", score: Number((8 + ((number * 19) % 115) / 10).toFixed(1)) },
+        { subject: "Histoire-Géo", score: Number((9 + ((number * 11) % 105) / 10).toFixed(1)) },
+        { subject: "Sciences", score: Number((8.5 + ((number * 23) % 110) / 10).toFixed(1)) },
+        { subject: "Anglais", score: Number((9.5 + ((number * 7) % 100) / 10).toFixed(1)) },
+      ],
+      behavior: {
+        conductScore: 1 + ((number * 3) % 5),
+        workEthicScore: 1 + ((number * 7) % 5),
+        absencesHours: number % 11 === 0 ? 8 : 0,
+        tardinessCount: number % 9 === 0 ? 2 : 0,
+      },
+      teacherComments: "Élève sérieux et coopératif.",
+      options: number % 5 === 0 ? ["Allemand"] : number % 7 === 0 ? ["Latin"] : [],
+      supportFlags,
+      conflictsWith: number === 5 ? ["student-12"] : [],
+    };
+  });
+
+  const classrooms: Classroom[] = Array.from({ length: classCount }, (_, idx) => {
+    const letter = String.fromCharCode(65 + idx);
+    return {
+      id: `class-${letter}`,
+      label: `Classe ${letter}`,
+      minSize: Math.max(10, Math.floor(studentCount / classCount) - 3),
+      maxSize,
+    };
+  });
+
+  return {
+    establishmentId: "demo-college",
+    level: "Niveau Personnalisé",
+    students,
+    classrooms,
+    dataClassification: "SYNTHETIC_DEMO_ONLY" as const,
   };
 }
 
@@ -945,11 +1005,13 @@ export function generateSchedule(input: TimetablingInput, seed = 42): Timetablin
   for (const course of sortedCourses) {
     courseIdx++;
     let placed = false;
-    // Étalement uniforme des créneaux sur les 5 jours de la semaine
+    // Étalement uniforme des créneaux sur l'ensemble de la journée (matin 08h-12h & après-midi 13h-16h)
     const shuffledSlots = [...input.timeSlots].sort((a, b) => {
-      const rankA = (days.indexOf(a.day) + courseIdx * 2) % 5;
-      const rankB = (days.indexOf(b.day) + courseIdx * 2) % 5;
-      return rankA - rankB;
+      const idxA = input.timeSlots.indexOf(a);
+      const idxB = input.timeSlots.indexOf(b);
+      const scoreA = ((idxA * 13 + courseIdx * 7) % 35);
+      const scoreB = ((idxB * 13 + courseIdx * 7) % 35);
+      return scoreA - scoreB;
     });
 
     for (const slot of shuffledSlots) {
@@ -1047,6 +1109,8 @@ export function createSyntheticTimetablingDemoInput(): TimetablingInput {
     { id: "prof-svt-1", displayName: "Mme Moreau (SVT)", subjects: ["SVT"], unavailableSlotIds: [] },
     { id: "prof-ang-1", displayName: "Mme Laurent (Anglais)", subjects: ["Anglais"], unavailableSlotIds: [] },
     { id: "prof-eps-1", displayName: "M. Simon (EPS)", subjects: ["EPS"], unavailableSlotIds: [] },
+    { id: "prof-tech-1", displayName: "Mme Leroy (Technologie)", subjects: ["Technologie"], unavailableSlotIds: [] },
+    { id: "prof-art-1", displayName: "M. Caron (Arts Plastiques & Musique)", subjects: ["Arts Plastiques", "Musique"], unavailableSlotIds: [] },
   ];
 
   const rooms: Room[] = [
@@ -1056,25 +1120,65 @@ export function createSyntheticTimetablingDemoInput(): TimetablingInput {
     { id: "room-lab-pc", label: "Labo Physique-Chimie", capacity: 28, roomType: "LABO" },
     { id: "room-lab-svt", label: "Labo SVT", capacity: 28, roomType: "LABO" },
     { id: "room-eps-gym", label: "Gymnase EPLE", capacity: 60, roomType: "EPS" },
+    { id: "room-tech", label: "Salle Technologie / Multimédia", capacity: 30, roomType: "INFORMATIQUE" },
+    { id: "room-art", label: "Salle d'Arts & Musique", capacity: 30, roomType: "ART" },
   ];
 
-  const courses: Course[] = [
-    { id: "c-6a-math", subject: "Mathématiques", classroomId: "6A", teacherId: "prof-math-1", hoursPerWeek: 4, requiredRoomType: "STANDARD" },
-    { id: "c-6a-fra", subject: "Français", classroomId: "6A", teacherId: "prof-fra-1", hoursPerWeek: 4, requiredRoomType: "STANDARD" },
-    { id: "c-6a-hg", subject: "Histoire-Géo", classroomId: "6A", teacherId: "prof-hg-1", hoursPerWeek: 3, requiredRoomType: "STANDARD" },
-    { id: "c-6a-pc", subject: "Physique-Chimie", classroomId: "6A", teacherId: "prof-pc-1", hoursPerWeek: 1.5, requiredRoomType: "LABO" },
-    { id: "c-6a-svt", subject: "SVT", classroomId: "6A", teacherId: "prof-svt-1", hoursPerWeek: 1.5, requiredRoomType: "LABO" },
-    { id: "c-6a-ang", subject: "Anglais", classroomId: "6A", teacherId: "prof-ang-1", hoursPerWeek: 3, requiredRoomType: "STANDARD" },
-    { id: "c-6a-eps", subject: "EPS", classroomId: "6A", teacherId: "prof-eps-1", hoursPerWeek: 4, requiredRoomType: "EPS" },
+  const courses: Course[] = [];
 
-    { id: "c-6b-math", subject: "Mathématiques", classroomId: "6B", teacherId: "prof-math-1", hoursPerWeek: 4, requiredRoomType: "STANDARD" },
-    { id: "c-6b-fra", subject: "Français", classroomId: "6B", teacherId: "prof-fra-1", hoursPerWeek: 4, requiredRoomType: "STANDARD" },
-    { id: "c-6b-hg", subject: "Histoire-Géo", classroomId: "6B", teacherId: "prof-hg-1", hoursPerWeek: 3, requiredRoomType: "STANDARD" },
-    { id: "c-6b-pc", subject: "Physique-Chimie", classroomId: "6B", teacherId: "prof-pc-1", hoursPerWeek: 1.5, requiredRoomType: "LABO" },
-    { id: "c-6b-svt", subject: "SVT", classroomId: "6B", teacherId: "prof-svt-1", hoursPerWeek: 1.5, requiredRoomType: "LABO" },
-    { id: "c-6b-ang", subject: "Anglais", classroomId: "6B", teacherId: "prof-ang-1", hoursPerWeek: 3, requiredRoomType: "STANDARD" },
-    { id: "c-6b-eps", subject: "EPS", classroomId: "6B", teacherId: "prof-eps-1", hoursPerWeek: 4, requiredRoomType: "EPS" },
+  // Génération d'un emploi du temps complet (24h-26h) pour la classe 6e A (Matin et Après-midi)
+  const curriculum6A: { subject: string; teacherId: string; reqRoom: "STANDARD" | "LABO" | "EPS" | "INFORMATIQUE" | "ART"; count: number }[] = [
+    { subject: "Mathématiques", teacherId: "prof-math-1", reqRoom: "STANDARD", count: 4 },
+    { subject: "Français", teacherId: "prof-fra-1", reqRoom: "STANDARD", count: 4 },
+    { subject: "Histoire-Géo", teacherId: "prof-hg-1", reqRoom: "STANDARD", count: 3 },
+    { subject: "Anglais", teacherId: "prof-ang-1", reqRoom: "STANDARD", count: 3 },
+    { subject: "EPS", teacherId: "prof-eps-1", reqRoom: "EPS", count: 3 },
+    { subject: "Physique-Chimie", teacherId: "prof-pc-1", reqRoom: "LABO", count: 2 },
+    { subject: "SVT", teacherId: "prof-svt-1", reqRoom: "LABO", count: 2 },
+    { subject: "Technologie", teacherId: "prof-tech-1", reqRoom: "INFORMATIQUE", count: 2 },
+    { subject: "Arts Plastiques", teacherId: "prof-art-1", reqRoom: "ART", count: 1 },
+    { subject: "Musique", teacherId: "prof-art-1", reqRoom: "ART", count: 1 },
   ];
+
+  curriculum6A.forEach((item) => {
+    for (let i = 1; i <= item.count; i++) {
+      courses.push({
+        id: `c-6a-${item.subject.toLowerCase().slice(0, 4)}-${i}`,
+        subject: item.subject,
+        classroomId: "6A",
+        teacherId: item.teacherId,
+        hoursPerWeek: 1,
+        requiredRoomType: item.reqRoom,
+      });
+    }
+  });
+
+  // Génération d'un emploi du temps complet pour la classe 6e B
+  const curriculum6B: { subject: string; teacherId: string; reqRoom: "STANDARD" | "LABO" | "EPS" | "INFORMATIQUE" | "ART"; count: number }[] = [
+    { subject: "Mathématiques", teacherId: "prof-math-1", reqRoom: "STANDARD", count: 4 },
+    { subject: "Français", teacherId: "prof-fra-1", reqRoom: "STANDARD", count: 4 },
+    { subject: "Histoire-Géo", teacherId: "prof-hg-1", reqRoom: "STANDARD", count: 3 },
+    { subject: "Anglais", teacherId: "prof-ang-1", reqRoom: "STANDARD", count: 3 },
+    { subject: "EPS", teacherId: "prof-eps-1", reqRoom: "EPS", count: 3 },
+    { subject: "Physique-Chimie", teacherId: "prof-pc-1", reqRoom: "LABO", count: 2 },
+    { subject: "SVT", teacherId: "prof-svt-1", reqRoom: "LABO", count: 2 },
+    { subject: "Technologie", teacherId: "prof-tech-1", reqRoom: "INFORMATIQUE", count: 2 },
+    { subject: "Arts Plastiques", teacherId: "prof-art-1", reqRoom: "ART", count: 1 },
+    { subject: "Musique", teacherId: "prof-art-1", reqRoom: "ART", count: 1 },
+  ];
+
+  curriculum6B.forEach((item) => {
+    for (let i = 1; i <= item.count; i++) {
+      courses.push({
+        id: `c-6b-${item.subject.toLowerCase().slice(0, 4)}-${i}`,
+        subject: item.subject,
+        classroomId: "6B",
+        teacherId: item.teacherId,
+        hoursPerWeek: 1,
+        requiredRoomType: item.reqRoom,
+      });
+    }
+  });
 
   return {
     establishmentId: "demo-college",
