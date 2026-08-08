@@ -1218,68 +1218,100 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
       {/* TAB 1: RÉPARTITION DES CLASSES */}
       {activeTab === "dispatch" && (
         <>
-          {/* Workflow Guidance Banner */}
-          <div className="workflow-stepper" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 20px", marginBottom: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", boxShadow: "var(--shadow-sm)", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
-              <span className={`step-pill ${dispatchSubTab === "roster" ? "active-step" : "done-step"}`}>
-                1
-              </span>
+          {/* COMBINED INTERACTIVE STEPPER NAVIGATION */}
+          <div
+            className="workflow-stepper"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-light)",
+              borderRadius: "var(--radius-md)",
+              padding: "10px 16px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              boxShadow: "var(--shadow-sm)",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setDispatchSubTab("roster")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flex: 1,
+                minWidth: "220px",
+                background: dispatchSubTab === "roster" ? "var(--bg-subtle)" : "transparent",
+                border: `1px solid ${dispatchSubTab === "roster" ? "var(--primary-brand)" : "transparent"}`,
+                padding: "8px 12px",
+                borderRadius: "var(--radius-sm)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <span className={`step-pill ${dispatchSubTab === "roster" ? "active-step" : "done-step"}`}>1</span>
               <div>
-                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>1. Profils Élèves</strong>
-                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Vérification des {dataset.students.length} dossiers</small>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>1. Profils Élèves ({dataset.students.length})</strong>
+                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Vérification des dossiers & effectifs</small>
               </div>
-            </div>
+            </button>
 
-            <div style={{ height: "1px", width: "30px", background: "var(--border-light)" }} />
+            <div style={{ height: "24px", width: "1px", background: "var(--border-light)" }} />
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
-              <span className={`step-pill ${dispatchSubTab === "weights" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>
-                2
-              </span>
+            <button
+              type="button"
+              onClick={() => setDispatchSubTab("weights")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flex: 1,
+                minWidth: "220px",
+                background: dispatchSubTab === "weights" ? "var(--bg-subtle)" : "transparent",
+                border: `1px solid ${dispatchSubTab === "weights" ? "var(--primary-brand)" : "transparent"}`,
+                padding: "8px 12px",
+                borderRadius: "var(--radius-sm)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <span className={`step-pill ${dispatchSubTab === "weights" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>2</span>
               <div>
-                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>2. Critères IA</strong>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>2. Critères IA & Options</strong>
                 <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Ajuster les priorités de mixité</small>
               </div>
-            </div>
+            </button>
 
-            <div style={{ height: "1px", width: "30px", background: "var(--border-light)" }} />
+            <div style={{ height: "24px", width: "1px", background: "var(--border-light)" }} />
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
-              <span className={`step-pill ${dispatchSubTab === "kanban" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>
-                3
-              </span>
+            <button
+              type="button"
+              onClick={() => setDispatchSubTab("kanban")}
+              disabled={scenarios.length === 0}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flex: 1,
+                minWidth: "220px",
+                background: dispatchSubTab === "kanban" ? "var(--bg-subtle)" : "transparent",
+                border: `1px solid ${dispatchSubTab === "kanban" ? "var(--primary-brand)" : "transparent"}`,
+                padding: "8px 12px",
+                borderRadius: "var(--radius-sm)",
+                cursor: scenarios.length === 0 ? "not-allowed" : "pointer",
+                opacity: scenarios.length === 0 ? 0.6 : 1,
+                textAlign: "left",
+              }}
+            >
+              <span className={`step-pill ${dispatchSubTab === "kanban" ? "active-step" : scenarios.length > 0 ? "done-step" : ""}`}>3</span>
               <div>
-                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>3. Scénarios & Validation</strong>
-                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>{scenarios.length} variante(s) prêtes</small>
+                <strong style={{ fontSize: "0.88rem", display: "block", color: "var(--text-main)" }}>3. Scénarios & Classes ({scenarios.length})</strong>
+                <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>{scenarios.length > 0 ? "Variantes prêtes" : "À générer en Étape 2"}</small>
               </div>
-            </div>
-          </div>
-
-          {/* Sub-Navigation for Module 1 */}
-          <div className="sub-nav-tabs" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button
-                className={`secondary ${dispatchSubTab === "roster" ? "active-subtab" : ""}`}
-                onClick={() => setDispatchSubTab("roster")}
-              >
-                👥 1. Effectifs & Profils des Élèves ({dataset.students.length})
-              </button>
-              <button
-                className={`secondary ${dispatchSubTab === "weights" ? "active-subtab" : ""}`}
-                onClick={() => setDispatchSubTab("weights")}
-              >
-                ⚙️ 2. Critères & Pondérations IA
-              </button>
-              <button
-                className={`secondary ${dispatchSubTab === "kanban" ? "active-subtab" : ""}`}
-                onClick={() => setDispatchSubTab("kanban")}
-                disabled={scenarios.length === 0}
-                style={{ opacity: scenarios.length === 0 ? 0.5 : 1, cursor: scenarios.length === 0 ? "not-allowed" : "pointer" }}
-                title={scenarios.length === 0 ? "Générez d'abord des scénarios dans l'Étape 2" : "Consulter les scénarios"}
-              >
-                📊 3. Scénarios & Classes {scenarios.length > 0 ? `(${scenarios.length})` : "(0 - à générer)"}
-              </button>
-            </div>
+            </button>
           </div>
 
           {importPreview && (
@@ -1392,7 +1424,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
                     onClick={() => { setRosterFilter("OPTIONS"); setRosterPage(1); }}
                   >
-                    Options ({dataset.students.filter(s => s.options.length > 0).length})
+                    🎓 Options Spécifiques ({dataset.students.filter(s => s.options.some(opt => !["LVA_ANG", "LVB_ESP"].includes(opt))).length})
                   </button>
                   <button
                     className="secondary"
@@ -1411,7 +1443,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
                   if (!nameMatches && !optionMatches) return false;
                   if (rosterFilter === "PAP") return student.supportFlags.length > 0;
-                  if (rosterFilter === "OPTIONS") return student.options.length > 0;
+                  if (rosterFilter === "OPTIONS") return student.options.some((opt) => !["LVA_ANG", "LVB_ESP"].includes(opt));
                   return true;
                 });
 
@@ -1470,7 +1502,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Élève</th>
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Genre</th>
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Moyenne Scolaire</th>
-                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Vie Scolaire & Autonomie</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>
+                              <span className="ui-tooltip" data-tooltip="Score d'autonomie comportementale (sur 5 étoiles) et cumul d'heures d'absence à la Vie Scolaire" style={{ cursor: "help" }}>
+                                ⭐ Autonomie & ⏱️ Assiduité ℹ️
+                              </span>
+                            </th>
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Accompagnements</th>
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Options & Langues</th>
                             <th style={{ padding: "10px 14px", fontWeight: 800 }}>Classe Cible</th>
@@ -1496,10 +1532,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   </span>
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
-                                  <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)" }}>
-                                    {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
-                                    <span style={{ color: "var(--text-muted)", marginLeft: "6px" }}>({student.behavior?.absencesHours ?? 0}h abs)</span>
-                                  </span>
+                                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                                    <span className="ui-tooltip" data-tooltip={`Autonomie comportementale : ${student.behavior?.conductScore ?? 4}/5 étoiles`} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#d97706", cursor: "help" }}>
+                                      {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
+                                    </span>
+                                    <span className="ui-tooltip" data-tooltip={`Cumul d'absences signalées : ${student.behavior?.absencesHours ?? 0}h`} style={{ fontSize: "0.76rem", fontWeight: 700, color: (student.behavior?.absencesHours ?? 0) > 5 ? "#dc2626" : "var(--text-muted)", cursor: "help" }}>
+                                      ⏱️ {student.behavior?.absencesHours ?? 0}h abs.
+                                    </span>
+                                  </div>
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
                                   {student.supportFlags.length > 0 ? (
@@ -1969,22 +2009,25 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               </div>
 
               {/* STRATÉGIES DE REGROUPEMENT D'OPTIONS & D'ACCOMPAGNEMENTS */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginTop: "16px" }}>
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
-                  <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1e293b", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🎓</span> Stratégie de Regroupement des Options & Langues (Allemand, Latin...)
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginTop: "16px" }}>
+                {/* CARD 1: STRATÉGIE OPTION GROUPING */}
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🌐</span> Stratégie de Regroupement des Options
+                    </div>
+                    <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                      Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
+                    </p>
                   </div>
-                  <p style={{ margin: "0 0 10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
-                  </p>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
                     <button
                       type="button"
                       onClick={() => setWeights({ ...weights, optionGroupingMode: "BALANCED_DISPERSION" })}
                       style={{
                         flex: 1,
-                        padding: "7px 10px",
-                        fontSize: "0.76rem",
+                        padding: "9px 12px",
+                        fontSize: "0.8rem",
                         fontWeight: 700,
                         borderRadius: "var(--radius-sm)",
                         border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#3b82f6" : "var(--border-light)"}`,
@@ -1993,7 +2036,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         cursor: "pointer",
                       }}
                     >
-                      ⚖️ Diluer / Équilibrer
+                      ↕ Diluer / Équilibrer
                     </button>
                     <button
                       type="button"
@@ -2006,8 +2049,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       }
                       style={{
                         flex: 1,
-                        padding: "7px 10px",
-                        fontSize: "0.76rem",
+                        padding: "9px 12px",
+                        fontSize: "0.8rem",
                         fontWeight: 700,
                         borderRadius: "var(--radius-sm)",
                         border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#8b5cf6" : "var(--border-light)"}`,
@@ -2016,122 +2059,29 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         cursor: "pointer",
                       }}
                     >
-                      🎯 Regrouper sur 1 Classe
+                      📌 Regrouper sur 1 Classe
                     </button>
                   </div>
-
-                  {/* AFFECTATION SUR-MESURE PAR LANGUE / OPTION & EXCLUSIVITÉ */}
-                  {(() => {
-                    const uniqueOptions = [...new Set(dataset.students.flatMap((s) => s.options))];
-                    if (uniqueOptions.length === 0) return null;
-                    return (
-                      <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px dashed var(--border-light)" }}>
-                        <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#1e293b", marginBottom: "6px" }}>
-                          📌 Affectation Dédiée par Langue (Disposition sur-mesure) :
-                        </div>
-                        {uniqueOptions.map((opt) => (
-                          <div key={opt} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "6px" }}>
-                            <span style={{ fontSize: "0.76rem", fontWeight: 700, color: "#6b21a8", background: "#f3e8ff", padding: "2px 8px", borderRadius: "10px" }}>
-                              🎓 Option {opt}
-                            </span>
-                            <select
-                              value={weights.optionClassroomMap?.[opt] || ""}
-                              onChange={(e) => {
-                                const classId = e.target.value;
-                                const nextMap = { ...weights.optionClassroomMap };
-                                if (classId) nextMap[opt] = classId;
-                                else delete nextMap[opt];
-                                setWeights({
-                                  ...weights,
-                                  optionClassroomMap: nextMap,
-                                  optionGroupingMode: "STRICT_SINGLE_CLASS",
-                                  optionBalance: Math.max(weights.optionBalance, 8),
-                                });
-                              }}
-                              style={{ padding: "4px 8px", fontSize: "0.78rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700 }}
-                            >
-                              <option value="">🎲 Choix Automatique IA</option>
-                              {dataset.classrooms.map((c) => (
-                                <option key={c.id} value={c.id}>📌 Regrouper {opt} sur {c.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                        ))}
-
-                        {/* RÈGLE D'EXCLUSIVITÉ MULTI-CLASSES (OPTION PAR OPTION ET CLASSE PAR CLASSE) */}
-                        <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px dotted var(--border-light)" }}>
-                          <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#b45309", marginBottom: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span>🛡️</span> Exclusivité Multi-Classes (Sélectionnez 1 ou plusieurs classes réservées par Option) :
-                          </div>
-                          
-                          {/* VUE OPTION PAR OPTION (MULTI-SELECT PAR CASES À COCHER) */}
-                          {uniqueOptions.map((opt) => {
-                            const optStudents = dataset.students.filter((s) => s.options.includes(opt));
-                            const optCount = optStudents.length;
-                            const assignedClasses = dataset.classrooms.filter((c) => weights.exclusiveOptionClassrooms?.[c.id] === opt);
-                            const totalCap = assignedClasses.reduce((sum, c) => sum + c.maxSize, 0);
-
-                            return (
-                              <div key={opt} style={{ background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "8px", border: "1px solid var(--border-light)" }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", flexWrap: "wrap", gap: "6px" }}>
-                                  <strong style={{ fontSize: "0.78rem", color: "var(--primary-brand)" }}>🎓 Option {opt} ({optCount} élève{optCount > 1 ? "s" : ""})</strong>
-                                  <span style={{ fontSize: "0.74rem", fontWeight: 800, color: totalCap >= optCount ? "#15803d" : assignedClasses.length === 0 ? "var(--text-muted)" : "#b45309" }}>
-                                    {assignedClasses.length === 0
-                                      ? "Non réservée (répartition libre)"
-                                      : totalCap >= optCount
-                                      ? `✅ ${assignedClasses.length} classe(s) = ${totalCap} places / ${optCount} élèves`
-                                      : `⚠️ Insuffisant (${totalCap} / ${optCount} places - cochez 1 classe de plus)`}
-                                  </span>
-                                </div>
-                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                  {dataset.classrooms.map((c) => {
-                                    const isChecked = weights.exclusiveOptionClassrooms?.[c.id] === opt;
-                                    return (
-                                      <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.76rem", fontWeight: 700, cursor: "pointer", background: isChecked ? "#fef3c7" : "var(--bg-card)", border: `1px solid ${isChecked ? "#fde68a" : "var(--border-light)"}`, padding: "3px 8px", borderRadius: "var(--radius-sm)", color: isChecked ? "#b45309" : "var(--text-main)" }}>
-                                        <input
-                                          type="checkbox"
-                                          checked={isChecked}
-                                          onChange={(e) => {
-                                            const nextExcl = { ...(weights.exclusiveOptionClassrooms || {}) };
-                                            if (e.target.checked) nextExcl[c.id] = opt;
-                                            else if (nextExcl[c.id] === opt) delete nextExcl[c.id];
-                                            setWeights({
-                                              ...weights,
-                                              exclusiveOptionClassrooms: nextExcl,
-                                              optionGroupingMode: "STRICT_SINGLE_CLASS",
-                                              optionBalance: Math.max(weights.optionBalance, 9),
-                                            });
-                                          }}
-                                        />
-                                        {c.label} ({c.maxSize} max)
-                                      </label>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </div>
 
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
-                  <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1e293b", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🤝</span> Stratégie Accompagnements AESH & Besoins (PAP / PPS)
+                {/* CARD 2: STRATÉGIE AESH */}
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🤝</span> Stratégie Accompagnements AESH
+                    </div>
+                    <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                      Regroupez les accompagnements sur 1-2 classes cibles pour mutualiser les heures AESH, ou dispersez-les.
+                    </p>
                   </div>
-                  <p style={{ margin: "0 0 10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    Regrouper les accompagnements sur 1-2 classes cibles pour mutualiser les heures AESH ou les disperser.
-                  </p>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
                     <button
                       type="button"
                       onClick={() => setWeights({ ...weights, supportGroupingMode: "BALANCED_DISPERSION" })}
                       style={{
                         flex: 1,
-                        padding: "7px 10px",
-                        fontSize: "0.76rem",
+                        padding: "9px 12px",
+                        fontSize: "0.8rem",
                         fontWeight: 700,
                         borderRadius: "var(--radius-sm)",
                         border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#10b981" : "var(--border-light)"}`,
@@ -2140,15 +2090,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         cursor: "pointer",
                       }}
                     >
-                      ⚖️ Dispersion Homogène
+                      ↕ Dispersion Homogène
                     </button>
                     <button
                       type="button"
                       onClick={() => setWeights({ ...weights, supportGroupingMode: "GROUP_AESH_CLASSES" })}
                       style={{
                         flex: 1,
-                        padding: "7px 10px",
-                        fontSize: "0.76rem",
+                        padding: "9px 12px",
+                        fontSize: "0.8rem",
                         fontWeight: 700,
                         borderRadius: "var(--radius-sm)",
                         border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#f59e0b" : "var(--border-light)"}`,
@@ -2162,6 +2112,101 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   </div>
                 </div>
               </div>
+
+              {/* FULL-WIDTH SCALABLE OPTION-CLASSROOM MATRIX CARD */}
+              {(() => {
+                const uniqueOptions = [...new Set(dataset.students.flatMap((s) => s.options))];
+                if (uniqueOptions.length === 0) return null;
+                return (
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "18px 20px", marginTop: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: "0.96rem", fontWeight: 800, color: "var(--text-main)" }}>
+                          ✦ Affectation par langue & options — exclusivité multi-classes
+                        </h4>
+                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
+                          Cochez les classes réservées à une option ; laissez vide pour une répartition libre.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
+                      <table className="option-matrix-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.84rem" }}>
+                        <thead>
+                          <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
+                            <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 800, width: "180px" }}>OPTION</th>
+                            <th style={{ textAlign: "center", padding: "10px 14px", fontWeight: 800, width: "100px" }}>EFFECTIF</th>
+                            {dataset.classrooms.map((c) => (
+                              <th key={c.id} style={{ textAlign: "center", padding: "10px 14px", fontWeight: 800 }}>
+                                {c.label} <small style={{ fontWeight: 600, color: "var(--text-muted)" }}>({c.maxSize} MAX)</small>
+                              </th>
+                            ))}
+                            <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 800, width: "220px" }}>STATUT</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {uniqueOptions.map((opt) => {
+                            const optStudents = dataset.students.filter((s) => s.options.includes(opt));
+                            const optCount = optStudents.length;
+                            const assignedClasses = dataset.classrooms.filter((c) => weights.exclusiveOptionClassrooms?.[c.id] === opt);
+                            const totalCap = assignedClasses.reduce((sum, c) => sum + c.maxSize, 0);
+
+                            return (
+                              <tr key={opt} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                                <td style={{ padding: "10px 14px", fontWeight: 800, color: "var(--primary-brand)" }}>{opt}</td>
+                                <td style={{ textAlign: "center", padding: "10px 14px", fontWeight: 700, color: "var(--text-main)" }}>{optCount}</td>
+                                {dataset.classrooms.map((c) => {
+                                  const isChecked = weights.exclusiveOptionClassrooms?.[c.id] === opt;
+                                  return (
+                                    <td key={c.id} style={{ textAlign: "center", padding: "10px 14px", background: isChecked ? "#fef3c7" : "transparent" }}>
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={(e) => {
+                                          const nextExcl = { ...(weights.exclusiveOptionClassrooms || {}) };
+                                          if (e.target.checked) nextExcl[c.id] = opt;
+                                          else if (nextExcl[c.id] === opt) delete nextExcl[c.id];
+                                          setWeights({
+                                            ...weights,
+                                            exclusiveOptionClassrooms: nextExcl,
+                                            optionGroupingMode: "STRICT_SINGLE_CLASS",
+                                            optionBalance: Math.max(weights.optionBalance, 9),
+                                          });
+                                        }}
+                                        style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                                      />
+                                    </td>
+                                  );
+                                })}
+                                <td style={{ textAlign: "left", padding: "10px 14px", fontWeight: 700, fontSize: "0.78rem" }}>
+                                  {assignedClasses.length === 0 ? (
+                                    <span style={{ color: "var(--text-light)" }}>Non réservée (libre)</span>
+                                  ) : totalCap >= optCount ? (
+                                    <span style={{ color: "#15803d", fontWeight: 800 }}>✓ {assignedClasses.length} classe(s) = {totalCap} places / {optCount} élèves</span>
+                                  ) : (
+                                    <span style={{ color: "#b45309", fontWeight: 800 }}>⚠️ {totalCap} / {optCount} places (Manque {optCount - totalCap})</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "16px", alignItems: "center", fontSize: "0.76rem", fontWeight: 700, marginTop: "12px", color: "var(--text-muted)" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }} />
+                        Capacité suffisante pour l'effectif réservé
+                      </span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94a3b8" }} />
+                        Répartition libre — aucune classe réservée
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* GESTIONNAIRE D'INCOMPATIBILITÉS & D'ASSOCIATIONS D'ÉLÈVES */}
               <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginTop: "16px" }}>
