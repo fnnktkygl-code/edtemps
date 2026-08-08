@@ -557,7 +557,6 @@ export default function App() {
             className="theme-toggle-btn"
             onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
             data-tooltip="Basculez entre le mode clair et le mode sombre"
-            style={{ padding: "6px 10px", fontSize: "0.84rem" }}
           >
             {theme === "light" ? "🌙" : "☀️"}
           </button>
