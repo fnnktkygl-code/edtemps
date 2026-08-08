@@ -10,11 +10,13 @@ export type StudentBehavior = {
   tardinessCount: number;   // Nombre de retards
 };
 
+export type Gender = "F" | "M" | "X";
+
 export type Student = {
   id: string;
   displayName: string;
   initials: string;
-  gender: "F" | "M" | "X";
+  gender: Gender;
   levelAverage: number;
   subjectGrades?: SubjectGrade[];
   behavior?: StudentBehavior;

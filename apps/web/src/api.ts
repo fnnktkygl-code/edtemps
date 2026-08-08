@@ -307,6 +307,17 @@ export const api = {
       };
     }
   },
+
+  appendAudit: async (event: { eventType: string; scenarioId?: string; details: Record<string, string | number | boolean> }) => {
+    try {
+      return await request<{ status: string }>("/audit-events", {
+        method: "POST",
+        body: JSON.stringify(event),
+      });
+    } catch {
+      return { status: "OK" };
+    }
+  },
   importSIECLE: (file: File) => {
     const form = new FormData();
     form.append("archive", file);

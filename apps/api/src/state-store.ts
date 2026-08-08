@@ -14,7 +14,8 @@ export type AuditEvent = {
     | "SCENARIO_VALIDATED"
     | "SCHEDULE_GENERATED"
     | "COURSE_MOVED"
-    | "SCHEDULE_VALIDATED";
+    | "SCHEDULE_VALIDATED"
+    | "STUDENT_UPDATED";
   scenarioId?: string;
   details: Record<string, string | number | boolean>;
 };

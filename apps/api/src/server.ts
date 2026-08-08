@@ -491,6 +491,20 @@ app.get("/api/v1/establishments/:tenantId/audit-events", async (request, reply) 
   return { events: await stateStore.listAuditEvents(tenantId) };
 });
 
+app.post("/api/v1/establishments/:tenantId/audit-events", async (request, reply) => {
+  const { tenantId } = request.params as { tenantId: string };
+  if (!assertTenant(request, reply, tenantId) || !requireRole(request, reply, ["SCHOOL_ADMIN", "DPO", "DISPATCH_EDITOR"])) return;
+  const payload = request.body as { eventType: string; scenarioId?: string; details: Record<string, string | number | boolean> };
+  await audit({
+    tenantId,
+    actorId: getActor(request).id,
+    eventType: (payload.eventType as any) || "STUDENT_UPDATED",
+    scenarioId: payload.scenarioId,
+    details: payload.details || {},
+  });
+  return { status: "OK" };
+});
+
 app.addHook("onClose", async () => { await stateStore.close(); });
 
 app.setErrorHandler((error, _request, reply) => {
