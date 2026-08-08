@@ -127,7 +127,7 @@ export type TimetableConflict = {
   code: string;
   message: string;
   courseIds: string[];
-  timeSlotId: string;
+  timeSlotId?: string;
   roomId?: string;
 };
 

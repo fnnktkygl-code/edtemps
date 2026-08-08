@@ -345,7 +345,7 @@ export default function App() {
     <main className="page">
       <header className="masthead">
         <div className="brand-section">
-          <span className="brand-badge">🇫🇷 ÉDUCATION NATIONALE</span>
+          <span className="brand-badge">CONFORME RÉFÉRENTIELS ÉDUCATION NATIONALE</span>
           <h1>EdTemps</h1>
         </div>
         <div className="header-actions">
@@ -1165,7 +1165,7 @@ export default function App() {
         <section aria-labelledby="timetabling-title">
           <div className="section-header">
             <div>
-              <p className="eyebrow">MODULE 2 · SOLVEUR DE CONTRAINTES CP-SAT</p>
+              <p className="eyebrow">MODULE 2 · MOTEUR D'OPTIMISATION SOUS CONTRAINTES (HEURISTIQUE & RECUIT SIMULÉ)</p>
               <h2 id="timetabling-title">Emplois du Temps & Planning Semestriel</h2>
             </div>
             <div className="section-controls">
@@ -1627,11 +1627,14 @@ export default function App() {
             {/* Vie Scolaire & Comportement */}
             <div>
               <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                🧘 Vie Scolaire & Engagement
+                Vie Scolaire & Consultation Individuelle
               </h4>
+              <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                <strong>ℹ️ Protection des mineurs (Art. 22 RGPD) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
                 <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduct</span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduite</span>
                   <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
                     {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
                   </div>

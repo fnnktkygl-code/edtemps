@@ -296,20 +296,111 @@ export function generateScenario(
     for (const student of group) assignments[student.id] = selected.classroom.id;
   }
 
+  // Phase 2 : Passe d'optimisation par Recuit Simulé (Simulated Annealing)
+  const refinedAssignments = refineAssignmentWithSimulatedAnnealing(input, assignments, weights, random, 2000);
+
   const explanations: Record<string, StudentExplanation> = {};
   for (const student of input.students) {
-    const classroomId = assignments[student.id];
+    const classroomId = refinedAssignments[student.id];
     const classroom = input.classrooms.find((item) => item.id === classroomId);
-    if (classroom) explanations[student.id] = explanationFor(student, classroom, getClassStudents(assignments, classroom.id, input.students));
+    if (classroom) explanations[student.id] = explanationFor(student, classroom, getClassStudents(refinedAssignments, classroom.id, input.students));
   }
   return {
     id: `scenario-${seed}`,
-    assignments,
+    assignments: refinedAssignments,
     explanations,
-    metrics: calculateMetrics(input, assignments, weights),
+    metrics: calculateMetrics(input, refinedAssignments, weights),
     state: "DRAFT",
     generatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Passe d'optimisation locale par Recuit Simulé (Simulated Annealing).
+ * Permute des paires d'élèves de classes différentes pour réduire la pénalité globale
+ * et équilibrer au mieux les niveaux académiques, la parité et les dispositifs d'accompagnement.
+ */
+function refineAssignmentWithSimulatedAnnealing(
+  input: DispatchInput,
+  initialAssignments: Assignment,
+  weights: DispatchWeights,
+  random: () => number,
+  iterations = 2000
+): Assignment {
+  const current = { ...initialAssignments };
+  const students = input.students;
+  if (students.length < 2) return current;
+
+  const targets = targetStats(input);
+
+  function evalPenalty(assignments: Assignment): number {
+    const byClass = input.classrooms.map((c) => getClassStudents(assignments, c.id, students));
+    const genderDev = sum(byClass, (members) =>
+      Math.abs(members.filter((s) => s.gender === "F").length - targets.female) +
+      Math.abs(members.filter((s) => s.gender === "M").length - targets.male)
+    );
+    const academicDev = sum(byClass, (members) => Math.abs(average(members.map((s) => s.levelAverage)) - targets.average));
+    const supportDev = sum(byClass, (members) => Math.abs(members.filter((s) => s.supportFlags.length > 0).length - targets.support));
+    const optionDev = sum(byClass, (members) =>
+      sum(Object.entries(targets.options), ([opt, target]) => Math.abs(members.filter((s) => s.options.includes(opt)).length - target))
+    );
+    const hardViolations = validateAssignment(input, assignments).length;
+    return (
+      genderDev * weights.genderBalance +
+      academicDev * weights.academicBalance +
+      supportDev * weights.supportBalance +
+      optionDev * weights.optionBalance +
+      hardViolations * 1000
+    );
+  }
+
+  let currentPenalty = evalPenalty(current);
+  let bestAssignments = { ...current };
+  let bestPenalty = currentPenalty;
+
+  let temperature = 100;
+  const coolingRate = 0.995;
+
+  for (let i = 0; i < iterations; i++) {
+    temperature *= coolingRate;
+    if (temperature < 0.1) break;
+
+    const idxA = Math.floor(random() * students.length);
+    const idxB = Math.floor(random() * students.length);
+    if (idxA === idxB) continue;
+
+    const studentA = students[idxA];
+    const studentB = students[idxB];
+
+    const classA = current[studentA.id];
+    const classB = current[studentB.id];
+
+    if (!classA || !classB || classA === classB) continue;
+
+    const candidateAssignments = { ...current, [studentA.id]: classB, [studentB.id]: classA };
+
+    const classObjA = input.classrooms.find((c) => c.id === classA);
+    const classObjB = input.classrooms.find((c) => c.id === classB);
+
+    if (classObjA && getClassStudents(candidateAssignments, classA, students).length > classObjA.maxSize) continue;
+    if (classObjB && getClassStudents(candidateAssignments, classB, students).length > classObjB.maxSize) continue;
+
+    const candidatePenalty = evalPenalty(candidateAssignments);
+    const delta = candidatePenalty - currentPenalty;
+
+    if (delta < 0 || random() < Math.exp(-delta / temperature)) {
+      current[studentA.id] = classB;
+      current[studentB.id] = classA;
+      currentPenalty = candidatePenalty;
+
+      if (currentPenalty < bestPenalty) {
+        bestPenalty = currentPenalty;
+        bestAssignments = { ...current };
+      }
+    }
+  }
+
+  return bestAssignments;
 }
 
 export function calculateMetrics(input: DispatchInput, assignments: Assignment, weights: DispatchWeights = defaultWeights): ScenarioMetrics {
@@ -556,13 +647,14 @@ export type TimetableConflictCode =
   | "CLASS_COLLISION"
   | "TEACHER_UNAVAILABLE"
   | "BARRETTE_MISALIGNMENT"
-  | "ROOM_TYPE_MISMATCH";
+  | "ROOM_TYPE_MISMATCH"
+  | "UNPLACED_COURSE";
 
 export type TimetableConflict = {
   code: TimetableConflictCode;
   message: string;
   courseIds: string[];
-  timeSlotId: string;
+  timeSlotId?: string;
   roomId?: string;
 };
 
@@ -707,6 +799,17 @@ export function validateSchedule(input: TimetablingInput, placements: SchedulePl
           timeSlotId: barrettePlacements[0].timeSlotId,
         });
       }
+    }
+  }
+
+  // 7. Détection des cours non placés (échec de planification)
+  for (const course of input.courses) {
+    if (!placementMap.has(course.id)) {
+      conflicts.push({
+        code: "UNPLACED_COURSE",
+        message: `Le cours de ${course.subject} (${course.classroomId}) n'a pas pu être placé sur un créneau libre compatible.`,
+        courseIds: [course.id],
+      });
     }
   }
 
@@ -1064,10 +1167,12 @@ export function generateCNILRegisterJSON(establishmentId: string): string {
       basesLegales: ["Mission d'intérêt public (Art. 6.1.e RGPD / Code de l'Éducation)"],
       donneesTraitees: [
         "Identifiants techniques pseudonymisés (SHA-256 HMAC)",
-        "Sexe (parité)",
-        "Moyenne générale (niveaux)",
-        "Dispositifs d'accompagnement (PAP, PPS, PPRE, PAI - sans détail médical)",
+        "Genre / Sexe (parité F/M)",
+        "Niveau académique (moyenne générale et moyennes par discipline)",
+        "Dispositifs d'accompagnement (PAP, PPS, PPRE, PAI - sans dossier médical brut)",
+        "Options pédagogiques choisies",
         "Incompatibilités relationnelles signalées",
+        "Données de suivi de vie scolaire (assiduité/retards, appréciations de conseil de classe - consultation restreinte CPE/Enseignants, exclues du profilage algorithmique)",
       ],
       destinataires: ["Direction d'établissement", "Conseillers Principaux d'Éducation (CPE)", "Professeurs principaux"],
       dureeConservation: "Suppression à la fin de l'année scolaire + 1 an",
@@ -1087,7 +1192,7 @@ export function generateDPIAMarkdown(establishmentId: string): string {
 La plateforme **EdTemps** réalise une aide à la décision algorithmique pour la répartition des élèves et la génération d'emplois du temps.
 
 ## 2. Évaluation de la nécessité et de la proportionnalité
-- **Minimisation :** Aucune donnée médicale brute (PAI) ni donnée familiale sensible n'est traitée.
+- **Minimisation & Transparence :** Aucune donnée médicale brute (PAI) ni donnée familiale sensible n'est traitée. Les indicateurs de vie scolaire (retards, appréciations) sont strictement réservés au dossier individuel et isolés de l'algorithme de classement/répartition pour prévenir tout profilage comportemental automatisé (Art. 22 RGPD).
 - **Pseudonymisation :** L'Identifiant National Élève (INE) est pseudonymisé par HMAC-SHA256 dès l'import SIECLE.
 - **Absence de décision 100% automatisée (Art. 22 RGPD) :** L'algorithme propose des scénarios explicables ; seule une validation humaine explicite par le responsable de traitement officialise la décision.
 
