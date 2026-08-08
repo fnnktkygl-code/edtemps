@@ -1295,8 +1295,12 @@ button:disabled {
   flex-direction: column;
   gap: 10px;
   min-height: 140px;
+  max-height: 540px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
   width: 100%;
+  scrollbar-width: thin;
 }
 
 .student-card {

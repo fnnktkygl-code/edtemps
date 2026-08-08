@@ -789,6 +789,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
   const [rosterSearch, setRosterSearch] = useState("");
   const [rosterFilter, setRosterFilter] = useState<"ALL" | "PAP" | "OPTIONS">("ALL");
+  const [rosterPage, setRosterPage] = useState(1);
+  const [rosterPageSize, setRosterPageSize] = useState(25);
   const [inspectStudent, setInspectStudent] = useState<Student | null>(null);
 
   return (
@@ -1207,109 +1209,229 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   type="text"
                   placeholder="🔍 Rechercher un élève par nom, identifiant ou option..."
                   value={rosterSearch}
-                  onChange={(e) => setRosterSearch(e.target.value)}
+                  onChange={(e) => {
+                    setRosterSearch(e.target.value);
+                    setRosterPage(1);
+                  }}
                   style={{ flex: "1 1 240px", padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem", minWidth: "200px" }}
                 />
                 <div className="roster-filter-btns" style={{ display: "flex", gap: "8px", flexWrap: "wrap", flexShrink: 0 }}>
                   <button
                     className={`secondary ${rosterFilter === "ALL" ? "active-filter" : ""}`}
-                    onClick={() => setRosterFilter("ALL")}
+                    onClick={() => { setRosterFilter("ALL"); setRosterPage(1); }}
                   >
                     Tous ({dataset.students.length})
                   </button>
                   <button
                     className={`secondary ${rosterFilter === "PAP" ? "active-filter" : ""}`}
-                    onClick={() => setRosterFilter("PAP")}
+                    onClick={() => { setRosterFilter("PAP"); setRosterPage(1); }}
                   >
                     Besoins PAP/PPS ({dataset.students.filter(s => s.supportFlags.length > 0).length})
                   </button>
                   <button
                     className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
-                    onClick={() => setRosterFilter("OPTIONS")}
+                    onClick={() => { setRosterFilter("OPTIONS"); setRosterPage(1); }}
                   >
                     Options ({dataset.students.filter(s => s.options.length > 0).length})
                   </button>
                 </div>
               </div>
 
-              {/* Roster View (Desktop Table + Mobile Responsive Cards) */}
-              <div className="desktop-only-table table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
-                  <thead>
-                    <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Élève</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Genre</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Moyenne Scolaire</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Vie Scolaire & Autonomie</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Accompagnements</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Options & Langues</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Classe Cible</th>
-                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Dossier</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dataset.students
-                      .filter((student) => {
-                        const nameMatches = nameOf(student, anonymous).toLowerCase().includes(rosterSearch.toLowerCase());
-                        const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
-                        if (!nameMatches && !optionMatches) return false;
-                        if (rosterFilter === "PAP") return student.supportFlags.length > 0;
-                        if (rosterFilter === "OPTIONS") return student.options.length > 0;
-                        return true;
-                      })
-                      .map((student) => {
+              {(() => {
+                const filteredStudents = dataset.students.filter((student) => {
+                  const nameMatches = nameOf(student, anonymous).toLowerCase().includes(rosterSearch.toLowerCase());
+                  const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
+                  if (!nameMatches && !optionMatches) return false;
+                  if (rosterFilter === "PAP") return student.supportFlags.length > 0;
+                  if (rosterFilter === "OPTIONS") return student.options.length > 0;
+                  return true;
+                });
+
+                const totalPages = Math.max(1, Math.ceil(filteredStudents.length / rosterPageSize));
+                const currentPage = Math.min(rosterPage, totalPages);
+                const paginatedStudents = filteredStudents.slice((currentPage - 1) * rosterPageSize, currentPage * rosterPageSize);
+
+                return (
+                  <>
+                    {/* BARRE DE PAGINATION HAUT & BAS */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", fontSize: "0.82rem", flexWrap: "wrap", gap: "10px" }}>
+                      <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
+                        Affichage <strong>{filteredStudents.length > 0 ? (currentPage - 1) * rosterPageSize + 1 : 0}–{Math.min(currentPage * rosterPageSize, filteredStudents.length)}</strong> sur <strong>{filteredStudents.length}</strong> élèves
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <button
+                          className="secondary"
+                          disabled={currentPage === 1}
+                          onClick={() => setRosterPage((p) => Math.max(1, p - 1))}
+                          style={{ padding: "4px 10px", fontSize: "0.78rem", fontWeight: 700 }}
+                        >
+                          ◄ Précédent
+                        </button>
+                        <span style={{ fontWeight: 800, padding: "0 6px" }}>
+                          Page {currentPage} / {totalPages}
+                        </span>
+                        <button
+                          className="secondary"
+                          disabled={currentPage === totalPages}
+                          onClick={() => setRosterPage((p) => Math.min(totalPages, p + 1))}
+                          style={{ padding: "4px 10px", fontSize: "0.78rem", fontWeight: 700 }}
+                        >
+                          Suivant ►
+                        </button>
+                        <select
+                          value={rosterPageSize}
+                          onChange={(e) => {
+                            setRosterPageSize(Number(e.target.value));
+                            setRosterPage(1);
+                          }}
+                          style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.78rem", fontWeight: 700, marginLeft: "6px" }}
+                        >
+                          <option value={15}>15 par page</option>
+                          <option value={25}>25 par page</option>
+                          <option value={50}>50 par page</option>
+                          <option value={100}>100 par page</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Roster View (Desktop Table + Mobile Responsive Cards) */}
+                    <div className="desktop-only-table table-wrapper" style={{ overflowX: "auto", border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.88rem" }}>
+                        <thead>
+                          <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Élève</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Genre</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Moyenne Scolaire</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Vie Scolaire & Autonomie</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Accompagnements</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Options & Langues</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Classe Cible</th>
+                            <th style={{ padding: "10px 14px", fontWeight: 800 }}>Dossier</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedStudents.map((student) => {
+                            const currentAssignedClassId = selected?.assignments[student.id] ?? dataset.classrooms[0]?.id;
+                            return (
+                              <tr key={student.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                                <td style={{ padding: "10px 14px", fontWeight: 700 }}>
+                                  {nameOf(student, anonymous)}
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                                    {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  <span style={{ fontWeight: 800, color: "var(--primary-brand)" }}>
+                                    {student.levelAverage.toFixed(1)} / 20
+                                  </span>
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)" }}>
+                                    {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
+                                    <span style={{ color: "var(--text-muted)", marginLeft: "6px" }}>({student.behavior?.absencesHours ?? 0}h abs)</span>
+                                  </span>
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  {student.supportFlags.length > 0 ? (
+                                    student.supportFlags.map((need) => (
+                                      <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                        🤝 {need}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span style={{ color: "var(--text-light)" }}>—</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  {student.options.length > 0 ? (
+                                    student.options.map((opt) => (
+                                      <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                        🎓 {opt}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span style={{ color: "var(--text-light)" }}>—</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  <select
+                                    value={currentAssignedClassId}
+                                    disabled={selected?.state === "APPROVED"}
+                                    onChange={(e) => {
+                                      void move(student.id, e.target.value);
+                                    }}
+                                    style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700 }}
+                                  >
+                                    {dataset.classrooms.map((c) => (
+                                      <option key={c.id} value={c.id}>
+                                        {c.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td style={{ padding: "10px 14px" }}>
+                                  <button
+                                    className="secondary"
+                                    onClick={() => setInspectStudent(student)}
+                                    style={{ padding: "3px 8px", fontSize: "0.78rem", fontWeight: 700 }}
+                                  >
+                                    📋 Dossier
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Student Card List */}
+                    <div className="mobile-student-cards">
+                      {paginatedStudents.map((student) => {
                         const currentAssignedClassId = selected?.assignments[student.id] ?? dataset.classrooms[0]?.id;
                         return (
-                          <tr key={student.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
-                            <td style={{ padding: "10px 14px", fontWeight: 700 }}>
-                              {nameOf(student, anonymous)}
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
-                              <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
-                                {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
-                              </span>
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
-                              <span style={{ fontWeight: 800, color: "var(--primary-brand)" }}>
+                          <div key={student.id} className="mobile-student-card-item">
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontWeight: 800, fontSize: "0.98rem" }}>{nameOf(student, anonymous)}</span>
+                              <span style={{ fontWeight: 800, color: "var(--primary-brand)", fontSize: "0.92rem" }}>
                                 {student.levelAverage.toFixed(1)} / 20
                               </span>
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
-                              <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)" }}>
-                                {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
-                                <span style={{ color: "var(--text-muted)", marginLeft: "6px" }}>({student.behavior?.absencesHours ?? 0}h abs)</span>
+                            </div>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "0.78rem" }}>
+                              <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                                {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
                               </span>
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
-                              {student.supportFlags.length > 0 ? (
-                                student.supportFlags.map((need) => (
-                                  <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                              <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>
+                                {"★".repeat(student.behavior?.conductScore ?? 4)} ({student.behavior?.absencesHours ?? 0}h abs)
+                              </span>
+                            </div>
+
+                            {(student.supportFlags.length > 0 || student.options.length > 0) && (
+                              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                                {student.supportFlags.map((need) => (
+                                  <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
                                     🤝 {need}
                                   </span>
-                                ))
-                              ) : (
-                                <span style={{ color: "var(--text-light)" }}>—</span>
-                              )}
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
-                              {student.options.length > 0 ? (
-                                student.options.map((opt) => (
-                                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                ))}
+                                {student.options.map((opt) => (
+                                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
                                     🎓 {opt}
                                   </span>
-                                ))
-                              ) : (
-                                <span style={{ color: "var(--text-light)" }}>—</span>
-                              )}
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
+                                ))}
+                              </div>
+                            )}
+
+                            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px", paddingTop: "8px", borderTop: "1px solid var(--border-light)" }}>
                               <select
                                 value={currentAssignedClassId}
                                 disabled={selected?.state === "APPROVED"}
                                 onChange={(e) => {
                                   void move(student.id, e.target.value);
                                 }}
-                                style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700 }}
+                                style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.82rem" }}
                               >
                                 {dataset.classrooms.map((c) => (
                                   <option key={c.id} value={c.id}>
@@ -1317,96 +1439,21 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   </option>
                                 ))}
                               </select>
-                            </td>
-                            <td style={{ padding: "10px 14px" }}>
                               <button
                                 className="secondary"
                                 onClick={() => setInspectStudent(student)}
-                                style={{ padding: "3px 8px", fontSize: "0.78rem", fontWeight: 700 }}
+                                style={{ padding: "6px 10px", fontSize: "0.82rem", fontWeight: 700 }}
                               >
                                 📋 Dossier
                               </button>
-                            </td>
-                          </tr>
+                            </div>
+                          </div>
                         );
                       })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Student Card List */}
-              <div className="mobile-student-cards">
-                {dataset.students
-                  .filter((student) => {
-                    const nameMatches = nameOf(student, anonymous).toLowerCase().includes(rosterSearch.toLowerCase());
-                    const optionMatches = student.options.some((o) => o.toLowerCase().includes(rosterSearch.toLowerCase()));
-                    if (!nameMatches && !optionMatches) return false;
-                    if (rosterFilter === "PAP") return student.supportFlags.length > 0;
-                    if (rosterFilter === "OPTIONS") return student.options.length > 0;
-                    return true;
-                  })
-                  .map((student) => {
-                    const currentAssignedClassId = selected?.assignments[student.id] ?? dataset.classrooms[0]?.id;
-                    return (
-                      <div key={student.id} className="mobile-student-card-item">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontWeight: 800, fontSize: "0.98rem" }}>{nameOf(student, anonymous)}</span>
-                          <span style={{ fontWeight: 800, color: "var(--primary-brand)", fontSize: "0.92rem" }}>
-                            {student.levelAverage.toFixed(1)} / 20
-                          </span>
-                        </div>
-
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "0.78rem" }}>
-                          <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
-                            {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
-                          </span>
-                          <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>
-                            {"★".repeat(student.behavior?.conductScore ?? 4)} ({student.behavior?.absencesHours ?? 0}h abs)
-                          </span>
-                        </div>
-
-                        {(student.supportFlags.length > 0 || student.options.length > 0) && (
-                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                            {student.supportFlags.map((need) => (
-                              <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
-                                🤝 {need}
-                              </span>
-                            ))}
-                            {student.options.map((opt) => (
-                              <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
-                                🎓 {opt}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "4px", paddingTop: "8px", borderTop: "1px solid var(--border-light)" }}>
-                          <select
-                            value={currentAssignedClassId}
-                            disabled={selected?.state === "APPROVED"}
-                            onChange={(e) => {
-                              void move(student.id, e.target.value);
-                            }}
-                            style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.82rem" }}
-                          >
-                            {dataset.classrooms.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.label}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            className="secondary"
-                            onClick={() => setInspectStudent(student)}
-                            style={{ padding: "6px 10px", fontSize: "0.82rem", fontWeight: 700 }}
-                          >
-                            📋 Dossier
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
+                    </div>
+                  </>
+                );
+              })()}
             </section>
           )}
 
