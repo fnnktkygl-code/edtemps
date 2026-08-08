@@ -2436,8 +2436,24 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       </p>
                     </aside>
 
+                    {/* BARRE DE SAUT RAPIDE SUR MOBILE */}
+                    <div className="mobile-class-tabs">
+                      {studentsByClass.map((c) => (
+                        <button
+                          key={c.id}
+                          className="mobile-class-tab-btn"
+                          onClick={() => {
+                            const el = document.getElementById(`class-col-${c.id}`);
+                            el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                          }}
+                        >
+                          {c.label} ({c.students.length})
+                        </button>
+                      ))}
+                    </div>
+
                     {/* KANBAN DES CLASSES AVEC DRAG & DROP & SCEAU D'ÉQUILIBRAGE */}
-                    <div className="board" aria-label="Répartition des élèves par classe">
+                    <div className="board class-columns-grid" aria-label="Répartition des élèves par classe">
                       {studentsByClass.map((classroom) => {
                         const countF = classroom.students.filter((s) => s.gender === "F").length;
                         const countM = classroom.students.filter((s) => s.gender === "M").length;
@@ -2468,7 +2484,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                         return (
                           <section
-                            className={`class-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
+                            id={`class-col-${classroom.id}`}
+                            className={`class-column classroom-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
                             key={classroom.id}
                             aria-labelledby={`title-${classroom.id}`}
                             onDragOver={(e) => {

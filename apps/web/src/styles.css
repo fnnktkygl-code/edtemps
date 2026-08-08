@@ -1668,6 +1668,10 @@ button:disabled {
   display: none;
 }
 
+.mobile-class-tabs {
+  display: none;
+}
+
 /* Mobile Drawer Overlay */
 .mobile-drawer-overlay {
   position: fixed;
@@ -1835,6 +1839,60 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  /* Reconstitution de l'espace de travail sur mobile : LES CLASSES EN PREMIER */
+  .workspace {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .class-columns-grid {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .inspector {
+    order: 2 !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px !important;
+    margin-top: 16px !important;
+  }
+
+  /* Barre de saut rapide entre les classes sur Mobile */
+  .mobile-class-tabs {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+    scrollbar-width: none;
+  }
+
+  .mobile-class-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-class-tab-btn {
+    flex-shrink: 0 !important;
+    padding: 8px 14px !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 800 !important;
+    font-size: 0.84rem !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-main) !important;
+    cursor: pointer !important;
+  }
+
+  .mobile-class-tab-btn.active {
+    background: var(--primary-brand) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-brand) !important;
+  }
+
   .masthead {
     width: 100% !important;
     max-width: 100% !important;
