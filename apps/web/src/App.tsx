@@ -1190,7 +1190,7 @@ export default function App() {
             <section className="roster-section" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", padding: "24px", borderRadius: "var(--radius-md)", marginBottom: "24px" }}>
               <div className="section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
                 <div>
-                  <span className="eyebrow">COHORTE DU NIVEAU {dataset.level.toUpperCase()}</span>
+                  <span className="eyebrow">COHORTE DU NIVEAU {dataset.level}</span>
                   <h3 style={{ margin: "4px 0", fontSize: "1.2rem", fontWeight: 800 }}>Effectif complet & Profils des Élèves</h3>
                   <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.88rem" }}>
                     Consultez la liste nominative des élèves, leurs caractéristiques (genre, niveau, accompagnements PAP/PPS, options) et leur classe ciblée.
@@ -2551,17 +2551,50 @@ export default function App() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <span className="brand-badge">DOSSIER PÉDAGOGIQUE ÉLÈVE</span>
-                <h2 style={{ margin: "6px 0 0", fontSize: "1.4rem", fontWeight: 800 }}>
-                  {nameOf(inspectStudent, anonymous)}
-                </h2>
-                <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                  INE : {anonymous ? "student-hash-pseudonymisé" : inspectStudent.id} · Niveau {dataset.level.toUpperCase()}
-                </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
+              <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    background: getAvatarColor(inspectStudent.id),
+                    color: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800,
+                    fontSize: "1.1rem",
+                    boxShadow: "var(--shadow-sm)",
+                  }}
+                >
+                  {inspectStudent.initials}
+                </div>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span className="brand-badge" style={{ background: "var(--bg-subtle)", color: "var(--primary-brand)", border: "1px solid var(--border-light)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
+                      DOSSIER PÉDAGOGIQUE ÉLÈVE
+                    </span>
+                    <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                      Sexe : {inspectStudent.gender === "F" ? "Fille ♀" : inspectStudent.gender === "M" ? "Garçon ♂" : "Non spécifié"}
+                    </span>
+                  </div>
+                  <h2 style={{ margin: "4px 0 2px", fontSize: "1.4rem", fontWeight: 800, color: "var(--text-main)" }}>
+                    {nameOf(inspectStudent, anonymous)}
+                  </h2>
+                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem", fontWeight: 600 }}>
+                    🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "1px 6px", borderRadius: "4px", fontSize: "0.78rem" }}>{anonymous ? `student-` + inspectStudent.id.slice(0, 8) + `… (pseudonymisé HMAC SHA-256)` : inspectStudent.id}</code>
+                    &nbsp;·&nbsp;
+                    Niveau : <strong>{dataset.level}</strong>
+                  </p>
+                </div>
               </div>
-              <button className="secondary" onClick={() => setInspectStudent(null)} style={{ padding: "4px 10px", fontSize: "1rem" }}>
+              <button
+                className="icon-btn-subtle"
+                onClick={() => setInspectStudent(null)}
+                style={{ padding: "6px 12px", fontSize: "1rem", borderRadius: "50%", cursor: "pointer" }}
+                title="Fermer la fenêtre"
+              >
                 ✕
               </button>
             </div>
@@ -2616,21 +2649,57 @@ export default function App() {
                 "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
               </p>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {inspectStudent.supportFlags.length === 0 && inspectStudent.options.length === 0 && (
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Aucun aménagement spécifique ni option particulière.</span>
+                )}
                 {inspectStudent.supportFlags.map((flag) => (
-                  <span key={flag} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "4px 10px", borderRadius: "4px", fontWeight: 800 }}>
-                    🤝 Accompagnement {flag}
-                  </span>
+                  <div
+                    key={flag}
+                    style={{
+                      background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
+                      color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
+                      border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
+                      padding: "6px 12px",
+                      borderRadius: "var(--radius-sm)",
+                      fontSize: "0.82rem",
+                      fontWeight: 800,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span>🤝</span>
+                    <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
+                  </div>
                 ))}
                 {inspectStudent.options.map((opt) => (
-                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "4px 10px", borderRadius: "4px", fontWeight: 800 }}>
-                    🎓 Option {opt}
-                  </span>
+                  <div
+                    key={opt}
+                    style={{
+                      background: "#f3e8ff",
+                      color: "#6b21a8",
+                      border: "1px solid #e9d5ff",
+                      padding: "6px 12px",
+                      borderRadius: "var(--radius-sm)",
+                      fontSize: "0.82rem",
+                      fontWeight: 800,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span>🎓</span>
+                    <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="primary" onClick={() => setInspectStudent(null)}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", paddingTop: "14px", marginTop: "4px" }}>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                🔒 Traitement certifié RGPD - Ministère de l'Éducation Nationale
+              </span>
+              <button className="primary" onClick={() => setInspectStudent(null)} style={{ padding: "8px 20px", fontWeight: 800 }}>
                 Fermer le dossier
               </button>
             </div>
