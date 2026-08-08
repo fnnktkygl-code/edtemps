@@ -1258,16 +1258,20 @@ button:disabled {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   gap: 18px;
   overflow-x: auto;
+  align-items: start;
 }
 
 .class-column {
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
   transition: var(--transition-fast);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .class-column > header {
@@ -1286,21 +1290,28 @@ button:disabled {
 }
 
 .student-list {
-  padding: 14px;
-  display: grid;
-  gap: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   min-height: 140px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .student-card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
   text-align: left;
   box-shadow: var(--shadow-sm);
   cursor: grab;
   transition: var(--transition-fast);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .student-card:hover {
