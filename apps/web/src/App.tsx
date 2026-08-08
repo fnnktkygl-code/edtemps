@@ -338,13 +338,6 @@ export default function App() {
           <label className="toggle-pill" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
             <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser
           </label>
-          <button
-            className="theme-toggle-btn"
-            onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
-            data-tooltip="Basculez entre le mode clair et le mode sombre"
-          >
-            {theme === "light" ? "🌙" : "☀️"}
-          </button>
 
           <input
             ref={fileInput}
@@ -461,6 +454,14 @@ export default function App() {
               {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
             </button>
           )}
+
+          <button
+            className="theme-toggle-btn"
+            onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
+            data-tooltip="Basculez entre le mode clair et le mode sombre"
+          >
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
         </div>
       </header>
 
