@@ -2037,15 +2037,28 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                         {student.initials}
                                       </div>
 
-                                      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", minWidth: 0, flex: 1, overflow: "hidden" }}>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0, flex: 1, overflow: "hidden" }}>
                                         <span
                                           style={{ fontWeight: 700, fontSize: "0.88rem", color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
                                           title={nameOf(student, anonymous)}
                                         >
                                           {nameOf(student, anonymous)}
                                         </span>
-                                        <span style={{ fontSize: "0.78rem", color: "#64748b", fontWeight: 500, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", flexShrink: 0 }}>
-                                          {student.levelAverage.toFixed(1)}<span style={{ color: "#94a3b8", fontSize: "0.7rem", fontWeight: 400 }}>/20</span>
+                                        <span
+                                          style={{
+                                            fontSize: "0.78rem",
+                                            color: "#64748b",
+                                            fontWeight: 500,
+                                            fontFamily: "var(--font-mono)",
+                                            whiteSpace: "nowrap",
+                                            flexShrink: 0,
+                                            display: "inline-flex",
+                                            alignItems: "baseline",
+                                            gap: "1px",
+                                          }}
+                                        >
+                                          <span>{student.levelAverage.toFixed(1)}</span>
+                                          <span style={{ color: "#94a3b8", fontSize: "0.7rem", fontWeight: 400 }}>/20</span>
                                         </span>
                                       </div>
                                     </div>
