@@ -2016,109 +2016,114 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               </div>
 
               {/* STRATÉGIES DE REGROUPEMENT D'OPTIONS & D'ACCOMPAGNEMENTS */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginTop: "16px" }}>
-                {/* CARD 1: STRATÉGIE OPTION GROUPING */}
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span>🌐</span> Stratégie de Regroupement des Options
+              {(() => {
+                const targetAeshClasses = Math.max(1, Math.floor(dataset.classrooms.length / 2));
+                return (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginTop: "16px" }}>
+                    {/* CARD 1: STRATÉGIE OPTION GROUPING */}
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>🌐</span> Stratégie de Regroupement des Options
+                        </div>
+                        <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                          Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
+                        </p>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setWeights({ ...weights, optionGroupingMode: "BALANCED_DISPERSION" })}
+                          style={{
+                            flex: 1,
+                            padding: "9px 12px",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            borderRadius: "var(--radius-sm)",
+                            border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#3b82f6" : "var(--border-light)"}`,
+                            background: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#eff6ff" : "var(--bg-card)",
+                            color: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#1d4ed8" : "var(--text-muted)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ↕ Diluer / Équilibrer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setWeights({
+                              ...weights,
+                              optionGroupingMode: "STRICT_SINGLE_CLASS",
+                              optionBalance: Math.max(weights.optionBalance, 8),
+                            })
+                          }
+                          style={{
+                            flex: 1,
+                            padding: "9px 12px",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            borderRadius: "var(--radius-sm)",
+                            border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#8b5cf6" : "var(--border-light)"}`,
+                            background: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#f3e8ff" : "var(--bg-card)",
+                            color: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#6b21a8" : "var(--text-muted)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          📌 Regrouper sur 1 Classe
+                        </button>
+                      </div>
                     </div>
-                    <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
-                      Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
-                    </p>
-                  </div>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    <button
-                      type="button"
-                      onClick={() => setWeights({ ...weights, optionGroupingMode: "BALANCED_DISPERSION" })}
-                      style={{
-                        flex: 1,
-                        padding: "9px 12px",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#3b82f6" : "var(--border-light)"}`,
-                        background: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#eff6ff" : "var(--bg-card)",
-                        color: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#1d4ed8" : "var(--text-muted)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      ↕ Diluer / Équilibrer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setWeights({
-                          ...weights,
-                          optionGroupingMode: "STRICT_SINGLE_CLASS",
-                          optionBalance: Math.max(weights.optionBalance, 8),
-                        })
-                      }
-                      style={{
-                        flex: 1,
-                        padding: "9px 12px",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#8b5cf6" : "var(--border-light)"}`,
-                        background: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#f3e8ff" : "var(--bg-card)",
-                        color: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#6b21a8" : "var(--text-muted)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      📌 Regrouper sur 1 Classe
-                    </button>
-                  </div>
-                </div>
 
-                {/* CARD 2: STRATÉGIE AESH */}
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span>🤝</span> Stratégie Accompagnements AESH
+                    {/* CARD 2: STRATÉGIE AESH */}
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>🤝</span> Stratégie Accompagnements AESH
+                        </div>
+                        <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                          Regroupez les accompagnements AESH sur {targetAeshClasses} classe{targetAeshClasses > 1 ? "s cibles" : " cible"} pour mutualiser les heures AESH, ou dispersez-les.
+                        </p>
+                      </div>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setWeights({ ...weights, supportGroupingMode: "BALANCED_DISPERSION" })}
+                          style={{
+                            flex: 1,
+                            padding: "9px 12px",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            borderRadius: "var(--radius-sm)",
+                            border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#10b981" : "var(--border-light)"}`,
+                            background: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#ecfdf5" : "var(--bg-card)",
+                            color: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#047857" : "var(--text-muted)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ↕ Dispersion Homogène
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setWeights({ ...weights, supportGroupingMode: "GROUP_AESH_CLASSES" })}
+                          style={{
+                            flex: 1,
+                            padding: "9px 12px",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            borderRadius: "var(--radius-sm)",
+                            border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#f59e0b" : "var(--border-light)"}`,
+                            background: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#fffbe6" : "var(--bg-card)",
+                            color: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#b45309" : "var(--text-muted)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          🤝 Mutualiser AESH ({targetAeshClasses} classe{targetAeshClasses > 1 ? "s" : ""})
+                        </button>
+                      </div>
                     </div>
-                    <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
-                      Regroupez les accompagnements sur 1-2 classes cibles pour mutualiser les heures AESH, ou dispersez-les.
-                    </p>
                   </div>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    <button
-                      type="button"
-                      onClick={() => setWeights({ ...weights, supportGroupingMode: "BALANCED_DISPERSION" })}
-                      style={{
-                        flex: 1,
-                        padding: "9px 12px",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#10b981" : "var(--border-light)"}`,
-                        background: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#ecfdf5" : "var(--bg-card)",
-                        color: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#047857" : "var(--text-muted)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      ↕ Dispersion Homogène
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setWeights({ ...weights, supportGroupingMode: "GROUP_AESH_CLASSES" })}
-                      style={{
-                        flex: 1,
-                        padding: "9px 12px",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#f59e0b" : "var(--border-light)"}`,
-                        background: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#fffbe6" : "var(--bg-card)",
-                        color: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#b45309" : "var(--text-muted)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      🤝 Mutualiser AESH (1-2 classes)
-                    </button>
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* FULL-WIDTH SCALABLE OPTION-CLASSROOM MATRIX CARD */}
               {(() => {
@@ -2133,6 +2138,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         </h4>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
                           Cochez les classes réservées à une option ; laissez vide pour une répartition libre.
+                        </span>
+                        <span style={{ fontSize: "0.76rem", color: "#0284c7", marginTop: "6px", display: "inline-block", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontWeight: 700, lineHeight: 1.35 }}>
+                          ℹ️ Note pédagogique : Ce tableau concerne uniquement les enseignements disciplinaires (LVA, LVB, Latin, LCE, CHAM). Les besoins d'accompagnement (PAP, PPS, PAI, AESH) ne sont pas des cours et sont gérés par la stratégie AESH ci-dessus.
                         </span>
                       </div>
                     </div>
