@@ -321,14 +321,14 @@ export default function App() {
     <main className="page">
       <header className="masthead">
         <div>
-          <p className="eyebrow">Plateforme Établissement Scolaire (Éducation Nationale)</p>
+          <p className="eyebrow">🇫🇷 RÉPUBLIQUE FRANÇAISE · ÉDUCATION NATIONALE</p>
           <h1>
             EdTemps <span>— Répartition & Emplois du Temps</span>
           </h1>
         </div>
         <div className="header-actions">
           <label className="toggle">
-            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Affichage anonymisé
+            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser les noms
           </label>
           <input
             ref={fileInput}
@@ -364,25 +364,25 @@ export default function App() {
             }}
           />
           <button className="secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
-            Importer SIECLE
+            📦 SIECLE
           </button>
           <button className="secondary" onClick={() => stsFileInput.current?.click()} disabled={busy}>
-            Importer STS-Web
+            🏛️ STS-Web
           </button>
           <button className="secondary" onClick={() => ocrFileInput.current?.click()} disabled={busy} title="Scanner une fiche de vœux papier (Mistral OCR)">
-            📷 OCR Vœux (Pixtral)
+            📷 OCR (Pixtral)
           </button>
           <button className="secondary" onClick={() => void triggerVoiceCommand()} disabled={busy} title="Dicter une contrainte à la voix (Mistral Voxtral)">
-            🎙️ Dictée Vocale (Voxtral)
+            🎙️ Voxtral
           </button>
           {activeTab === "dispatch" && (
             <button className="primary" onClick={generate} disabled={busy}>
-              {busy ? "Calcul en cours…" : "Générer 3 scénarios"}
+              {busy ? "Calcul en cours…" : "✨ Générer 3 scénarios"}
             </button>
           )}
           {activeTab === "timetabling" && (
             <button className="primary" onClick={generateTimetable} disabled={busy}>
-              {busy ? "Calcul en cours…" : "Générer l'Emploi du temps"}
+              {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
             </button>
           )}
         </div>
