@@ -173,26 +173,59 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   const [lastMove, setLastMove] = useState<{ studentId: string; studentName: string; fromClassId: string; toClassId: string } | null>(null);
   const [openSupportModalClassId, setOpenSupportModalClassId] = useState<string | null>(null);
   const [showRebalanceModal, setShowRebalanceModal] = useState<boolean>(false);
+  const [ruleStudentAId, setRuleStudentAId] = useState<string>("");
+  const [ruleStudentBId, setRuleStudentBId] = useState<string>("");
+  const [ruleType, setRuleType] = useState<"CONFLICT" | "COLOCATION">("CONFLICT");
 
   // Weights slider state
-  const [weights, setWeightsState] = useState<{ genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }>(() => {
+  const [weights, setWeightsState] = useState<{
+    genderBalance: number;
+    academicBalance: number;
+    supportBalance: number;
+    optionBalance: number;
+    optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
+    supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
+  }>(() => {
     const saved = localStorage.getItem("edtemps_weights");
     if (saved) {
       try {
-        return JSON.parse(saved) as { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number };
+        return JSON.parse(saved);
       } catch {}
     }
-    return { genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 };
+    return {
+      genderBalance: 4,
+      academicBalance: 4,
+      supportBalance: 3,
+      optionBalance: 2,
+      optionGroupingMode: "BALANCED_DISPERSION",
+      supportGroupingMode: "BALANCED_DISPERSION",
+    };
   });
 
   const setWeights = (
     newWeights:
-      | { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }
-      | ((prev: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) => {
+      | {
           genderBalance: number;
           academicBalance: number;
           supportBalance: number;
           optionBalance: number;
+          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
+          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
+        }
+      | ((prev: {
+          genderBalance: number;
+          academicBalance: number;
+          supportBalance: number;
+          optionBalance: number;
+          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
+          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
+        }) => {
+          genderBalance: number;
+          academicBalance: number;
+          supportBalance: number;
+          optionBalance: number;
+          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
+          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
         })
   ) => {
     setWeightsState((prev) => {
@@ -1527,13 +1560,286 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       {getWeightLabel(weights.optionBalance).label}
                     </span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={weights.optionBalance}
-                    onChange={(e) => setWeights({ ...weights, optionBalance: Number(e.target.value) })}
-                  />
+                </div>
+              </div>
+
+              {/* STRATÉGIES DE REGROUPEMENT D'OPTIONS & D'ACCOMPAGNEMENTS */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginTop: "16px" }}>
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
+                  <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1e293b", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🎓</span> Stratégie de Regroupement des Options & Langues (Allemand, Latin...)
+                  </div>
+                  <p style={{ margin: "0 0 10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                    Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
+                  </p>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setWeights({ ...weights, optionGroupingMode: "BALANCED_DISPERSION" })}
+                      style={{
+                        flex: 1,
+                        padding: "7px 10px",
+                        fontSize: "0.76rem",
+                        fontWeight: 700,
+                        borderRadius: "var(--radius-sm)",
+                        border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#3b82f6" : "var(--border-light)"}`,
+                        background: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#eff6ff" : "var(--bg-card)",
+                        color: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#1d4ed8" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ⚖️ Diluer / Équilibrer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWeights({ ...weights, optionGroupingMode: "STRICT_SINGLE_CLASS" })}
+                      style={{
+                        flex: 1,
+                        padding: "7px 10px",
+                        fontSize: "0.76rem",
+                        fontWeight: 700,
+                        borderRadius: "var(--radius-sm)",
+                        border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#8b5cf6" : "var(--border-light)"}`,
+                        background: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#f3e8ff" : "var(--bg-card)",
+                        color: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#6b21a8" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      🎯 Regrouper sur 1 Classe
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
+                  <div style={{ fontSize: "0.86rem", fontWeight: 800, color: "#1e293b", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🤝</span> Stratégie Accompagnements AESH & Besoins (PAP / PPS)
+                  </div>
+                  <p style={{ margin: "0 0 10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                    Regrouper les accompagnements sur 1-2 classes cibles pour mutualiser les heures AESH ou les disperser.
+                  </p>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setWeights({ ...weights, supportGroupingMode: "BALANCED_DISPERSION" })}
+                      style={{
+                        flex: 1,
+                        padding: "7px 10px",
+                        fontSize: "0.76rem",
+                        fontWeight: 700,
+                        borderRadius: "var(--radius-sm)",
+                        border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#10b981" : "var(--border-light)"}`,
+                        background: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#ecfdf5" : "var(--bg-card)",
+                        color: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#047857" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ⚖️ Dispersion Homogène
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWeights({ ...weights, supportGroupingMode: "GROUP_AESH_CLASSES" })}
+                      style={{
+                        flex: 1,
+                        padding: "7px 10px",
+                        fontSize: "0.76rem",
+                        fontWeight: 700,
+                        borderRadius: "var(--radius-sm)",
+                        border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#f59e0b" : "var(--border-light)"}`,
+                        background: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#fffbe6" : "var(--bg-card)",
+                        color: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#b45309" : "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      🤝 Mutualiser AESH (1-2 classes)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* GESTIONNAIRE D'INCOMPATIBILITÉS & D'ASSOCIATIONS D'ÉLÈVES */}
+              <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginTop: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "1.1rem" }}>⛔</span>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#1e293b" }}>
+                        Gestionnaire de Règles Individuelles (Incompatibilités & Associations / Binômes)
+                      </h4>
+                      <span style={{ fontSize: "0.76rem", color: "var(--text-muted)" }}>
+                        Définissez les élèves qui ne doivent JAMAIS être ensemble ou qui doivent être OBLIGATOIREMENT dans la même classe.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Formulaire d'ajout rapide de règle */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", alignItems: "end", background: "#f8fafc", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, marginBottom: "3px", color: "var(--text-muted)" }}>Élève A</label>
+                    <select
+                      value={ruleStudentAId}
+                      onChange={(e) => setRuleStudentAId(e.target.value)}
+                      style={{ width: "100%", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)" }}
+                    >
+                      <option value="">Sélectionner Élève A…</option>
+                      {dataset.students.map((s) => (
+                        <option key={s.id} value={s.id}>{nameOf(s, anonymous)}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, marginBottom: "3px", color: "var(--text-muted)" }}>Type de Règle</label>
+                    <select
+                      value={ruleType}
+                      onChange={(e) => setRuleType(e.target.value as "CONFLICT" | "COLOCATION")}
+                      style={{ width: "100%", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", fontWeight: 700 }}
+                    >
+                      <option value="CONFLICT">⛔ Incompatibilité (Séparation obligatoire)</option>
+                      <option value="COLOCATION">🤝 Association (Mettre dans la même classe)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, marginBottom: "3px", color: "var(--text-muted)" }}>Élève B</label>
+                    <select
+                      value={ruleStudentBId}
+                      onChange={(e) => setRuleStudentBId(e.target.value)}
+                      style={{ width: "100%", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)" }}
+                    >
+                      <option value="">Sélectionner Élève B…</option>
+                      {dataset.students.filter((s) => s.id !== ruleStudentAId).map((s) => (
+                        <option key={s.id} value={s.id}>{nameOf(s, anonymous)}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={!ruleStudentAId || !ruleStudentBId}
+                    onClick={() => {
+                      if (!ruleStudentAId || !ruleStudentBId) return;
+                      const sA = dataset.students.find((s) => s.id === ruleStudentAId);
+                      const sB = dataset.students.find((s) => s.id === ruleStudentBId);
+                      if (!sA || !sB) return;
+
+                      const updatedStudents = dataset.students.map((student) => {
+                        if (ruleType === "CONFLICT") {
+                          if (student.id === sA.id) return { ...student, conflictsWith: [...new Set([...student.conflictsWith, sB.id])] };
+                          if (student.id === sB.id) return { ...student, conflictsWith: [...new Set([...student.conflictsWith, sA.id])] };
+                        } else {
+                          const gId = sA.coLocateGroupId || sB.coLocateGroupId || `group-coloc-${Date.now()}`;
+                          if (student.id === sA.id || student.id === sB.id) return { ...student, coLocateGroupId: gId };
+                        }
+                        return student;
+                      });
+
+                      const nextDs = { ...dataset, students: updatedStudents };
+                      setDataset(nextDs);
+                      setActiveDataset(nextDs);
+                      setRuleStudentAId("");
+                      setRuleStudentBId("");
+                      setNotice(`Règle d'affectation enregistrée entre ${nameOf(sA, anonymous)} et ${nameOf(sB, anonymous)}.`);
+                    }}
+                    style={{ padding: "6px 14px", fontSize: "0.82rem", fontWeight: 800 }}
+                  >
+                    ➕ Ajouter la Règle
+                  </button>
+                </div>
+
+                {/* Liste des règles actives */}
+                <div style={{ marginTop: "12px" }}>
+                  {dataset.students.every((s) => s.conflictsWith.length === 0 && !s.coLocateGroupId) ? (
+                    <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic", textAlign: "center", padding: "8px" }}>
+                      Aucune incompatibilité ni association particulière enregistrée. Utilisez le formulaire ci-dessus pour en ajouter.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", maxHeight: "140px", overflowY: "auto" }}>
+                      {dataset.students.flatMap((sA) =>
+                        sA.conflictsWith.map((conflictId) => {
+                          const sB = dataset.students.find((s) => s.id === conflictId);
+                          if (!sB || sA.id > sB.id) return null; // Éviter les doublons A-B / B-A
+                          return (
+                            <div
+                              key={`conflict-${sA.id}-${sB.id}`}
+                              style={{
+                                background: "#fef2f2",
+                                border: "1px solid #fecaca",
+                                color: "#991b1b",
+                                padding: "4px 10px",
+                                borderRadius: "12px",
+                                fontSize: "0.76rem",
+                                fontWeight: 700,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }}
+                            >
+                              <span>⛔ Séparation : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
+                              <button
+                                type="button"
+                                style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
+                                title="Supprimer cette incompatibilité"
+                                onClick={() => {
+                                  const updated = dataset.students.map((st) => {
+                                    if (st.id === sA.id) return { ...st, conflictsWith: st.conflictsWith.filter((id) => id !== sB.id) };
+                                    if (st.id === sB.id) return { ...st, conflictsWith: st.conflictsWith.filter((id) => id !== sA.id) };
+                                    return st;
+                                  });
+                                  const nextDs = { ...dataset, students: updated };
+                                  setDataset(nextDs);
+                                  setActiveDataset(nextDs);
+                                }}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                      {dataset.students.flatMap((sA) => {
+                        if (!sA.coLocateGroupId) return [];
+                        const sB = dataset.students.find((s) => s.id !== sA.id && s.coLocateGroupId === sA.coLocateGroupId);
+                        if (!sB || sA.id > sB.id) return [];
+                        return [
+                          <div
+                            key={`coloc-${sA.id}-${sB.id}`}
+                            style={{
+                              background: "#f0fdf4",
+                              border: "1px solid #bbf7d0",
+                              color: "#166534",
+                              padding: "4px 10px",
+                              borderRadius: "12px",
+                              fontSize: "0.76rem",
+                              fontWeight: 700,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <span>🤝 Association : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
+                            <button
+                              type="button"
+                              style={{ border: "none", background: "none", color: "#16a34a", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
+                              title="Supprimer cette association"
+                              onClick={() => {
+                                const updated = dataset.students.map((st) => {
+                                  if (st.id === sA.id || st.id === sB.id) return { ...st, coLocateGroupId: undefined };
+                                  return st;
+                                });
+                                const nextDs = { ...dataset, students: updated };
+                                setDataset(nextDs);
+                                setActiveDataset(nextDs);
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ];
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2162,9 +2468,49 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                       )}
                                     </div>
                                   </div>
-                              {/* Ligne 2 : Badges d'accompagnement et d'options sous le nom */}
-                                  {(student.supportFlags.length > 0 || student.options.length > 0) && (
+                                  {/* Ligne 2 : Badges d'accompagnement, d'incompatibilité et d'options sous le nom */}
+                                  {(student.supportFlags.length > 0 || student.options.length > 0 || student.coLocateGroupId || student.conflictsWith.length > 0) && (
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap", paddingLeft: "36px" }}>
+                                      {classroom.students.some((m) => m.id !== student.id && student.conflictsWith.includes(m.id)) && (
+                                        <span
+                                          className="badge-tooltip"
+                                          data-tooltip="⚠️ Incompatibilité forcée dans cette classe"
+                                          title="⚠️ Incompatibilité forcée dans cette classe (regroupement d'option strict ou capacité)"
+                                          style={{
+                                            background: "#fef2f2",
+                                            color: "#991b1b",
+                                            border: "1px solid #fecaca",
+                                            padding: "1px 6px",
+                                            borderRadius: "10px",
+                                            fontSize: "0.68rem",
+                                            fontWeight: 800,
+                                            lineHeight: 1.2,
+                                            cursor: "help",
+                                          }}
+                                        >
+                                          ⚠️ Incompatibilité
+                                        </span>
+                                      )}
+                                      {student.coLocateGroupId && (
+                                        <span
+                                          className="badge-tooltip"
+                                          data-tooltip="🤝 Binôme d'amitié / Regroupement conservé"
+                                          title="🤝 Binôme d'amitié ou regroupement d'accompagnement AESH conservé"
+                                          style={{
+                                            background: "#f0fdf4",
+                                            color: "#166534",
+                                            border: "1px solid #bbf7d0",
+                                            padding: "1px 6px",
+                                            borderRadius: "10px",
+                                            fontSize: "0.68rem",
+                                            fontWeight: 800,
+                                            lineHeight: 1.2,
+                                            cursor: "help",
+                                          }}
+                                        >
+                                          🤝 Binôme
+                                        </span>
+                                      )}
                                       {student.supportFlags.map((flag) => (
                                         <span
                                           key={flag}
@@ -2811,6 +3157,38 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 ))}
               </div>
             </div>
+
+            {/* Justifications d'affectation & Règles d'Incompatibilités */}
+            {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
+              <div>
+                <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                  💡 Motif d'Affectation & Analyse des Contraintes (Explication IA)
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        fontSize: "0.82rem",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        background: hc.includes("⚠️") ? "#fef2f2" : "#f8fafc",
+                        border: `1px solid ${hc.includes("⚠️") ? "#fecaca" : "#e2e8f0"}`,
+                        color: hc.includes("⚠️") ? "#991b1b" : "#334155",
+                        fontWeight: hc.includes("⚠️") ? 700 : 500,
+                      }}
+                    >
+                      {hc}
+                    </div>
+                  ))}
+                  {selected.explanations[inspectStudent.id].softConsiderations.map((sc, idx) => (
+                    <div key={idx} style={{ fontSize: "0.8rem", color: "#64748b", paddingLeft: "8px" }}>
+                      • {sc}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", paddingTop: "14px", marginTop: "4px" }}>
               <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>

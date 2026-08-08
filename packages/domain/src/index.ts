@@ -49,6 +49,8 @@ export type DispatchWeights = {
   optionBalance: number;
   behaviorBalance?: number;
   subjectBalance?: number;
+  optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
+  supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
 };
 
 export type Assignment = Record<string, string>;
@@ -132,16 +134,32 @@ function hasConflict(candidate: Student[], currentStudents: Student[]): boolean 
     currentStudents.some((student) => student.conflictsWith.some((otherId) => candidate.some((item) => item.id === otherId)));
 }
 
-function targetStats(input: DispatchInput) {
+function targetStats(input: DispatchInput, weights?: DispatchWeights) {
   const numberOfClasses = input.classrooms.length;
   const optionLabels = [...new Set(input.students.flatMap((student) => student.options))];
+
+  const optionTargets: Record<string, number> = {};
+  for (const option of optionLabels) {
+    const totalCount = input.students.filter((s) => s.options.includes(option)).length;
+    if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS") {
+      optionTargets[option] = totalCount;
+    } else {
+      optionTargets[option] = totalCount / numberOfClasses;
+    }
+  }
+
+  const totalSupport = input.students.filter((s) => s.supportFlags.length > 0).length;
+  const supportTarget = weights?.supportGroupingMode === "GROUP_AESH_CLASSES"
+    ? Math.ceil(totalSupport / Math.max(1, Math.floor(numberOfClasses / 2)))
+    : totalSupport / numberOfClasses;
+
   return {
     size: input.students.length / numberOfClasses,
     female: input.students.filter((student) => student.gender === "F").length / numberOfClasses,
     male: input.students.filter((student) => student.gender === "M").length / numberOfClasses,
     average: average(input.students.map((student) => student.levelAverage)),
-    support: input.students.filter((student) => student.supportFlags.length > 0).length / numberOfClasses,
-    options: Object.fromEntries(optionLabels.map((option) => [option, input.students.filter((student) => student.options.includes(option)).length / numberOfClasses])),
+    support: supportTarget,
+    options: optionTargets,
   };
 }
 
@@ -232,15 +250,49 @@ export function validateAssignment(input: DispatchInput, assignments: Assignment
   return violations;
 }
 
-function explanationFor(student: Student, classroom: Classroom, members: Student[]): StudentExplanation {
-  const hardConstraints = [
-    `Effectif de ${classroom.label} sous le maximum autorisé (${members.length}/${classroom.maxSize}).`,
-    "Aucune incompatibilité déclarée dans cette affectation.",
+function explanationFor(
+  student: Student,
+  classroom: Classroom,
+  members: Student[],
+  weights?: DispatchWeights,
+): StudentExplanation {
+  const hardConstraints: string[] = [
+    `Effectif de ${classroom.label} conforme aux jauges (${members.length}/${classroom.maxSize}).`,
   ];
-  if (student.coLocateGroupId) hardConstraints.push("Regroupement d'accompagnement conservé.");
-  const softConsiderations = ["Contribution à l'équilibre filles/garçons et des résultats scolaires."];
-  if (student.supportFlags.length > 0) softConsiderations.push("Répartition des besoins d'accompagnement prise en compte.");
-  if (student.options.length > 0) softConsiderations.push(`Options équilibrées : ${student.options.join(", ")}.`);
+
+  // Détection des incompatibilités non résolues dans cette affectation (ex: option unique forcée)
+  const conflictingMembers = members.filter((m) => m.id !== student.id && student.conflictsWith.includes(m.id));
+  if (conflictingMembers.length > 0) {
+    const names = conflictingMembers.map((m) => m.displayName).join(", ");
+    hardConstraints.push(
+      `⚠️ Incompatibilité forcée avec ${names} (regroupement d'option strict [${student.options.join(", ")}] ou capacité atteinte).`
+    );
+  } else {
+    hardConstraints.push("Aucune incompatibilité non résolue dans cette affectation.");
+  }
+
+  if (student.coLocateGroupId) {
+    hardConstraints.push("🤝 Regroupement d'association / AESH conservé.");
+  }
+
+  const softConsiderations: string[] = [
+    "Contribution à l'équilibre filles/garçons et à la mixité des niveaux scolaires.",
+  ];
+  if (student.supportFlags.length > 0) {
+    softConsiderations.push(
+      weights?.supportGroupingMode === "GROUP_AESH_CLASSES"
+        ? `Regroupement AESH/Accompagnements (${student.supportFlags.join(", ")}) dans la même classe.`
+        : `Répartition des besoins d'accompagnement (${student.supportFlags.join(", ")}) prise en compte.`
+    );
+  }
+  if (student.options.length > 0) {
+    softConsiderations.push(
+      weights?.optionGroupingMode === "STRICT_SINGLE_CLASS"
+        ? `Option ${student.options.join(", ")} regroupée en classe dédiée (${classroom.label}).`
+        : `Options équilibrées : ${student.options.join(", ")}.`
+    );
+  }
+
   return { hardConstraints, softConsiderations };
 }
 
@@ -254,7 +306,7 @@ export function generateScenario(
     throw new Error("La capacité totale des classes est insuffisante.");
   }
   const random = seededRandom(seed);
-  const targets = targetStats(input);
+  const targets = targetStats(input, weights);
   const assignments: Assignment = {};
   const groups = groupStudents(input.students).sort((left, right) => {
     const importance = (group: Student[]) => sum(group, (student) => student.conflictsWith.length * 10 + student.supportFlags.length * 2);
@@ -306,7 +358,7 @@ export function generateScenario(
   for (const student of input.students) {
     const classroomId = refinedAssignments[student.id];
     const classroom = input.classrooms.find((item) => item.id === classroomId);
-    if (classroom) explanations[student.id] = explanationFor(student, classroom, getClassStudents(refinedAssignments, classroom.id, input.students));
+    if (classroom) explanations[student.id] = explanationFor(student, classroom, getClassStudents(refinedAssignments, classroom.id, input.students), weights);
   }
   return {
     id: `scenario-${seed}`,
@@ -334,7 +386,7 @@ function refineAssignmentWithSimulatedAnnealing(
   const students = input.students;
   if (students.length < 2) return current;
 
-  const targets = targetStats(input);
+  const targets = targetStats(input, weights);
 
   function evalPenalty(assignments: Assignment): number {
     const byClass = input.classrooms.map((c) => getClassStudents(assignments, c.id, students));
