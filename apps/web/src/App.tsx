@@ -910,16 +910,36 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
     setDataset(updatedDataset);
 
     setAudit([auditEvent, ...audit]);
-    api.appendAudit({
-      eventType: "STUDENT_UPDATED",
-      scenarioId: selected?.id,
-      details: auditEvent.details,
-    });
-
-    setInspectStudent(editStudentForm);
     setIsEditingStudent(false);
     setEditReason("");
     setNotice(`✓ Modifications de ${nameOf(editStudentForm, anonymous)} enregistrées et horodatées (${now.toLocaleTimeString("fr-FR")}). Scénarios actualisés.`);
+  };
+
+  const handleRegenerateCohort = async () => {
+    setBusy(true);
+    try {
+      const seed = Date.now();
+      const freshInput = createSyntheticDemoInputCustom(70, 3, 25, 20, seed);
+      const newDataset: Dataset = {
+        establishmentId: dataset.establishmentId || "demo-college",
+        level: "6e (Cohorte Complète)",
+        students: freshInput.students,
+        classrooms: dataset.classrooms.length > 0 ? dataset.classrooms : freshInput.classrooms,
+        dataClassification: "SYNTHETIC_DEMO_ONLY",
+      };
+      setDataset(newDataset);
+      setActiveDataset(newDataset);
+
+      const res = await api.generate(weights, newDataset);
+      setScenarios(res.scenarios);
+      const bestId = getBestScenarioId(res.scenarios);
+      if (bestId) setSelectedId(bestId);
+      setNotice("🎲 Cohorte de 70 élèves régénérée aléatoirement ! Dossiers 100% complets (LV1, LV2, Options, 9 Notes) et scénarios recalculés.");
+    } catch (err: any) {
+      setNotice(`Erreur lors de la génération : ${err?.message || "Impossible de régénérer"}`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -1106,6 +1126,17 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   }}
                 >
                   🎙️ Dictée Vocale (Voxtral)
+                </button>
+                <button
+                  className="secondary"
+                  style={{ textAlign: "left", justifyContent: "flex-start", background: "#fef3c7", color: "#b45309", border: "1px solid #fde68a", fontWeight: 800 }}
+                  onClick={() => {
+                    setImportMenuOpen(false);
+                    void handleRegenerateCohort();
+                  }}
+                  title="Générer une nouvelle cohorte aléatoire de 70 élèves complètement remplis"
+                >
+                  🎲 Régénérer 70 Élèves (Aléatoire MEN)
                 </button>
               </div>
             )}
@@ -1362,6 +1393,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     onClick={() => { setRosterFilter("OPTIONS"); setRosterPage(1); }}
                   >
                     Options ({dataset.students.filter(s => s.options.length > 0).length})
+                  </button>
+                  <button
+                    className="secondary"
+                    onClick={() => void handleRegenerateCohort()}
+                    style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", fontWeight: 800 }}
+                    title="Générer une nouvelle cohorte aléatoire de 70 élèves complètement remplis (LV1, LV2, options, 9 notes)"
+                  >
+                    🎲 Régénérer 70 Élèves
                   </button>
                 </div>
               </div>

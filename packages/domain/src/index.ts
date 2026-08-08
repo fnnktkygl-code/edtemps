@@ -714,103 +714,100 @@ export function moveStudent(input: DispatchInput, scenario: DispatchScenario, st
   };
 }
 
-export function createSyntheticDemoInput(): DispatchInput {
-  const firstNames = ["Aline", "Basile", "Chloé", "Dario", "Elsa", "Farid", "Gaëlle", "Hugo", "Inès", "Jules", "Kenza", "Léo", "Mina", "Noé", "Olympe", "Paul", "Rania", "Sacha", "Tara", "Yanis"];
-  const lastInitials = ["A.", "B.", "C.", "D.", "E.", "F.", "G.", "H.", "I.", "J."];
-  const students: Student[] = Array.from({ length: 80 }, (_, index) => {
-    const number = index + 1;
-    const firstName = firstNames[index % firstNames.length];
-    const lastInitial = lastInitials[index % lastInitials.length];
-    const supportFlags: Student["supportFlags"] = [];
-    if (number % 13 === 0) supportFlags.push("PAP");
-    if (number % 29 === 0) supportFlags.push("PPS");
-    return {
-      id: `student-${number}`,
-      displayName: `${firstName} ${lastInitial}`,
-      initials: `${firstName.slice(0, 1)}.${lastInitial}`,
-      gender: number % 3 === 0 ? "M" : "F",
-      levelAverage: Number((9 + ((number * 17) % 90) / 10).toFixed(1)),
-      subjectGrades: [
-        { subject: "Mathématiques", score: Number((7 + ((number * 13) % 125) / 10).toFixed(1)) },
-        { subject: "Français", score: Number((8 + ((number * 19) % 115) / 10).toFixed(1)) },
-        { subject: "Histoire-Géo", score: Number((9 + ((number * 11) % 105) / 10).toFixed(1)) },
-        { subject: "Sciences", score: Number((8.5 + ((number * 23) % 110) / 10).toFixed(1)) },
-        { subject: "Anglais", score: Number((9.5 + ((number * 7) % 100) / 10).toFixed(1)) },
-      ],
-      behavior: {
-        conductScore: 1 + ((number * 3) % 5),
-        workEthicScore: 1 + ((number * 7) % 5),
-        absencesHours: number % 11 === 0 ? 8 : number % 17 === 0 ? 14 : 0,
-        tardinessCount: number % 9 === 0 ? 3 : 0,
-      },
-      teacherComments:
-        number % 4 === 0
-          ? "Élève moteur, très bon investissement en classe."
-          : number % 5 === 0
-          ? "Travail régulier, profil discret à encourager."
-          : number % 7 === 0
-          ? "Potentiel solide, veiller à la concentration."
-          : "Élève sérieux et coopératif.",
-      options: number % 5 === 0 ? ["Allemand"] : number % 7 === 0 ? ["Latin"] : [],
-      supportFlags,
-      conflictsWith: number === 7 ? ["student-42"] : number === 42 ? ["student-7"] : [],
-      coLocateGroupId: number === 29 || number === 58 ? "aesh-demo-1" : undefined,
-    };
-  });
-  return {
-    establishmentId: "demo-college",
-    level: "6e",
-    students,
-    classrooms: [
-      { id: "6A", label: "6e A", minSize: 18, maxSize: 22 },
-      { id: "6B", label: "6e B", minSize: 18, maxSize: 22 },
-      { id: "6C", label: "6e C", minSize: 18, maxSize: 22 },
-      { id: "6D", label: "6e D", minSize: 18, maxSize: 22 }
-    ],
-    dataClassification: "SYNTHETIC_DEMO_ONLY" as const,
-  };
+export function createSyntheticDemoInput(seed = 42): DispatchInput {
+  return createSyntheticDemoInputCustom(70, 3, 25, 20, seed);
 }
 
-export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3, maxSize = 24, minSize?: number): DispatchInput {
-  const firstNames = ["Léa", "Thomas", "Camille", "Hugo", "Manon", "Lucas", "Chloé", "Enzo", "Inès", "Nathan", "Sarah", "Antoine", "Emma", "Julien", "Jade", "Mathis"];
-  const lastInitials = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
+export function createSyntheticDemoInputCustom(studentCount = 70, classCount = 3, maxSize = 25, minSize?: number, seed = Date.now()): DispatchInput {
+  const random = seededRandom(seed);
+
+  const maleFirstNames = ["Lucas", "Hugo", "Enzo", "Nathan", "Antoine", "Thomas", "Julien", "Mathis", "Gabriel", "Léo", "Louis", "Raphaël", "Arthur", "Jules", "Adam", "Maël", "Noah", "Liam", "Ethan", "Paul", "Sacha", "Yanis", "Farid", "Dario", "Basile"];
+  const femaleFirstNames = ["Léa", "Chloé", "Inès", "Sarah", "Emma", "Jade", "Manon", "Camille", "Mina", "Elsa", "Gaëlle", "Rania", "Tara", "Kenza", "Aline", "Olympe", "Alice", "Lina", "Rose", "Anna", "Lola", "Zélie", "Mia", "Eva", "Clara"];
+  const lastNames = ["Dupont", "Martin", "Bernard", "Petit", "Durand", "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Roux", "David", "Bertrand", "Morel", "Fournier", "Girard", "Bonnet", "Mercier", "Blanc", "Guerin", "Faure", "Rousseau", "Fontaine", "Roux", "Vincent"];
+
+  const commentsList = [
+    "Élève moteur, très bon investissement en classe et participation orale pertinente.",
+    "Travail régulier et sérieux, attitude très positive au quotidien.",
+    "Potentiel solide, doit poursuivre ses efforts de concentration en fin d'heure.",
+    "Élève calme, appliqué et méthodique. Poursuivre ainsi.",
+    "Des résultats très satisfaisants, implication exemplaire dans les travaux de groupe.",
+    "Résultats en hausse ce trimestre, belle marge de progression.",
+    "Travail sérieux mais manque parfois de confiance en soi. À encourager.",
+    "Participation active et dynamique en classe. Résultats très encouragants.",
+    "Bon niveau d'ensemble, élève autonome et autonome dans ses apprentissages.",
+    "Efforts réguliers constatés, poursuivre avec la même rigueur au prochain trimestre.",
+    "Profil scientifique très prometteur, raisonnement rigoureux.",
+    "Excellentes compétences rédactionnelles et esprit d'analyse aiguisé.",
+    "Bilan positif, comportement irréprochable et esprit d'entraide réaffirmé.",
+  ];
 
   const students: Student[] = Array.from({ length: studentCount }, (_, idx) => {
-    const number = idx + 1;
-    const firstName = firstNames[number % firstNames.length];
-    const lastInitial = lastInitials[number % lastInitials.length];
-    const supportFlags: ("PAP" | "PPS" | "PPRE")[] = [];
-    if (number % 9 === 0) supportFlags.push("PAP");
-    if (number % 13 === 0) supportFlags.push("PPS");
-    if (number % 11 === 0) supportFlags.push("PPRE");
+    const isMale = (idx + Math.floor(random() * 10)) % 2 === 0;
+    const gender: Gender = isMale ? "M" : "F";
+    const firstName = isMale
+      ? maleFirstNames[idx % maleFirstNames.length]
+      : femaleFirstNames[idx % femaleFirstNames.length];
+    const lastName = lastNames[(idx + Math.floor(random() * 25)) % lastNames.length];
+    const lastInitial = lastName.slice(0, 1) + ".";
+
+    // Langues & Options (LV1, LV2, LCA, Sections)
+    const lv1 = idx % 8 === 0 ? "LVA_ALL" : idx % 15 === 0 ? "LVA_ESP" : "LVA_ANG";
+    const lv2 = idx % 3 === 0 ? "LVB_ESP" : idx % 4 === 0 ? "LVB_ALL" : idx % 7 === 0 ? "LVB_ITA" : idx % 11 === 0 ? "LVB_CHI" : "LVB_ESP";
+
+    const options: string[] = [lv1, lv2];
+    if (idx % 6 === 0) options.push("LATIN");
+    if (idx % 14 === 0) options.push("GREC");
+    if (idx % 9 === 0) options.push("LCE");
+    if (idx % 12 === 0) options.push("CHAM");
+
+    // Dispositifs d'Accompagnement (PAP, PPS, PAI, PPRE, ULIS)
+    const supportFlags: ("PAP" | "PPS" | "PAI" | "PPRE" | "ULIS")[] = [];
+    if (idx % 9 === 0) supportFlags.push("PAP");
+    if (idx % 17 === 0) supportFlags.push("PPS");
+    if (idx % 13 === 0) supportFlags.push("PAI");
+    if (idx % 11 === 0) supportFlags.push("PPRE");
+    if (idx % 23 === 0) supportFlags.push("ULIS");
+
+    // 9 Matières Officieuses STS-Web complets
+    const baseScore = 9 + (random() * 9.5); // Entre 9.0 et 18.5
+    const subjectGrades = [
+      { subject: "Français", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 4 - 2))).toFixed(1)) },
+      { subject: "Mathématiques", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 5 - 2.5))).toFixed(1)) },
+      { subject: "Histoire-Géographie & EMC", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 3 - 1.5))).toFixed(1)) },
+      { subject: "Physique-Chimie", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 4 - 2))).toFixed(1)) },
+      { subject: "SVT (Sciences de la Vie et de la Terre)", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 3.5 - 1.7))).toFixed(1)) },
+      { subject: "Technologie", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 3 - 1.5))).toFixed(1)) },
+      { subject: "Anglais (LVA / LV1)", score: Number(Math.min(20, Math.max(4, baseScore + (random() * 4 - 2))).toFixed(1)) },
+      { subject: "EPS (Éducation Physique et Sportive)", score: Number(Math.min(20, Math.max(6, baseScore + (random() * 4 - 1))).toFixed(1)) },
+      { subject: "Arts Plastiques", score: Number(Math.min(20, Math.max(6, baseScore + (random() * 3.5 - 1))).toFixed(1)) },
+    ];
+
+    const meanScore = subjectGrades.reduce((sum, g) => sum + g.score, 0) / subjectGrades.length;
+    const levelAverage = Number(meanScore.toFixed(1));
 
     return {
-      id: `student-${number}`,
-      displayName: `${firstName} ${lastInitial}.`,
+      id: `student-${idx + 1}`,
+      displayName: `${firstName} ${lastInitial}`,
       initials: `${firstName.slice(0, 1)}.${lastInitial}`,
-      gender: number % 2 === 0 ? "M" : "F",
-      levelAverage: Number((8.5 + ((number * 17) % 115) / 10).toFixed(1)),
-      subjectGrades: [
-        { subject: "Mathématiques", score: Number((7 + ((number * 13) % 125) / 10).toFixed(1)) },
-        { subject: "Français", score: Number((8 + ((number * 19) % 115) / 10).toFixed(1)) },
-        { subject: "Histoire-Géo", score: Number((9 + ((number * 11) % 105) / 10).toFixed(1)) },
-        { subject: "Sciences", score: Number((8.5 + ((number * 23) % 110) / 10).toFixed(1)) },
-        { subject: "Anglais", score: Number((9.5 + ((number * 7) % 100) / 10).toFixed(1)) },
-      ],
-      behavior: {
-        conductScore: 1 + ((number * 3) % 5),
-        workEthicScore: 1 + ((number * 7) % 5),
-        absencesHours: number % 11 === 0 ? 8 : 0,
-        tardinessCount: number % 9 === 0 ? 2 : 0,
-      },
-      teacherComments: "Élève sérieux et coopératif.",
-      options: number % 5 === 0 ? ["Allemand"] : number % 7 === 0 ? ["Latin"] : [],
+      gender,
+      levelAverage,
+      subjectGrades,
+      lv1,
+      lv2,
+      options,
       supportFlags,
-      conflictsWith: number === 5 ? ["student-12"] : [],
+      behavior: {
+        conductScore: Math.min(5, Math.max(1, Math.floor(3 + random() * 2.8))),
+        workEthicScore: Math.min(5, Math.max(1, Math.floor(3 + random() * 2.8))),
+        absencesHours: idx % 7 === 0 ? Math.floor(random() * 12) : 0,
+        tardinessCount: idx % 5 === 0 ? Math.floor(random() * 4) : 0,
+      },
+      teacherComments: commentsList[idx % commentsList.length],
+      conflictsWith: idx === 6 ? ["student-42"] : idx === 41 ? ["student-7"] : idx === 24 ? ["student-41"] : idx === 40 ? ["student-25"] : [],
     };
   });
 
-  const defaultMin = Math.max(1, Math.floor(studentCount / classCount) - 4);
+  const defaultMin = Math.max(1, Math.floor(studentCount / classCount) - 3);
   const effectiveMin = minSize !== undefined ? minSize : defaultMin;
 
   const classrooms: Classroom[] = Array.from({ length: classCount }, (_, idx) => {
@@ -825,7 +822,7 @@ export function createSyntheticDemoInputCustom(studentCount = 60, classCount = 3
 
   return {
     establishmentId: "demo-college",
-    level: "Niveau Personnalisé",
+    level: "6e (Cohorte Complète)",
     students,
     classrooms,
     dataClassification: "SYNTHETIC_DEMO_ONLY" as const,
