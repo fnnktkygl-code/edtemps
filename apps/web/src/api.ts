@@ -108,15 +108,16 @@ export const api = {
     try {
       return await request<{ schedules: TimetablingSchedule[] }>("/timetabling/schedules");
     } catch {
-      return { schedules: [fallbackSchedule as unknown as TimetablingSchedule] };
+      const schedule = generateDomainSchedule(fallbackTimetablingDataset);
+      return { schedules: [schedule as unknown as TimetablingSchedule] };
     }
   },
   generateSchedule: async () => {
     try {
       return await request<{ schedule: TimetablingSchedule }>("/timetabling/generate", { method: "POST", body: JSON.stringify({}) });
     } catch {
-      fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
-      return { schedule: fallbackSchedule as unknown as TimetablingSchedule };
+      const schedule = generateDomainSchedule(fallbackTimetablingDataset);
+      return { schedule: schedule as unknown as TimetablingSchedule };
     }
   },
   moveCourseSlot: (scheduleId: string, courseId: string, targetTimeSlotId: string, targetRoomId: string) =>
