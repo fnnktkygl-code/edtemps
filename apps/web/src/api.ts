@@ -21,17 +21,38 @@ const apiOrigin =
     ? "https://edtemps-api.onrender.com"
     : "http://localhost:3001");
 
+let activeActorRole = (typeof localStorage !== "undefined" && localStorage.getItem("actorRole")) || "SCHOOL_ADMIN";
+let activeActorId = (typeof localStorage !== "undefined" && localStorage.getItem("actorId")) || "demo-adjoint";
+
+export let isOfflineFallback = false;
+
+export function setActorRole(role: string, id?: string): void {
+  activeActorRole = role;
+  if (id) activeActorId = id;
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("actorRole", role);
+    localStorage.setItem("actorId", activeActorId);
+  }
+}
+
+export function getActiveActor(): { role: string; id: string } {
+  return { role: activeActorRole, id: activeActorId };
+}
+
 const base = `${apiOrigin}/api/v1/establishments/demo-college`;
-const headers = {
-  "content-type": "application/json",
-  "x-tenant-id": "demo-college",
-  "x-actor-id": "demo-adjoint",
-  "x-actor-role": "SCHOOL_ADMIN",
-};
+
+function getHeaders(): Record<string, string> {
+  return {
+    "content-type": "application/json",
+    "x-tenant-id": "demo-college",
+    "x-actor-id": activeActorId,
+    "x-actor-role": activeActorRole,
+  };
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const bodyIsFormData = init?.body instanceof FormData;
-  const requestHeaders = { ...headers, ...init?.headers } as Record<string, string>;
+  const requestHeaders = { ...getHeaders(), ...init?.headers } as Record<string, string>;
   if (bodyIsFormData) delete requestHeaders["content-type"];
 
   // Timeout de 3.5 secondes pour éviter tout blocage UI sur Render cold-start
@@ -65,9 +86,12 @@ let fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
 export const api = {
   dataset: async () => {
     try {
-      return await request<Dataset>("/dispatch/dataset");
+      const data = await request<Dataset>("/dispatch/dataset");
+      isOfflineFallback = false;
+      return data;
     } catch {
-      return fallbackDataset as unknown as Dataset;
+      isOfflineFallback = true;
+      return { ...fallbackDataset, dataClassification: "SYNTHETIC_DEMO_ONLY" as const };
     }
   },
   generate: async (weights?: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) => {

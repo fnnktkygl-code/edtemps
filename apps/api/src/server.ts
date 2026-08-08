@@ -98,8 +98,9 @@ const activateImportSchema = z.object({
 
 const app = Fastify({ logger: true });
 
+const allowedCorsOrigin = process.env.CORS_ORIGIN || process.env.ALLOWED_ORIGIN || "*";
 await app.register(cors, {
-  origin: process.env.ALLOWED_ORIGIN ? [process.env.ALLOWED_ORIGIN] : ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: allowedCorsOrigin === "*" ? true : [allowedCorsOrigin, "http://localhost:5173", "http://127.0.0.1:5173", "https://edtemps.vercel.app"],
   methods: ["GET", "POST"],
   allowedHeaders: ["content-type", "x-tenant-id", "x-actor-id", "x-actor-role"],
 });
@@ -495,8 +496,13 @@ app.addHook("onClose", async () => { await stateStore.close(); });
 app.setErrorHandler((error, _request, reply) => {
   app.log.error(error);
   const err = error as Error;
-  reply.code(500).send({ error: "INTERNAL_ERROR", message: err.message, stack: err.stack });
+  // RGPD & Sécurité : Ne jamais divulguer la stack trace ou les détails internes au client
+  reply.code(422).send({
+    error: "PROCESSING_FAILED",
+    message: err.message || "Une erreur de traitement s'est produite lors de l'exécution de la requête.",
+  });
 });
 
 const port = Number(process.env.PORT ?? 3001);
-await app.listen({ port, host: "127.0.0.1" });
+const host = process.env.HOST || "0.0.0.0";
+await app.listen({ port, host });

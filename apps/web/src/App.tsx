@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "./api";
+import { api, getActiveActor, isOfflineFallback, setActorRole } from "./api";
 import type {
   AuditEvent,
   Classroom,
@@ -38,7 +38,9 @@ function subjectColorClass(subject: string): string {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"dispatch" | "timetabling" | "compliance">("dispatch");
+  const [activeTab, setActiveTab] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">("dispatch");
+  const [actorRole, setActorRoleState] = useState<string>(() => getActiveActor().role);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("teacher-1");
 
   // Module 1 State (Dispatch)
   const [dataset, setDataset] = useState<Dataset>(emptyDataset);
@@ -347,6 +349,24 @@ export default function App() {
           <h1>EdTemps</h1>
         </div>
         <div className="header-actions">
+          {/* Sélecteur de Rôle RBAC */}
+          <select
+            value={actorRole}
+            onChange={(e) => {
+              const newRole = e.target.value;
+              setActorRole(newRole);
+              setActorRoleState(newRole);
+            }}
+            style={{ padding: "6px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.85rem", color: "var(--text-main)" }}
+            title="Contrôle d'accès par rôle (RBAC)"
+          >
+            <option value="SCHOOL_ADMIN">👨‍💼 Chef d'Établissement</option>
+            <option value="DISPATCH_EDITOR">⚙️ Adjoint de Direction</option>
+            <option value="TEACHER">👩‍🏫 Enseignant</option>
+            <option value="CPE">📋 CPE / Vie Scolaire</option>
+            <option value="DPO">🔒 DPO / RSSI</option>
+          </select>
+
           <label className="toggle-pill" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
             <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser
           </label>
@@ -494,6 +514,13 @@ export default function App() {
           📅 Emplois du temps & Remplacements
         </button>
         <button
+          className={`tab-button ${activeTab === "teacher" ? "active" : ""}`}
+          onClick={() => setActiveTab("teacher")}
+          data-tooltip="Espace Enseignant : consultation de l'EDT personnel, vœux et absence"
+        >
+          👩‍🏫 Espace Enseignant
+        </button>
+        <button
           className={`tab-button ${activeTab === "compliance" ? "active" : ""}`}
           onClick={() => {
             setActiveTab("compliance");
@@ -504,6 +531,14 @@ export default function App() {
           📋 Conformité, DPO & Homologation RGS
         </button>
       </nav>
+
+      {/* BANDEAU DE MODE DÉGRADER HORS LIGNE (Audit RGPD/Souveraineté) */}
+      {isOfflineFallback && (
+        <div style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #f59e0b", padding: "10px 16px", borderRadius: "var(--radius-sm)", marginBottom: "16px", fontWeight: 700, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.88rem" }}>
+          <span>⚠️ <strong>MODE DÉMO HORS-LIGNE ACTIVÉ :</strong> L'API distante est en cours de démarrage ou inaccessible. Les données affichées sont des exemples 100% fictifs générés localement par le navigateur.</span>
+          <span className="chip" style={{ background: "#f59e0b", color: "#ffffff", marginLeft: "12px", whiteSpace: "nowrap" }}>Mode Démo Local</span>
+        </div>
+      )}
 
       <section className="safety-banner" aria-label="Information importante">
         <strong>Décision humaine obligatoire.</strong> Le produit formule des propositions algorithmiques explicables ; seul un professionnel habilité (chef d'établissement / adjoint) peut les valider.
@@ -1289,6 +1324,153 @@ export default function App() {
               </div>
             </>
           )}
+        </section>
+      )}
+
+      {/* TAB 4: ESPACE ENSEIGNANT (CONSULTATION, VŒUX & ABSENCES) */}
+      {activeTab === "teacher" && (
+        <section aria-labelledby="teacher-space-title">
+          <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-card)", padding: "20px 24px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)", marginBottom: "24px" }}>
+            <div>
+              <p className="eyebrow">Service Numérique Enseignant</p>
+              <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800 }}>👩‍🏫 Espace Enseignant (Self-Service)</h2>
+              <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
+                Consultez votre emploi du temps en temps réel, saisissez vos vœux d'aménagement horaire et organisez vos remplacements d'urgence.
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-muted)" }}>Profil enseignant :</span>
+              <select
+                value={selectedTeacherId}
+                onChange={(e) => setSelectedTeacherId(e.target.value)}
+                style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.9rem" }}
+              >
+                {timetablingData?.teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.displayName} ({t.subjects.join(", ")})
+                  </option>
+                )) ?? (
+                  <>
+                    <option value="t-1">Mme Martin (Mathématiques)</option>
+                    <option value="t-2">M. Bernard (Français)</option>
+                    <option value="t-3">Mme Thomas (Histoire-Géo)</option>
+                  </>
+                )}
+              </select>
+            </div>
+          </div>
+
+          {/* Grille d'Emploi du Temps Personnel Enseignant */}
+          <div className="compliance-card" style={{ marginBottom: "28px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0, fontSize: "1.1rem" }}>📅 Mon Emploi du Temps de la Semaine</h3>
+              <span className="chip approved">✓ Planning Synchronisé</span>
+            </div>
+
+            <div className="timetabling-grid">
+              <div className="time-col-header">Créneaux</div>
+              {days.map((day) => (
+                <div key={day} className="grid-header">
+                  {day}
+                </div>
+              ))}
+
+              {periods.map((period, periodIdx) => (
+                <div key={period} style={{ display: "contents" }}>
+                  <div className="time-label">{period.slice(0, 5)}</div>
+                  {days.map((day) => {
+                    const isMeridienne = period.includes("12h00 - 13h00");
+                    const slotId = `slot-${day.toLowerCase().slice(0, 3)}-${periodIdx + 1}`;
+                    const myPlacements = selectedSchedule?.placements.filter((p) => {
+                      const course = timetablingData?.courses.find((c) => c.id === p.courseId);
+                      return course?.teacherId === selectedTeacherId && p.timeSlotId === slotId;
+                    }) ?? [];
+
+                    return (
+                      <div key={slotId} className={`grid-slot ${isMeridienne ? "meridienne" : ""}`}>
+                        {isMeridienne ? (
+                          "Pause Méridienne"
+                        ) : myPlacements.length > 0 ? (
+                          myPlacements.map((placement) => {
+                            const course = timetablingData?.courses.find((c) => c.id === placement.courseId);
+                            const classroom = dataset.classrooms.find((c) => c.id === course?.classroomId);
+                            const room = timetablingData?.rooms.find((r) => r.id === placement.roomId);
+                            return (
+                              <div key={placement.courseId} style={{ background: "var(--primary-brand)", color: "#ffffff", padding: "8px", borderRadius: "var(--radius-sm)", fontSize: "0.82rem" }}>
+                                <strong style={{ display: "block" }}>{course?.subject}</strong>
+                                <span>Classe : {classroom?.label ?? course?.classroomId}</span>
+                                <small style={{ display: "block", marginTop: "2px", opacity: 0.9 }}>Salle {room?.label ?? placement.roomId}</small>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <span style={{ color: "var(--text-light)", fontSize: "0.78rem", fontStyle: "italic" }}>Disponible</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Vœux Horaires & Remplacements */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
+            <div className="compliance-card">
+              <h3>✏️ Mes Vœux & Décharges Horaires</h3>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "14px" }}>
+                Signalez vos contraintes personnelles de décharge académique ou de réunion pédagogique pour le prochain semestre.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.88rem", fontWeight: 600 }}>
+                  <input type="checkbox" defaultChecked /> Décharge de formation académique (Mercredi Après-Midi)
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.88rem", fontWeight: 600 }}>
+                  <input type="checkbox" defaultChecked /> Pas de cours en première heure le Lundi (08h00)
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.88rem", fontWeight: 600 }}>
+                  <input type="checkbox" /> Préférence pour Salle Spécialisée Labo / Multimédia
+                </label>
+              </div>
+              <button className="primary" style={{ marginTop: "16px" }} onClick={() => setNotice("Vos vœux horaires ont été enregistrés et transmis au proviseur adjoint.")}>
+                💾 Enregistrer mes vœux
+              </button>
+            </div>
+
+            <div className="compliance-card">
+              <h3>🚨 Déclarer une Absence & Trouver un Remplaçant</h3>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "14px" }}>
+                Déclenchez immédiatement la recherche automatisée d'un enseignant disponible de la même discipline.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "4px" }}>Créneau de l'absence</label>
+                  <select
+                    value={absenceTimeSlotId}
+                    onChange={(e) => setAbsenceTimeSlotId(e.target.value)}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}
+                  >
+                    <option value="">Sélectionner un créneau</option>
+                    {timetablingData?.timeSlots.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.day} ({s.period})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  className="validate"
+                  disabled={!absenceTimeSlotId || busy}
+                  onClick={() => {
+                    setAbsenceTeacherId(selectedTeacherId);
+                    void fetchSubstitutions();
+                  }}
+                >
+                  ⚡ Obtenir les propositions de remplacement
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
