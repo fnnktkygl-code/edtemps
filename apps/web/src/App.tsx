@@ -978,53 +978,101 @@ export default function App() {
                     <p className="hint">La validation n'est pas une publication et ne remplace pas la relecture CPE / direction.</p>
                   </aside>
 
-                  {/* KANBAN DES CLASSES AVEC DRAG & DROP */}
+                  {/* KANBAN DES CLASSES AVEC DRAG & DROP & SCEAU D'ÉQUILIBRAGE */}
                   <div className="board" aria-label="Répartition des élèves par classe">
-                    {studentsByClass.map((classroom) => (
-                      <section
-                        className={`class-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
-                        key={classroom.id}
-                        aria-labelledby={`title-${classroom.id}`}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          setDragOverClassId(classroom.id);
-                        }}
-                        onDragLeave={() => setDragOverClassId(null)}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          setDragOverClassId(null);
-                          if (draggedStudentId && selected.assignments[draggedStudentId] !== classroom.id) {
-                            void move(draggedStudentId, classroom.id);
-                          }
-                        }}
-                      >
-                        <header>
-                          <h3 id={`title-${classroom.id}`}>{classroom.label}</h3>
-                          <span>
-                            {classroom.students.length}/{classroom.maxSize}
-                          </span>
-                        </header>
-                        <div className="student-list">
-                          {classroom.students.map((student) => (
-                            <button
-                              key={student.id}
-                              draggable={selected.state !== "APPROVED"}
-                              onDragStart={() => setDraggedStudentId(student.id)}
-                              onDragEnd={() => setDraggedStudentId(null)}
-                              className={`student-card ${selectedStudentId === student.id ? "active" : ""}`}
-                              onClick={() => setSelectedStudentId(student.id)}
-                              aria-pressed={selectedStudentId === student.id}
-                            >
-                              <span>{nameOf(student, anonymous)}</span>
-                              <small>
-                                {student.levelAverage.toFixed(1)}/20{" "}
-                                {student.supportFlags.length > 0 ? `· ${student.supportFlags.join("/")}` : ""}
-                              </small>
-                            </button>
-                          ))}
-                        </div>
-                      </section>
-                    ))}
+                    {studentsByClass.map((classroom) => {
+                      const countF = classroom.students.filter((s) => s.gender === "F").length;
+                      const countM = classroom.students.filter((s) => s.gender === "M").length;
+                      const pctF = classroom.students.length > 0 ? (countF / classroom.students.length) * 100 : 50;
+                      const pctM = 100 - pctF;
+                      const avg = classroom.students.length > 0 ? (classroom.students.reduce((sum, s) => sum + s.levelAverage, 0) / classroom.students.length).toFixed(1) : "0.0";
+                      const supportCount = classroom.students.filter((s) => s.supportFlags.length > 0).length;
+                      const isBalanced = classroom.students.length >= classroom.minSize && classroom.students.length <= classroom.maxSize && Math.abs(countF - countM) <= 4;
+
+                      return (
+                        <section
+                          className={`class-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
+                          key={classroom.id}
+                          aria-labelledby={`title-${classroom.id}`}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setDragOverClassId(classroom.id);
+                          }}
+                          onDragLeave={() => setDragOverClassId(null)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setDragOverClassId(null);
+                            if (draggedStudentId && selected.assignments[draggedStudentId] !== classroom.id) {
+                              void move(draggedStudentId, classroom.id);
+                            }
+                          }}
+                        >
+                          <header style={{ paddingBottom: "10px", borderBottom: "1px solid var(--border-light)" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                              <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)" }}>{classroom.label}</h3>
+                              <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.9rem" }}>
+                                {classroom.students.length}/{classroom.maxSize} él.
+                              </span>
+                            </div>
+
+                            {/* Sceau d'Équilibrage Institutionnel */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <span className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}>
+                                {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
+                              </span>
+                              <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                                {countF} F / {countM} G
+                              </span>
+                            </div>
+
+                            {/* Barre de Parité Visuelle Bi-couleur */}
+                            <div className="parity-bar" title={`Parité : ${countF} Filles / ${countM} Garçons`}>
+                              <div className="parity-fill-f" style={{ width: `${pctF}%` }} />
+                              <div className="parity-fill-m" style={{ width: `${pctM}%` }} />
+                            </div>
+
+                            {/* Synthèse Moyenne & Besoins */}
+                            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "8px" }}>
+                              <span>Moy : <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
+                              <span>🤝 <strong>{supportCount}</strong> PAP/PPS</span>
+                            </div>
+                          </header>
+
+                          <div className="student-list">
+                            {classroom.students.map((student) => (
+                              <div
+                                key={student.id}
+                                draggable={selected.state !== "APPROVED"}
+                                onDragStart={() => setDraggedStudentId(student.id)}
+                                onDragEnd={() => setDraggedStudentId(null)}
+                                className={`student-card ${selectedStudentId === student.id ? "active" : ""}`}
+                                onClick={() => setSelectedStudentId(student.id)}
+                                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "grab" }}
+                              >
+                                <div>
+                                  <span style={{ fontWeight: 700, display: "block" }}>{nameOf(student, anonymous)}</span>
+                                  <small style={{ fontFamily: "var(--font-mono)" }}>
+                                    {student.levelAverage.toFixed(1)}/20{" "}
+                                    {student.supportFlags.length > 0 ? `· ${student.supportFlags.join("/")}` : ""}
+                                  </small>
+                                </div>
+                                <button
+                                  className="secondary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setInspectStudent(student);
+                                  }}
+                                  style={{ padding: "2px 6px", fontSize: "0.72rem", fontWeight: 700 }}
+                                  title="Consulter la fiche élève complète"
+                                >
+                                  📋
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      );
+                    })}
                   </div>
                 </section>
               )}
