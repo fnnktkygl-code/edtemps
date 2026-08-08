@@ -3597,21 +3597,23 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               border: "1px solid var(--border-light)",
               borderRadius: "var(--radius-md)",
               boxShadow: "var(--shadow-lg)",
-              maxWidth: "600px",
+              maxWidth: "640px",
               width: "100%",
-              padding: "26px",
+              maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              gap: "20px",
+              overflow: "hidden",
+              padding: 0,
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
+            {/* En-tête Fixe de la Modale */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", padding: "18px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
               <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "44px",
+                    height: "44px",
                     borderRadius: "50%",
                     background: getAvatarColor(inspectStudent.id),
                     color: "#ffffff",
@@ -3619,8 +3621,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     alignItems: "center",
                     justifyContent: "center",
                     fontWeight: 800,
-                    fontSize: "1.1rem",
+                    fontSize: "1.05rem",
                     boxShadow: "var(--shadow-sm)",
+                    flexShrink: 0,
                   }}
                 >
                   {inspectStudent.initials}
@@ -3634,11 +3637,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       Sexe : {inspectStudent.gender === "F" ? "Fille ♀" : inspectStudent.gender === "M" ? "Garçon ♂" : "Non spécifié"}
                     </span>
                   </div>
-                  <h2 style={{ margin: "4px 0 2px", fontSize: "1.4rem", fontWeight: 800, color: "var(--text-main)" }}>
+                  <h2 style={{ margin: "2px 0 0", fontSize: "1.3rem", fontWeight: 800, color: "var(--text-main)" }}>
                     {nameOf(inspectStudent, anonymous)}
                   </h2>
-                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem", fontWeight: 600 }}>
-                    🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "1px 6px", borderRadius: "4px", fontSize: "0.78rem" }}>{anonymous ? `student-` + inspectStudent.id.slice(0, 8) + `… (pseudonymisé HMAC SHA-256)` : inspectStudent.id}</code>
+                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", fontWeight: 600 }}>
+                    🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "1px 6px", borderRadius: "4px", fontSize: "0.76rem" }}>{anonymous ? `student-` + inspectStudent.id.slice(0, 8) + `… (HMAC)` : inspectStudent.id}</code>
                     &nbsp;·&nbsp;
                     Niveau : <strong>{dataset.level}</strong>
                   </p>
@@ -3647,144 +3650,148 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <button
                 className="icon-btn-subtle"
                 onClick={() => setInspectStudent(null)}
-                style={{ padding: "6px 12px", fontSize: "1rem", borderRadius: "50%", cursor: "pointer" }}
+                style={{ padding: "6px 12px", fontSize: "1.1rem", borderRadius: "50%", cursor: "pointer", flexShrink: 0 }}
                 title="Fermer la fenêtre"
               >
                 ✕
               </button>
             </div>
 
-            {/* Synthese Notes par Matiere */}
-            <div>
-              <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
-              </h4>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                {inspectStudent.subjectGrades?.map((sg) => (
-                  <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
-                    <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
-                      {sg.score.toFixed(1)} / 20
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Vie Scolaire & Comportement */}
-            <div>
-              <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                Vie Scolaire & Consultation Individuelle
-              </h4>
-              <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduite</span>
-                  <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
-                    {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
-                  </div>
-                </div>
-                <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Assiduité & Ponctualité</span>
-                  <div style={{ fontWeight: 800, fontSize: "1rem" }}>
-                    {inspectStudent.behavior?.absencesHours ?? 0}h d'absence · {inspectStudent.behavior?.tardinessCount ?? 0} retards
-                  </div>
+            {/* Corps Déroulant Interne de la Modale */}
+            <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px", flex: 1, WebkitOverflowScrolling: "touch" }}>
+              {/* Synthese Notes par Matiere */}
+              <div>
+                <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                  📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                  {inspectStudent.subjectGrades?.map((sg) => (
+                    <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
+                      <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
+                        {sg.score.toFixed(1)} / 20
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* Remarques & Accompagnements */}
-            <div>
-              <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                📝 Appréciation & Dispositifs Pédagogiques
-              </h4>
-              <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
-                "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
-              </p>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                {inspectStudent.supportFlags.length === 0 && inspectStudent.options.length === 0 && (
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Aucun aménagement spécifique ni option particulière.</span>
-                )}
-                {inspectStudent.supportFlags.map((flag) => (
-                  <div
-                    key={flag}
-                    style={{
-                      background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
-                      color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
-                      border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
-                      padding: "6px 12px",
-                      borderRadius: "var(--radius-sm)",
-                      fontSize: "0.82rem",
-                      fontWeight: 800,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <span>🤝</span>
-                    <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
+              {/* Vie Scolaire & Comportement */}
+              <div>
+                <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                  Vie Scolaire & Consultation Individuelle
+                </h4>
+                <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                  <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont exclues de l'algorithme automatisé de classement et de répartition des classes.
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                  <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduite</span>
+                    <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
+                      {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
+                    </div>
                   </div>
-                ))}
-                {inspectStudent.options.map((opt) => (
-                  <div
-                    key={opt}
-                    style={{
-                      background: "#f3e8ff",
-                      color: "#6b21a8",
-                      border: "1px solid #e9d5ff",
-                      padding: "6px 12px",
-                      borderRadius: "var(--radius-sm)",
-                      fontSize: "0.82rem",
-                      fontWeight: 800,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <span>🎓</span>
-                    <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
+                  <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Assiduité & Ponctualité</span>
+                    <div style={{ fontWeight: 800, fontSize: "1rem" }}>
+                      {inspectStudent.behavior?.absencesHours ?? 0}h d'absence · {inspectStudent.behavior?.tardinessCount ?? 0} retards
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
 
-            {/* Justifications d'affectation & Règles d'Incompatibilités */}
-            {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
+              {/* Remarques & Accompagnements */}
               <div>
                 <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                  💡 Motif d'Affectation & Analyse des Contraintes (Explication IA)
+                  📝 Appréciation & Dispositifs Pédagogiques
                 </h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
+                <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
+                  "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
+                </p>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {inspectStudent.supportFlags.length === 0 && inspectStudent.options.length === 0 && (
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Aucun aménagement spécifique ni option particulière.</span>
+                  )}
+                  {inspectStudent.supportFlags.map((flag) => (
                     <div
-                      key={idx}
+                      key={flag}
                       style={{
+                        background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
+                        color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
+                        border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
+                        padding: "6px 12px",
+                        borderRadius: "var(--radius-sm)",
                         fontSize: "0.82rem",
-                        padding: "8px 12px",
-                        borderRadius: "6px",
-                        background: hc.includes("⚠️") ? "#fef2f2" : "#f8fafc",
-                        border: `1px solid ${hc.includes("⚠️") ? "#fecaca" : "#e2e8f0"}`,
-                        color: hc.includes("⚠️") ? "#991b1b" : "#334155",
-                        fontWeight: hc.includes("⚠️") ? 700 : 500,
+                        fontWeight: 800,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
                       }}
                     >
-                      {hc}
+                      <span>🤝</span>
+                      <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
                     </div>
                   ))}
-                  {selected.explanations[inspectStudent.id].softConsiderations.map((sc, idx) => (
-                    <div key={idx} style={{ fontSize: "0.8rem", color: "#64748b", paddingLeft: "8px" }}>
-                      • {sc}
+                  {inspectStudent.options.map((opt) => (
+                    <div
+                      key={opt}
+                      style={{
+                        background: "#f3e8ff",
+                        color: "#6b21a8",
+                        border: "1px solid #e9d5ff",
+                        padding: "6px 12px",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span>🎓</span>
+                      <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", paddingTop: "14px", marginTop: "4px" }}>
+              {/* Justifications d'affectation & Règles d'Incompatibilités */}
+              {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
+                <div>
+                  <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                    💡 Motif d'Affectation & Analyse des Contraintes (Explication IA)
+                  </h4>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          fontSize: "0.82rem",
+                          padding: "8px 12px",
+                          borderRadius: "6px",
+                          background: hc.includes("⚠️") ? "#fef2f2" : "#f8fafc",
+                          border: `1px solid ${hc.includes("⚠️") ? "#fecaca" : "#e2e8f0"}`,
+                          color: hc.includes("⚠️") ? "#991b1b" : "#334155",
+                          fontWeight: hc.includes("⚠️") ? 700 : 500,
+                        }}
+                      >
+                        {hc}
+                      </div>
+                    ))}
+                    {selected.explanations[inspectStudent.id].softConsiderations.map((sc, idx) => (
+                      <div key={idx} style={{ fontSize: "0.8rem", color: "#64748b", paddingLeft: "8px" }}>
+                        • {sc}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Pied de Modale Fixe */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", padding: "14px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
               <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                🔒 Traitement certifié RGPD - Ministère de l'Éducation Nationale
+                🔒 Traitement certifié RGPD - Éducation Nationale
               </span>
               <button className="primary" onClick={() => setInspectStudent(null)} style={{ padding: "8px 20px", fontWeight: 800 }}>
                 Fermer le dossier
