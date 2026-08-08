@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type {
   AuditEvent,
@@ -269,6 +269,66 @@ export default function App() {
     maxSize: number;
   } | null>(null);
 
+  // Stack d'historique Undo / Redo (Annuler / Rétablir)
+  const [historyPast, setHistoryPast] = useState<Scenario[]>([]);
+  const [historyFuture, setHistoryFuture] = useState<Scenario[]>([]);
+
+  // Action d'Annulation (Undo - Ctrl+Z)
+  const handleUndo = useCallback(() => {
+    if (historyPast.length === 0 || !selected) return;
+    const previousScenario = historyPast[historyPast.length - 1];
+    const newPast = historyPast.slice(0, historyPast.length - 1);
+
+    setHistoryFuture((prev) => [selected, ...prev]);
+    setHistoryPast(newPast);
+
+    setScenarios((current) =>
+      current.map((scenario) => (scenario.id === selected.id ? previousScenario : scenario))
+    );
+
+    setNotice("Action annulée (Ctrl+Z).");
+  }, [historyPast, selected]);
+
+  // Action de Rétablissement (Redo - Ctrl+Y / Cmd+Shift+Z)
+  const handleRedo = useCallback(() => {
+    if (historyFuture.length === 0 || !selected) return;
+    const nextScenario = historyFuture[0];
+    const newFuture = historyFuture.slice(1);
+
+    setHistoryPast((prev) => [...prev, selected]);
+    setHistoryFuture(newFuture);
+
+    setScenarios((current) =>
+      current.map((scenario) => (scenario.id === selected.id ? nextScenario : scenario))
+    );
+
+    setNotice("Action rétablie (Ctrl+Y).");
+  }, [historyFuture, selected]);
+
+  // Écouteur global des raccourcis clavier Ctrl+Z / Cmd+Z et Ctrl+Y / Cmd+Shift+Z
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        if (e.shiftKey) {
+          e.preventDefault();
+          handleRedo();
+        } else {
+          e.preventDefault();
+          handleUndo();
+        }
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
   function requestMove(studentId: string, targetClassroomId: string): void {
     if (!selected) return;
     const student = dataset.students.find((s) => s.id === studentId);
@@ -293,9 +353,14 @@ export default function App() {
   }
 
   async function confirmMove(): Promise<void> {
-    if (!pendingMove) return;
+    if (!pendingMove || !selected) return;
     const { studentId, toClassId } = pendingMove;
     setPendingMove(null);
+
+    // Enregistrer l'état courant dans l'historique avant modification
+    setHistoryPast((prev) => [...prev, selected]);
+    setHistoryFuture([]); // Vider le futur lors d'une nouvelle action
+
     await move(studentId, toClassId);
   }
 
@@ -1389,14 +1454,57 @@ export default function App() {
           {(dispatchSubTab === "kanban" || scenarios.length > 0) && (
             <>
               <section aria-labelledby="scenarios-title">
-                <div className="section-heading">
+                <div className="section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <span className="eyebrow">MODULE 1 · ÉVALUATION & CHOIX DES SCÉNARIOS</span>
                     <h2 id="scenarios-title">Variantes Optimisées par l'IA</h2>
                   </div>
-                  <p>
-                    {dataset.students.length} élèves · {dataset.classrooms.length} classes · niveau {dataset.level}
-                  </p>
+
+                  {/* BARRE D'HISTORIQUE UNDO / REDO (ANNULER & RÉTABLIR) */}
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <button
+                      className="icon-btn-subtle"
+                      onClick={handleUndo}
+                      disabled={historyPast.length === 0 || busy || selected?.state === "APPROVED"}
+                      title="Annuler le dernier déplacement d'élève (Ctrl+Z / Cmd+Z)"
+                      style={{
+                        padding: "6px 12px",
+                        fontWeight: 700,
+                        fontSize: "0.84rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        borderRadius: "var(--radius-sm)",
+                        border: "1px solid var(--border-light)",
+                        background: historyPast.length > 0 ? "var(--bg-card)" : "var(--bg-subtle)",
+                        color: historyPast.length > 0 ? "var(--text-main)" : "var(--text-muted)",
+                        cursor: historyPast.length > 0 ? "pointer" : "not-allowed",
+                      }}
+                    >
+                      ↩️ Annuler ({historyPast.length})
+                    </button>
+                    <button
+                      className="icon-btn-subtle"
+                      onClick={handleRedo}
+                      disabled={historyFuture.length === 0 || busy || selected?.state === "APPROVED"}
+                      title="Rétablir le déplacement annulé (Ctrl+Y / Cmd+Shift+Z)"
+                      style={{
+                        padding: "6px 12px",
+                        fontWeight: 700,
+                        fontSize: "0.84rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        borderRadius: "var(--radius-sm)",
+                        border: "1px solid var(--border-light)",
+                        background: historyFuture.length > 0 ? "var(--bg-card)" : "var(--bg-subtle)",
+                        color: historyFuture.length > 0 ? "var(--text-main)" : "var(--text-muted)",
+                        cursor: historyFuture.length > 0 ? "pointer" : "not-allowed",
+                      }}
+                    >
+                      ↪️ Rétablir ({historyFuture.length})
+                    </button>
+                  </div>
                 </div>
                 <div className="scenario-grid">
                   {busy ? (
@@ -1603,11 +1711,29 @@ export default function App() {
                       {studentsByClass.map((classroom) => {
                         const countF = classroom.students.filter((s) => s.gender === "F").length;
                         const countM = classroom.students.filter((s) => s.gender === "M").length;
-                        const pctF = classroom.students.length > 0 ? (countF / classroom.students.length) * 100 : 50;
+                        const totalCount = classroom.students.length;
+                        const pctF = totalCount > 0 ? (countF / totalCount) * 100 : 50;
                         const pctM = 100 - pctF;
-                        const avg = classroom.students.length > 0 ? (classroom.students.reduce((sum, s) => sum + s.levelAverage, 0) / classroom.students.length).toFixed(1) : "0.0";
+                        const avg = totalCount > 0 ? (classroom.students.reduce((sum, s) => sum + s.levelAverage, 0) / totalCount).toFixed(1) : "0.0";
                         const supportCount = classroom.students.filter((s) => s.supportFlags.length > 0).length;
-                        const isBalanced = classroom.students.length >= classroom.minSize && classroom.students.length <= classroom.maxSize && Math.abs(countF - countM) <= 4;
+
+                        // Diagnostic explicite des motifs lorsque la classe est marquée "À AJUSTER"
+                        const adjustReasons: string[] = [];
+                        if (totalCount < classroom.minSize) {
+                          adjustReasons.push(`Sous-effectif (${totalCount} < ${classroom.minSize} min)`);
+                        }
+                        if (totalCount > classroom.maxSize) {
+                          adjustReasons.push(`Sur-effectif (${totalCount} > ${classroom.maxSize} max)`);
+                        }
+                        if (Math.abs(countF - countM) > 4) {
+                          adjustReasons.push(`Déséquilibre F/G (${countF} F / ${countM} G)`);
+                        }
+                        if (supportCount > 7) {
+                          adjustReasons.push(`Forte concentration d'accompagnements (${supportCount} PAP/PPS)`);
+                        }
+
+                        const isBalanced = adjustReasons.length === 0;
+                        const reasonText = isBalanced ? "Classe parfaitement équilibrée" : adjustReasons.join(" • ");
                         const otherClasses = dataset.classrooms.filter((c) => c.id !== classroom.id);
 
                         return (
@@ -1636,15 +1762,39 @@ export default function App() {
                                 </span>
                               </div>
 
-                              {/* Sceau d'Équilibrage Institutionnel */}
+                              {/* Sceau d'Équilibrage Institutionnel avec Infobulle Explicative */}
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}>
+                                <span
+                                  className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}
+                                  title={reasonText}
+                                  data-tooltip={reasonText}
+                                >
                                   {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
                                 </span>
                                 <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
                                   {countF} F / {countM} G
                                 </span>
                               </div>
+
+                              {/* Bannière explicite des motifs d'ajustement */}
+                              {!isBalanced && (
+                                <div
+                                  style={{
+                                    fontSize: "0.72rem",
+                                    color: "#92400e",
+                                    background: "#fef3c7",
+                                    padding: "4px 8px",
+                                    borderRadius: "var(--radius-sm)",
+                                    border: "1px solid #fcd34d",
+                                    marginTop: "4px",
+                                    fontWeight: 700,
+                                    lineHeight: 1.3,
+                                  }}
+                                  title={reasonText}
+                                >
+                                  ⚠️ {adjustReasons.join(" • ")}
+                                </div>
+                              )}
 
                               {/* Barre de Parité Visuelle Bi-couleur */}
                               <div className="parity-bar" title={`Parité : ${countF} Filles / ${countM} Garçons`}>

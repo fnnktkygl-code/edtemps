@@ -79,6 +79,45 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 }
 
+// Système de Caching Performant (In-Memory + LocalStorage avec TTL)
+interface CacheEntry<T> {
+  timestamp: number;
+  data: T;
+}
+
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function getCached<T>(key: string): T | null {
+  const memory = memoryCache.get(key);
+  if (memory && Date.now() - memory.timestamp < CACHE_TTL_MS) {
+    return memory.data as T;
+  }
+  if (typeof localStorage !== "undefined") {
+    try {
+      const raw = localStorage.getItem(`cache_${key}`);
+      if (raw) {
+        const parsed = JSON.parse(raw) as CacheEntry<T>;
+        if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
+          memoryCache.set(key, parsed as CacheEntry<unknown>);
+          return parsed.data;
+        }
+      }
+    } catch {}
+  }
+  return null;
+}
+
+function setCached<T>(key: string, data: T): void {
+  const entry: CacheEntry<T> = { timestamp: Date.now(), data };
+  memoryCache.set(key, entry as CacheEntry<unknown>);
+  if (typeof localStorage !== "undefined") {
+    try {
+      localStorage.setItem(`cache_${key}`, JSON.stringify(entry));
+    } catch {}
+  }
+}
+
 // Fallback client-side instantané (< 10ms) pour garantir 0 freeze
 const fallbackDataset = createSyntheticDemoInput();
 const fallbackTimetablingDataset = createSyntheticTimetablingDemoInput();
@@ -89,18 +128,27 @@ let activeDataset: Dataset = fallbackDataset;
 
 export function setActiveDataset(ds: Dataset) {
   activeDataset = ds;
+  setCached("dataset", ds);
 }
 
 export const api = {
   dataset: async () => {
+    const cached = getCached<Dataset>("dataset");
+    if (cached) {
+      activeDataset = cached;
+      return cached;
+    }
     try {
       const data = await request<Dataset>("/dispatch/dataset");
       isOfflineFallback = false;
       activeDataset = data;
+      setCached("dataset", data);
       return data;
     } catch {
       isOfflineFallback = true;
-      return { ...activeDataset, dataClassification: "SYNTHETIC_DEMO_ONLY" as const };
+      const fallback = { ...activeDataset, dataClassification: "SYNTHETIC_DEMO_ONLY" as const };
+      setCached("dataset", fallback);
+      return fallback;
     }
   },
   generate: async (
