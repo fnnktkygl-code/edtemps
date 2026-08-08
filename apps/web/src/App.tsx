@@ -2639,8 +2639,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap", paddingLeft: "36px" }}>
                                       {classroom.students.some((m) => m.id !== student.id && student.conflictsWith.includes(m.id)) && (
                                         <span
-                                          className="badge-tooltip"
-                                          data-tooltip="⚠️ Incompatibilité forcée dans cette classe"
                                           title="⚠️ Incompatibilité forcée dans cette classe (regroupement d'option strict ou capacité)"
                                           style={{
                                             background: "#fef2f2",
@@ -2659,8 +2657,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                       )}
                                       {student.coLocateGroupId && (
                                         <span
-                                          className="badge-tooltip"
-                                          data-tooltip="🤝 Binôme d'amitié / Regroupement conservé"
                                           title="🤝 Binôme d'amitié ou regroupement d'accompagnement AESH conservé"
                                           style={{
                                             background: "#f0fdf4",
@@ -2680,8 +2676,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                       {student.supportFlags.map((flag) => (
                                         <span
                                           key={flag}
-                                          className="badge-tooltip"
-                                          data-tooltip={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           title={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           style={{
                                             background: flag === "PAP" ? "#ffedd5" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
@@ -2700,8 +2694,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                       {student.options.map((opt) => (
                                         <span
                                           key={opt}
-                                          className="badge-tooltip"
-                                          data-tooltip={OPTION_TITLES[opt] || `Option : ${opt}`}
                                           title={OPTION_TITLES[opt] || `Option linguistique ou artistique : ${opt}`}
                                           style={{
                                             background: "#f3e8ff",
