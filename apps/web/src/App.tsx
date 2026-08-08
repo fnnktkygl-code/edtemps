@@ -1354,6 +1354,37 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 )}
               </div>
 
+              {/* GUIDE PÉDAGOGIQUE EXPLICATIF DE 0 À 10 POUR NON-AGUERRIS */}
+              <div style={{ background: "linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)", border: "1px solid #cbd5e1", borderRadius: "var(--radius-md)", padding: "16px 18px", marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "1.1rem" }}>💡</span>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 800, color: "#1e293b" }}>
+                    Comment fonctionnent les niveaux de priorité (de 0 à 10) ?
+                  </h4>
+                </div>
+                <p style={{ margin: "0 0 12px", fontSize: "0.84rem", color: "#475569", lineHeight: 1.45 }}>
+                  Les curseurs indiquent à l'algorithme la valeur accordée à chaque règle. Plus la note est élevée, plus le solveur sacrifiera les autres critères secondaires pour satisfaire celui-ci.
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "#64748b", display: "block" }}>⚪ 0 / 10 — Ignoré</strong>
+                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Le critère est totalement désactivé.</span>
+                  </div>
+                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "#0284c7", display: "block" }}>🔵 1 à 3 / 10 — Secondaire</strong>
+                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Pris en compte si possible.</span>
+                  </div>
+                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "#15803d", display: "block" }}>🟢 4 à 7 / 10 — Équilibré</strong>
+                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Niveau standard recommandé.</span>
+                  </div>
+                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "#6b21a8", display: "block" }}>🟣 8 à 10 / 10 — Priorité Haute</strong>
+                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Priorité maximale sur les autres.</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="weights-grid">
                 <div className="weight-card">
                   <div className="weight-header">
@@ -1361,7 +1392,19 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       <span>⚖️ Parité Filles / Garçons</span>
                       <small>Équilibre 50%/50% du ratio de genre dans chaque classe</small>
                     </div>
-                    <span className="weight-score">{weights.genderBalance}/10</span>
+                    <span
+                      style={{
+                        background: getWeightLabel(weights.genderBalance).bg,
+                        color: getWeightLabel(weights.genderBalance).color,
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        fontSize: "0.78rem",
+                        fontWeight: 800,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {getWeightLabel(weights.genderBalance).label}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -1378,7 +1421,19 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       <span>📊 Mixité des Niveaux Scolaires</span>
                       <small>Répartition hétérogène des compétences (forts, moyens, à besoins)</small>
                     </div>
-                    <span className="weight-score">{weights.academicBalance}/10</span>
+                    <span
+                      style={{
+                        background: getWeightLabel(weights.academicBalance).bg,
+                        color: getWeightLabel(weights.academicBalance).color,
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        fontSize: "0.78rem",
+                        fontWeight: 800,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {getWeightLabel(weights.academicBalance).label}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -1395,7 +1450,19 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       <span>🤝 Besoins Particuliers (PAP / PPS / PAI)</span>
                       <small>Évite la concentration d'élèves à accompagnement dans la même classe</small>
                     </div>
-                    <span className="weight-score">{weights.supportBalance}/10</span>
+                    <span
+                      style={{
+                        background: getWeightLabel(weights.supportBalance).bg,
+                        color: getWeightLabel(weights.supportBalance).color,
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        fontSize: "0.78rem",
+                        fontWeight: 800,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {getWeightLabel(weights.supportBalance).label}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -1412,7 +1479,19 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       <span>🎓 Répartition des Options & Langues</span>
                       <small>Harmonisation des groupes LCE, Bilangue, Latin et EIP</small>
                     </div>
-                    <span className="weight-score">{weights.optionBalance}/10</span>
+                    <span
+                      style={{
+                        background: getWeightLabel(weights.optionBalance).bg,
+                        color: getWeightLabel(weights.optionBalance).color,
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        fontSize: "0.78rem",
+                        fontWeight: 800,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {getWeightLabel(weights.optionBalance).label}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -2975,6 +3054,13 @@ function Explanation({ student, scenario }: { student: Student; scenario: Scenar
 
 function nameOf(student: Student, anonymous: boolean): string {
   return anonymous ? student.initials : student.displayName;
+}
+
+function getWeightLabel(value: number): { label: string; color: string; bg: string } {
+  if (value === 0) return { label: "Ignoré (0/10)", color: "#64748b", bg: "#f1f5f9" };
+  if (value <= 3) return { label: `Secondaire (${value}/10)`, color: "#0369a1", bg: "#e0f2fe" };
+  if (value <= 7) return { label: `Équilibré (${value}/10)`, color: "#15803d", bg: "#dcfce7" };
+  return { label: `Priorité Haute (${value}/10)`, color: "#6b21a8", bg: "#f3e8ff" };
 }
 
 export type RebalanceStep = {
