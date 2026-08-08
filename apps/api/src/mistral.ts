@@ -12,7 +12,7 @@ export async function explainConflictWithMistral(conflictMessage: string): Promi
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "mistral-small-latest",
+        model: "ministral-8b-latest",
         messages: [
           {
             role: "system",
