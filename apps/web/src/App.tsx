@@ -66,13 +66,46 @@ const SUPPORT_FLAG_TITLES: Record<string, string> = {
   ULIS: "Unité Localisée pour l'Inclusion Scolaire (Dispositif d'inclusion)",
 };
 
+const OFFICIAL_LANGUAGES_OPTIONS: { code: string; label: string; group: string }[] = [
+  { code: "ANG", label: "Anglais (LVA / LVB)", group: "Langues Vivantes" },
+  { code: "ALL", label: "Allemand (LVA / LVB / Bilangue)", group: "Langues Vivantes" },
+  { code: "ESP", label: "Espagnol (LVB)", group: "Langues Vivantes" },
+  { code: "ITA", label: "Italien (LVB)", group: "Langues Vivantes" },
+  { code: "POR", label: "Portugais (LVB)", group: "Langues Vivantes" },
+  { code: "ARA", label: "Arabe (LVA / LVB)", group: "Langues Vivantes" },
+  { code: "CHI", label: "Chinois (LVB / LVC)", group: "Langues Vivantes" },
+  { code: "RUS", label: "Russe (LVB)", group: "Langues Vivantes" },
+  { code: "JAP", label: "Japonais (LVB / LVC)", group: "Langues Vivantes" },
+  { code: "LATIN", label: "Latin (LCA - Langues & Cultures Antiquité)", group: "LCA & Antiquité" },
+  { code: "GREC", label: "Grec Ancien (LCA - Langues & Cultures Antiquité)", group: "LCA & Antiquité" },
+  { code: "LCR", label: "Langues & Cultures Régionales (Occitan, Basque, Breton, etc.)", group: "Régionales" },
+  { code: "BILANGUE", label: "Section Bilangue (LVA + LVB précoce)", group: "Parcours" },
+  { code: "LCE", label: "LCE (Langues et Cultures Européennes)", group: "Parcours" },
+  { code: "CHAM", label: "CHAM / CHAD / CHAT (Musique / Danse / Théâtre)", group: "Parcours" },
+  { code: "SEL", label: "Section Européenne & Langues Orientales", group: "Parcours" },
+];
+
 const OPTION_TITLES: Record<string, string> = {
-  Latin: "Option Linguistique : Latin / Langues et Cultures de l'Antiquité",
-  LCR: "Option : Langue et Culture Régionale",
-  Allemand: "Langue Vivante : Allemand (LVA / LVB)",
-  Espagnol: "Langue Vivante : Espagnol (LVB)",
+  ANG: "Langue Vivante : Anglais (LVA / LVB)",
   Anglais: "Langue Vivante : Anglais (LVA)",
-  CHAM: "Classe à Horaires Aménagés Musique / Danse / Théâtre",
+  ALL: "Langue Vivante : Allemand (LVA / LVB / Bilangue)",
+  Allemand: "Langue Vivante : Allemand (LVA / LVB)",
+  ESP: "Langue Vivante : Espagnol (LVB)",
+  Espagnol: "Langue Vivante : Espagnol (LVB)",
+  ITA: "Langue Vivante : Italien (LVB)",
+  POR: "Langue Vivante : Portugais (LVB)",
+  ARA: "Langue Vivante : Arabe (LVA / LVB)",
+  CHI: "Langue Vivante : Chinois (LVB / LVC)",
+  RUS: "Langue Vivante : Russe (LVB)",
+  JAP: "Langue Vivante : Japonais (LVB / LVC)",
+  LATIN: "Option LCA : Latin (Langues et Cultures de l'Antiquité)",
+  Latin: "Option LCA : Latin (Langues et Cultures de l'Antiquité)",
+  GREC: "Option LCA : Grec Ancien (Langues et Cultures de l'Antiquité)",
+  LCR: "Option : Langue et Culture Régionale (Occitan, Basque, Breton...)",
+  BILANGUE: "Section Bilangue (Apprentissage précoce LVA + LVB)",
+  LCE: "LCE : Langues et Cultures Européennes",
+  CHAM: "CHAM : Classe à Horaires Aménagés Musique / Danse / Théâtre",
+  SEL: "Section Européenne et de Langues Orientales",
 };
 
 export default function App() {
@@ -816,6 +849,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
     }
     if (inspectStudent.teacherComments !== editStudentForm.teacherComments) {
       diffs.push(`Appréciation mise à jour`);
+    }
+    if (JSON.stringify(inspectStudent.subjectGrades) !== JSON.stringify(editStudentForm.subjectGrades)) {
+      diffs.push(`Notes par matière modifiées`);
     }
 
     const summary = diffs.length > 0 ? diffs.join(" | ") : "Mise à jour des informations de l'élève";
@@ -3798,7 +3834,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                           <div>
                             <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                              Moyenne Générale (/20) :
+                              Moyenne Générale (/20) (Calculée ou manuelle) :
                             </label>
                             <input
                               type="number"
@@ -3812,10 +3848,106 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </div>
                         </div>
 
+                        {/* ÉDITION DES NOTES PAR MATIÈRE */}
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary-brand)", margin: 0 }}>
+                              📐 Édition des Notes par Matière (/20) :
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentGrades = editStudentForm.subjectGrades || [
+                                  { subject: "Mathématiques", score: 12.0 },
+                                  { subject: "Français", score: 12.0 },
+                                  { subject: "Histoire-Géo", score: 12.0 },
+                                  { subject: "Sciences", score: 12.0 },
+                                  { subject: "Anglais", score: 12.0 },
+                                ];
+                                const newGrades = [...currentGrades, { subject: "Nouvelle matière", score: 10.0 }];
+                                const avg = newGrades.reduce((sum, g) => sum + g.score, 0) / newGrades.length;
+                                setEditStudentForm({ ...editStudentForm, subjectGrades: newGrades, levelAverage: parseFloat(avg.toFixed(1)) });
+                              }}
+                              style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontSize: "0.76rem", fontWeight: 800, cursor: "pointer" }}
+                            >
+                              ➕ Ajouter une matière
+                            </button>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", maxHeight: "200px", overflowY: "auto" }}>
+                            {(!editStudentForm.subjectGrades || editStudentForm.subjectGrades.length === 0) ? (
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                                  Aucune note individuelle enregistrée.
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const defaultGrades = [
+                                      { subject: "Mathématiques", score: 12.0 },
+                                      { subject: "Français", score: 12.0 },
+                                      { subject: "Histoire-Géo", score: 12.0 },
+                                      { subject: "Sciences", score: 12.0 },
+                                      { subject: "Anglais", score: 12.0 },
+                                    ];
+                                    setEditStudentForm({ ...editStudentForm, subjectGrades: defaultGrades, levelAverage: 12.0 });
+                                  }}
+                                  style={{ background: "#2563eb", color: "#ffffff", border: "none", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontSize: "0.74rem", fontWeight: 800, cursor: "pointer" }}
+                                >
+                                  Générer le bulletin type (5 matières)
+                                </button>
+                              </div>
+                            ) : (
+                              editStudentForm.subjectGrades.map((sg, idx) => (
+                                <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 90px 32px", gap: "8px", alignItems: "center" }}>
+                                  <input
+                                    type="text"
+                                    value={sg.subject}
+                                    onChange={(e) => {
+                                      const updated = [...(editStudentForm.subjectGrades || [])];
+                                      updated[idx] = { ...updated[idx], subject: e.target.value };
+                                      setEditStudentForm({ ...editStudentForm, subjectGrades: updated });
+                                    }}
+                                    placeholder="Intitulé de la matière"
+                                    style={{ padding: "6px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.82rem", fontWeight: 700, background: "var(--bg-card)", color: "var(--text-main)" }}
+                                  />
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="20"
+                                    step="0.1"
+                                    value={sg.score}
+                                    onChange={(e) => {
+                                      const updated = [...(editStudentForm.subjectGrades || [])];
+                                      const scoreVal = parseFloat(e.target.value) || 0;
+                                      updated[idx] = { ...updated[idx], score: scoreVal };
+                                      const avg = updated.reduce((sum, g) => sum + g.score, 0) / updated.length;
+                                      setEditStudentForm({ ...editStudentForm, subjectGrades: updated, levelAverage: parseFloat(avg.toFixed(1)) });
+                                    }}
+                                    style={{ padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontSize: "0.86rem", fontWeight: 800, textAlign: "right", background: "var(--bg-card)", color: "var(--text-main)" }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = (editStudentForm.subjectGrades || []).filter((_, i) => i !== idx);
+                                      const avg = updated.length > 0 ? updated.reduce((sum, g) => sum + g.score, 0) / updated.length : editStudentForm.levelAverage;
+                                      setEditStudentForm({ ...editStudentForm, subjectGrades: updated, levelAverage: parseFloat(avg.toFixed(1)) });
+                                    }}
+                                    style={{ background: "#fef2f2", color: "#ef4444", border: "1px solid #fecaca", borderRadius: "var(--radius-sm)", padding: "4px", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
+                                    title="Supprimer cette matière"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
                         {/* Dispositifs d'Accompagnement */}
                         <div>
                           <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                            🤝 Dispositifs & Aménagements Pédagogiques :
+                            🤝 Dispositifs & Aménagements Pédagogiques (PAP, PPS, PAI, PPRE, ULIS) :
                           </label>
                           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                             {(["PAP", "PPS", "PAI", "PPRE", "ULIS"] as const).map((flag) => {
@@ -3839,27 +3971,26 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </div>
                         </div>
 
-                        {/* Options Scolaires */}
+                        {/* Options Scolaires & Langues (Programme National Officiel) */}
                         <div>
                           <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                            🎓 Options Scolaires & Langues :
+                            🎓 Options Scolaires, LV1, LV2 & Sections (Programme National Officiel) :
                           </label>
-                          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                            {(["LCE", "BILANGUE", "LATIN", "CHAM"] as const).map((opt) => {
-                              const checked = editStudentForm.options.includes(opt);
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", maxHeight: "180px", overflowY: "auto", padding: "10px", background: "var(--bg-subtle)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                            {OFFICIAL_LANGUAGES_OPTIONS.map((item) => {
+                              const checked = editStudentForm.options.includes(item.code) || editStudentForm.options.includes(item.code.toLowerCase());
                               return (
-                                <label key={opt} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
+                                <label key={item.code} title={item.label} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-card)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "5px 10px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.78rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
                                   <input
                                     type="checkbox"
                                     checked={checked}
                                     onChange={(e) => {
-                                      const opts = e.target.checked
-                                        ? [...editStudentForm.options, opt]
-                                        : editStudentForm.options.filter((o) => o !== opt);
-                                      setEditStudentForm({ ...editStudentForm, options: opts });
+                                      const currentOpts = editStudentForm.options.filter((o) => o !== item.code && o.toLowerCase() !== item.code.toLowerCase());
+                                      const newOpts = e.target.checked ? [...currentOpts, item.code] : currentOpts;
+                                      setEditStudentForm({ ...editStudentForm, options: newOpts });
                                     }}
                                   />
-                                  <span>{opt}</span>
+                                  <span>{item.code} ({item.label.split(" ")[0]})</span>
                                 </label>
                               );
                             })}
