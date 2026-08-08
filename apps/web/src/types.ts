@@ -1,13 +1,28 @@
+export type SubjectGrade = {
+  subject: string;
+  score: number;
+};
+
+export type StudentBehavior = {
+  conductScore: number;     // 1 à 5
+  workEthicScore: number;   // 1 à 5
+  absencesHours: number;    // Heures d'absence
+  tardinessCount: number;   // Nombre de retards
+};
+
 export type Student = {
   id: string;
   displayName: string;
   initials: string;
   gender: "F" | "M" | "X";
   levelAverage: number;
+  subjectGrades?: SubjectGrade[];
+  behavior?: StudentBehavior;
   options: string[];
   supportFlags: string[];
   conflictsWith: string[];
   coLocateGroupId?: string;
+  teacherComments?: string;
 };
 
 export type Classroom = { id: string; label: string; minSize: number; maxSize: number };

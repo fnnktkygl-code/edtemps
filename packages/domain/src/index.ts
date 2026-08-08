@@ -1,15 +1,30 @@
 export type Gender = "F" | "M" | "X";
 
+export type SubjectGrade = {
+  subject: string;
+  score: number;
+};
+
+export type StudentBehavior = {
+  conductScore: number;     // 1 à 5
+  workEthicScore: number;   // 1 à 5
+  absencesHours: number;    // Heures d'absence
+  tardinessCount: number;   // Nombre de retards
+};
+
 export type Student = {
   id: string;
   displayName: string;
   initials: string;
   gender: Gender;
   levelAverage: number;
+  subjectGrades?: SubjectGrade[];
+  behavior?: StudentBehavior;
   options: string[];
   supportFlags: ("PAP" | "PPRE" | "PPS" | "PAI" | "ULIS")[];
   conflictsWith: string[];
   coLocateGroupId?: string;
+  teacherComments?: string;
 };
 
 export type Classroom = {
@@ -31,6 +46,8 @@ export type DispatchWeights = {
   academicBalance: number;
   supportBalance: number;
   optionBalance: number;
+  behaviorBalance?: number;
+  subjectBalance?: number;
 };
 
 export type Assignment = Record<string, string>;
@@ -352,7 +369,28 @@ export function createSyntheticDemoInput(): DispatchInput {
       displayName: `${firstName} ${lastInitial}`,
       initials: `${firstName.slice(0, 1)}.${lastInitial}`,
       gender: number % 3 === 0 ? "M" : "F",
-      levelAverage: 9 + ((number * 17) % 90) / 10,
+      levelAverage: Number((9 + ((number * 17) % 90) / 10).toFixed(1)),
+      subjectGrades: [
+        { subject: "Mathématiques", score: Number((7 + ((number * 13) % 125) / 10).toFixed(1)) },
+        { subject: "Français", score: Number((8 + ((number * 19) % 115) / 10).toFixed(1)) },
+        { subject: "Histoire-Géo", score: Number((9 + ((number * 11) % 105) / 10).toFixed(1)) },
+        { subject: "Sciences", score: Number((8.5 + ((number * 23) % 110) / 10).toFixed(1)) },
+        { subject: "Anglais", score: Number((9.5 + ((number * 7) % 100) / 10).toFixed(1)) },
+      ],
+      behavior: {
+        conductScore: 1 + ((number * 3) % 5),
+        workEthicScore: 1 + ((number * 7) % 5),
+        absencesHours: number % 11 === 0 ? 8 : number % 17 === 0 ? 14 : 0,
+        tardinessCount: number % 9 === 0 ? 3 : 0,
+      },
+      teacherComments:
+        number % 4 === 0
+          ? "Élève moteur, très bon investissement en classe."
+          : number % 5 === 0
+          ? "Travail régulier, profil discret à encourager."
+          : number % 7 === 0
+          ? "Potentiel solide, veiller à la concentration."
+          : "Élève sérieux et coopératif.",
       options: number % 5 === 0 ? ["Allemand"] : number % 7 === 0 ? ["Latin"] : [],
       supportFlags,
       conflictsWith: number === 7 ? ["student-42"] : number === 42 ? ["student-7"] : [],

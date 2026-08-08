@@ -331,6 +331,7 @@ export default function App() {
   const [dispatchSubTab, setDispatchSubTab] = useState<"roster" | "weights" | "kanban">("roster");
   const [rosterSearch, setRosterSearch] = useState("");
   const [rosterFilter, setRosterFilter] = useState<"ALL" | "PAP" | "OPTIONS">("ALL");
+  const [inspectStudent, setInspectStudent] = useState<Student | null>(null);
 
   return (
     <main className="page">
@@ -662,9 +663,11 @@ export default function App() {
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Élève</th>
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Genre</th>
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Moyenne Scolaire</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Vie Scolaire & Autonomie</th>
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Accompagnements</th>
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Options & Langues</th>
                       <th style={{ padding: "10px 14px", fontWeight: 800 }}>Classe Cible</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>Dossier</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -692,6 +695,12 @@ export default function App() {
                             <td style={{ padding: "10px 14px" }}>
                               <span style={{ fontWeight: 800, color: "var(--primary-brand)" }}>
                                 {student.levelAverage.toFixed(1)} / 20
+                              </span>
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)" }}>
+                                {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
+                                <span style={{ color: "var(--text-muted)", marginLeft: "6px" }}>({student.behavior?.absencesHours ?? 0}h abs)</span>
                               </span>
                             </td>
                             <td style={{ padding: "10px 14px" }}>
@@ -731,6 +740,15 @@ export default function App() {
                                   </option>
                                 ))}
                               </select>
+                            </td>
+                            <td style={{ padding: "10px 14px" }}>
+                              <button
+                                className="secondary"
+                                onClick={() => setInspectStudent(student)}
+                                style={{ padding: "3px 8px", fontSize: "0.78rem", fontWeight: 700 }}
+                              >
+                                📋 Dossier
+                              </button>
                             </td>
                           </tr>
                         );
@@ -1220,6 +1238,126 @@ export default function App() {
             )}
           </section>
         </section>
+      )}
+
+      {/* MODAL FICHE ÉLÈVE COMPLÈTE */}
+      {inspectStudent && (
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 4000,
+            padding: "20px",
+          }}
+          onClick={() => setInspectStudent(null)}
+        >
+          <div
+            className="modal-card"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-light)",
+              borderRadius: "var(--radius-md)",
+              boxShadow: "var(--shadow-lg)",
+              maxWidth: "600px",
+              width: "100%",
+              padding: "26px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <span className="brand-badge">DOSSIER PÉDAGOGIQUE ÉLÈVE</span>
+                <h2 style={{ margin: "6px 0 0", fontSize: "1.4rem", fontWeight: 800 }}>
+                  {nameOf(inspectStudent, anonymous)}
+                </h2>
+                <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.88rem" }}>
+                  INE : {anonymous ? "student-hash-pseudonymisé" : inspectStudent.id} · Niveau {dataset.level.toUpperCase()}
+                </p>
+              </div>
+              <button className="secondary" onClick={() => setInspectStudent(null)} style={{ padding: "4px 10px", fontSize: "1rem" }}>
+                ✕
+              </button>
+            </div>
+
+            {/* Synthese Notes par Matiere */}
+            <div>
+              <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
+              </h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                {inspectStudent.subjectGrades?.map((sg) => (
+                  <div key={sg.subject} style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{sg.subject}</span>
+                    <span style={{ fontWeight: 800, color: sg.score >= 12 ? "#10b981" : sg.score >= 10 ? "#f59e0b" : "#ef4444" }}>
+                      {sg.score.toFixed(1)} / 20
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Vie Scolaire & Comportement */}
+            <div>
+              <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                🧘 Vie Scolaire & Engagement
+              </h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
+                <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Autonomie & Conduct</span>
+                  <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>
+                    {"★".repeat(inspectStudent.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (inspectStudent.behavior?.conductScore ?? 4))} ({inspectStudent.behavior?.conductScore ?? 4}/5)
+                  </div>
+                </div>
+                <div style={{ background: "var(--bg-subtle)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>Assiduité & Ponctualité</span>
+                  <div style={{ fontWeight: 800, fontSize: "1rem" }}>
+                    {inspectStudent.behavior?.absencesHours ?? 0}h d'absence · {inspectStudent.behavior?.tardinessCount ?? 0} retards
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Remarques & Accompagnements */}
+            <div>
+              <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                📝 Appréciation & Dispositifs Pédagogiques
+              </h4>
+              <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
+                "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
+              </p>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {inspectStudent.supportFlags.map((flag) => (
+                  <span key={flag} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "4px 10px", borderRadius: "4px", fontWeight: 800 }}>
+                    🤝 Accompagnement {flag}
+                  </span>
+                ))}
+                {inspectStudent.options.map((opt) => (
+                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "4px 10px", borderRadius: "4px", fontWeight: 800 }}>
+                    🎓 Option {opt}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button className="primary" onClick={() => setInspectStudent(null)}>
+                Fermer le dossier
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
