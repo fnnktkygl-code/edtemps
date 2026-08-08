@@ -1007,20 +1007,20 @@ export default function App() {
                             }
                           }}
                         >
-                          <header style={{ paddingBottom: "10px", borderBottom: "1px solid var(--border-light)" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <header>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)" }}>{classroom.label}</h3>
-                              <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.9rem" }}>
+                              <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.88rem" }}>
                                 {classroom.students.length}/{classroom.maxSize} él.
                               </span>
                             </div>
 
                             {/* Sceau d'Équilibrage Institutionnel */}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}>
                                 {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
                               </span>
-                              <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
                                 {countF} F / {countM} G
                               </span>
                             </div>
@@ -1032,7 +1032,7 @@ export default function App() {
                             </div>
 
                             {/* Synthèse Moyenne & Besoins */}
-                            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem", marginTop: "8px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem" }}>
                               <span>Moy : <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
                               <span>🤝 <strong>{supportCount}</strong> PAP/PPS</span>
                             </div>
