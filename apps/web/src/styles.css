@@ -1483,40 +1483,73 @@ button:disabled {
   border-radius: var(--radius-sm);
 }
 
-/* Custom Instant Tooltip */
-.badge-tooltip {
+/* ==========================================================================
+   UNIFIED PREMIUM TOOLTIP SYSTEM (Design System EdTemps)
+   ========================================================================== */
+.ui-tooltip {
   position: relative;
-  cursor: pointer;
 }
 
 @media (hover: hover) {
-  .badge-tooltip::after {
+  .ui-tooltip::after {
     content: attr(data-tooltip);
     position: absolute;
-    top: 125%;
+    top: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%) translateY(-4px);
     background: #0f172a;
-    color: #ffffff;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.72rem;
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.76rem;
     font-weight: 700;
+    line-height: 1.35;
     white-space: normal;
-    max-width: 220px;
+    max-width: 260px;
     width: max-content;
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 2000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 5000;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35);
+    text-align: center;
   }
 
-  .badge-tooltip:hover::after {
+  .ui-tooltip::before {
+    content: '';
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent #0f172a transparent;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 5001;
+  }
+
+  .ui-tooltip:hover::after,
+  .ui-tooltip:hover::before {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
+  }
+
+  .ui-tooltip-top::after {
+    top: auto;
+    bottom: calc(100% + 8px);
+  }
+
+  .ui-tooltip-top::before {
+    top: auto;
+    bottom: calc(100% + 2px);
+    border-width: 6px 6px 0 6px;
+    border-color: #0f172a transparent transparent transparent;
   }
 }
 

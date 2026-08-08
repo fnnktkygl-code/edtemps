@@ -2027,10 +2027,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   {/* BARRE D'HISTORIQUE UNDO / REDO (ANNULER & RÉTABLIR) */}
                   <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                     <button
-                      className="icon-btn-subtle"
+                      className={`icon-btn-subtle ui-tooltip ${historyPast.length > 0 ? "" : "disabled"}`}
+                      data-tooltip="Annuler le dernier déplacement d'élève (Ctrl+Z / Cmd+Z)"
                       onClick={handleUndo}
                       disabled={historyPast.length === 0 || busy || selected?.state === "APPROVED"}
-                      title="Annuler le dernier déplacement d'élève (Ctrl+Z / Cmd+Z)"
                       style={{
                         padding: "6px 12px",
                         fontWeight: 700,
@@ -2048,10 +2048,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       ↩️ Annuler ({historyPast.length})
                     </button>
                     <button
-                      className="icon-btn-subtle"
+                      className={`icon-btn-subtle ui-tooltip ${historyFuture.length > 0 ? "" : "disabled"}`}
+                      data-tooltip="Rétablir le déplacement annulé (Ctrl+Y / Cmd+Shift+Z)"
                       onClick={handleRedo}
                       disabled={historyFuture.length === 0 || busy || selected?.state === "APPROVED"}
-                      title="Rétablir le déplacement annulé (Ctrl+Y / Cmd+Shift+Z)"
                       style={{
                         padding: "6px 12px",
                         fontWeight: 700,
@@ -2446,13 +2446,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                               {/* Ligne de Synthèse : ⚖️ Parité | ∅ Moyenne | ✦ Accompagnements & Besoins */}
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-light)", whiteSpace: "nowrap" }}>
-                                <span style={{ whiteSpace: "nowrap" }} title={`Parité filles / garçons : ${countF} Filles et ${countM} Garçons`}>
+                                <span className="ui-tooltip" data-tooltip={`Parité filles / garçons : ${countF} Filles et ${countM} Garçons`} style={{ whiteSpace: "nowrap", cursor: "help" }}>
                                   ⚖️ <strong>{countF}F</strong>/<strong>{countM}G</strong>
                                 </span>
-                                <span style={{ whiteSpace: "nowrap" }} title={`Moyenne générale calculée pour ${classroom.label} : ${avg} / 20`}>
+                                <span className="ui-tooltip" data-tooltip={`Moyenne générale calculée pour ${classroom.label} : ${avg} / 20`} style={{ whiteSpace: "nowrap", cursor: "help" }}>
                                   ∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong>
                                 </span>
                                 <button
+                                  className={`ui-tooltip ${openSupportModalClassId === classroom.id ? "active" : ""}`}
+                                  data-tooltip="Cliquez pour afficher le détail des accompagnements (PAP, PPS, PAI...) de la classe"
                                   style={{
                                     background: openSupportModalClassId === classroom.id ? "var(--primary-brand)" : "transparent",
                                     color: openSupportModalClassId === classroom.id ? "#ffffff" : "var(--text-muted)",
@@ -2466,7 +2468,6 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                     transition: "var(--transition-fast)",
                                   }}
                                   onClick={() => setOpenSupportModalClassId(openSupportModalClassId === classroom.id ? null : classroom.id)}
-                                  title="Cliquez pour afficher le détail des accompagnements (PAP, PPS, PAI...) de la classe"
                                 >
                                   ✦ <strong>{supportCount}</strong> besoins ℹ️
                                 </button>
@@ -2575,6 +2576,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                           {nameOf(student, anonymous)}
                                         </span>
                                         <span
+                                          className="ui-tooltip"
+                                          data-tooltip={`Moyenne générale de ${nameOf(student, anonymous)} : ${student.levelAverage.toFixed(1)}/20`}
                                           style={{
                                             background: "#f1f5f9",
                                             border: "1px solid #cbd5e1",
@@ -2590,8 +2593,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                             alignItems: "center",
                                             gap: "1.5px",
                                             boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                                            cursor: "help"
                                           }}
-                                          title={`Moyenne générale de ${nameOf(student, anonymous)} : ${student.levelAverage.toFixed(1)}/20`}
                                         >
                                           <span>{student.levelAverage.toFixed(1)}</span>
                                           <span style={{ color: "#94a3b8", fontSize: "0.68rem", fontWeight: 500 }}>/20</span>
@@ -2602,12 +2605,12 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                     {/* Actions : 🔍 Fiche & ⇄ Déplacer */}
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
                                       <button
-                                        className="icon-btn-subtle"
+                                        className="icon-btn-subtle ui-tooltip"
+                                        data-tooltip="Consulter le dossier pédagogique"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setInspectStudent(student);
                                         }}
-                                        title="Consulter le dossier pédagogique"
                                         style={{ padding: "3px 6px", fontSize: "0.75rem", borderRadius: "var(--radius-sm)" }}
                                       >
                                         🔍
@@ -2615,7 +2618,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                                       {selected.state !== "APPROVED" && (
                                         <select
-                                          className="compact-move-select"
+                                          className="compact-move-select ui-tooltip"
+                                          data-tooltip="Transférer vers une autre classe"
                                           value=""
                                           onClick={(e) => e.stopPropagation()}
                                           onChange={(e) => {
