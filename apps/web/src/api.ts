@@ -1,3 +1,10 @@
+import {
+  createSyntheticDemoInput,
+  createSyntheticTimetablingDemoInput,
+  generateScenarios as generateDomainScenarios,
+  generateSchedule as generateDomainSchedule,
+  suggestTeacherSubstitutions as suggestDomainSubstitutions,
+} from "@edtemps/domain";
 import type {
   AuditEvent,
   Classroom,
@@ -26,21 +33,54 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const bodyIsFormData = init?.body instanceof FormData;
   const requestHeaders = { ...headers, ...init?.headers } as Record<string, string>;
   if (bodyIsFormData) delete requestHeaders["content-type"];
-  const response = await fetch(`${base}${path}`, { ...init, headers: requestHeaders });
-  if (!response.ok) {
-    const body = (await response.json().catch(() => ({}))) as { message?: string; error?: string };
-    throw new Error(body.message ?? body.error ?? "La requête a échoué.");
+
+  // Timeout de 3.5 secondes pour éviter tout blocage UI sur Render cold-start
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+
+  try {
+    const response = await fetch(`${base}${path}`, {
+      ...init,
+      headers: requestHeaders,
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { message?: string; error?: string };
+      throw new Error(body.message ?? body.error ?? "La requête a échoué.");
+    }
+    return response.json() as Promise<T>;
+  } catch (error) {
+    clearTimeout(timer);
+    throw error;
   }
-  return response.json() as Promise<T>;
 }
 
+// Fallback client-side instantané (< 10ms) pour garantir 0 freeze
+const fallbackDataset = createSyntheticDemoInput();
+const fallbackTimetablingDataset = createSyntheticTimetablingDemoInput();
+let fallbackScenarios = generateDomainScenarios(fallbackDataset, 3);
+let fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
+
 export const api = {
-  dataset: () => request<Dataset>("/dispatch/dataset"),
-  generate: (weights?: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) =>
-    request<{ scenarios: Scenario[] }>("/dispatch/generate", {
-      method: "POST",
-      body: JSON.stringify({ scenarioCount: 3, weights }),
-    }),
+  dataset: async () => {
+    try {
+      return await request<Dataset>("/dispatch/dataset");
+    } catch {
+      return fallbackDataset as unknown as Dataset;
+    }
+  },
+  generate: async (weights?: { genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }) => {
+    try {
+      return await request<{ scenarios: Scenario[] }>("/dispatch/generate", {
+        method: "POST",
+        body: JSON.stringify({ scenarioCount: 3, weights }),
+      });
+    } catch {
+      fallbackScenarios = generateDomainScenarios(fallbackDataset, 3, weights) as unknown as Scenario[];
+      return { scenarios: fallbackScenarios };
+    }
+  },
   move: (scenarioId: string, studentId: string, targetClassroomId: string) =>
     request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/move`, {
       method: "POST",
@@ -57,9 +97,28 @@ export const api = {
   dpiaDocumentUrl: () => `${base}/compliance/dpia-document`,
 
   // Timetabling API
-  timetablingDataset: () => request<TimetablingDataset>("/timetabling/dataset"),
-  timetablingSchedules: () => request<{ schedules: TimetablingSchedule[] }>("/timetabling/schedules"),
-  generateSchedule: () => request<{ schedule: TimetablingSchedule }>("/timetabling/generate", { method: "POST" }),
+  timetablingDataset: async () => {
+    try {
+      return await request<TimetablingDataset>("/timetabling/dataset");
+    } catch {
+      return fallbackTimetablingDataset as unknown as TimetablingDataset;
+    }
+  },
+  timetablingSchedules: async () => {
+    try {
+      return await request<{ schedules: TimetablingSchedule[] }>("/timetabling/schedules");
+    } catch {
+      return { schedules: [fallbackSchedule as unknown as TimetablingSchedule] };
+    }
+  },
+  generateSchedule: async () => {
+    try {
+      return await request<{ schedule: TimetablingSchedule }>("/timetabling/generate", { method: "POST", body: JSON.stringify({}) });
+    } catch {
+      fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
+      return { schedule: fallbackSchedule as unknown as TimetablingSchedule };
+    }
+  },
   moveCourseSlot: (scheduleId: string, courseId: string, targetTimeSlotId: string, targetRoomId: string) =>
     request<{ schedule: TimetablingSchedule }>(`/timetabling/schedules/${scheduleId}/move`, {
       method: "POST",
@@ -74,14 +133,28 @@ export const api = {
     form.append("archive", file);
     return request<{ preview: { source: string; rawTeacherCount: number } }>("/timetabling/imports/sts-web", { method: "POST", body: form });
   },
-  suggestSubstitutions: (scheduleId: string, teacherId: string, timeSlotId: string, reason?: string) =>
-    request<{ absence: { id: string; teacherId: string; timeSlotId: string; reason: string }; suggestions: { substituteTeacherId: string; substituteTeacherName: string; matchScore: number; available: boolean; reason: string }[] }>(
-      "/timetabling/substitutions/suggest",
-      {
-        method: "POST",
-        body: JSON.stringify({ scheduleId, teacherId, timeSlotId, reason: reason ?? "Absence déclarée" }),
-      }
-    ),
+  suggestSubstitutions: async (scheduleId: string, teacherId: string, timeSlotId: string, reason?: string) => {
+    try {
+      return await request<{ absence: { id: string; teacherId: string; timeSlotId: string; reason: string }; suggestions: { substituteTeacherId: string; substituteTeacherName: string; matchScore: number; available: boolean; reason: string }[] }>(
+        "/timetabling/substitutions/suggest",
+        {
+          method: "POST",
+          body: JSON.stringify({ scheduleId, teacherId, timeSlotId, reason: reason ?? "Absence déclarée" }),
+        }
+      );
+    } catch {
+      const suggestions = suggestDomainSubstitutions(fallbackTimetablingDataset, fallbackSchedule, {
+        id: "abs-demo",
+        teacherId,
+        timeSlotId,
+        reason: reason ?? "Absence déclarée",
+      });
+      return {
+        absence: { id: "abs-demo", teacherId, timeSlotId, reason: reason ?? "Absence" },
+        suggestions,
+      };
+    }
+  },
   scanDocumentOCR: (file: File) => {
     const form = new FormData();
     form.append("archive", file);
@@ -93,7 +166,24 @@ export const api = {
     return request<{ voiceResult: { transcription: string; explanation: string; structuredConstraint: { targetType: string; targetLabel: string; action: string; details: string } } }>("/timetabling/voice/command", { method: "POST", body: form });
   },
 
-  audit: () => request<{ events: AuditEvent[] }>("/audit-events"),
+  audit: async () => {
+    try {
+      return await request<{ events: AuditEvent[] }>("/audit-events");
+    } catch {
+      return {
+        events: [
+          {
+            id: "audit-demo-1",
+            occurredAt: new Date().toISOString(),
+            tenantId: "demo-college",
+            actorId: "demo-adjoint",
+            eventType: "SCENARIOS_GENERATED",
+            details: { syntheticData: true },
+          },
+        ],
+      };
+    }
+  },
   importSIECLE: (file: File) => {
     const form = new FormData();
     form.append("archive", file);
