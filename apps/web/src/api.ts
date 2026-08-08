@@ -5,8 +5,9 @@ import {
   generateScenarios as generateDomainScenarios,
   generateSchedule as generateDomainSchedule,
   suggestTeacherSubstitutions as suggestDomainSubstitutions,
+  validateDispatchFeasibility,
 } from "@edtemps/domain";
-export { createSyntheticDemoInputCustom };
+export { createSyntheticDemoInputCustom, validateDispatchFeasibility };
 import type {
   AuditEvent,
   Classroom,

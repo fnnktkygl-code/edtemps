@@ -296,14 +296,109 @@ function explanationFor(
   return { hardConstraints, softConsiderations };
 }
 
+export type FeasibilityError = {
+  code: "TOTAL_CAPACITY_EXCEEDED" | "TOTAL_MIN_CAPACITY_UNREACHED" | "OPTION_SINGLE_CLASS_OVERFLOW";
+  title: string;
+  message: string;
+  suggestedFix?: {
+    recommendedClassCount?: number;
+    recommendedMaxSize?: number;
+    recommendedMinSize?: number;
+    label: string;
+  };
+};
+
+export type FeasibilityCheckResult = {
+  isFeasible: boolean;
+  errors: FeasibilityError[];
+};
+
+export function validateDispatchFeasibility(
+  input: DispatchInput,
+  weights?: DispatchWeights
+): FeasibilityCheckResult {
+  const errors: FeasibilityError[] = [];
+  const totalStudents = input.students.length;
+  const classCount = input.classrooms.length;
+  if (classCount === 0 || totalStudents === 0) {
+    return { isFeasible: true, errors: [] };
+  }
+
+  const maxPerClass = input.classrooms[0]?.maxSize ?? 24;
+  const minPerClass = input.classrooms[0]?.minSize ?? 18;
+  const totalMaxCapacity = sum(input.classrooms, (c) => c.maxSize);
+  const totalMinCapacity = sum(input.classrooms, (c) => c.minSize);
+
+  // 1. Surcharge globale de capacité max
+  if (totalMaxCapacity < totalStudents) {
+    const missingPlaces = totalStudents - totalMaxCapacity;
+    const recommendedClasses = Math.ceil(totalStudents / maxPerClass);
+    const recommendedMax = Math.ceil(totalStudents / classCount);
+
+    errors.push({
+      code: "TOTAL_CAPACITY_EXCEEDED",
+      title: "🚨 Capacité Totale Insuffisante (Surcharge Globale)",
+      message: `Vous avez ${totalStudents} élèves à répartir sur ${classCount} classe${classCount > 1 ? "s" : ""} de ${maxPerClass} élèves max (capacité cumulée = ${totalMaxCapacity} places). Il manque ${missingPlaces} place${missingPlaces > 1 ? "s" : ""} !`,
+      suggestedFix: {
+        recommendedClassCount: recommendedClasses,
+        recommendedMaxSize: recommendedMax,
+        label: `Passer à ${recommendedClasses} classes OU augmenter l'effectif max à ${recommendedMax} élèves/classe.`,
+      },
+    });
+  }
+
+  // 2. Sous-effectif généralisé sous le seuil minimal
+  if (totalMinCapacity > totalStudents && classCount > 1) {
+    const excessThreshold = totalMinCapacity - totalStudents;
+    const recommendedClasses = Math.max(1, Math.floor(totalStudents / minPerClass));
+    const recommendedMin = Math.max(1, Math.floor(totalStudents / classCount) - 2);
+
+    errors.push({
+      code: "TOTAL_MIN_CAPACITY_UNREACHED",
+      title: "⚠️ Seuil Minimal Non Atteint (Sous-effectif Généralisé)",
+      message: `Vous avez ${totalStudents} élèves pour un seuil cumulé de ${totalMinCapacity} élèves minimum (${classCount} classes × ${minPerClass} élèves min). Vos classes seraient sous le seuil minimal de ${excessThreshold} élèves.`,
+      suggestedFix: {
+        recommendedClassCount: recommendedClasses,
+        recommendedMinSize: recommendedMin,
+        label: `Réduire à ${recommendedClasses} classe${recommendedClasses > 1 ? "s" : ""} OU baisser l'effectif min à ${recommendedMin} élèves/classe.`,
+      },
+    });
+  }
+
+  // 3. Regroupement d'option strict dépassant la taille d'une classe
+  if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS") {
+    const optionLabels = [...new Set(input.students.flatMap((student) => student.options))];
+    for (const option of optionLabels) {
+      const optionCount = input.students.filter((s) => s.options.includes(option)).length;
+      if (optionCount > maxPerClass) {
+        errors.push({
+          code: "OPTION_SINGLE_CLASS_OVERFLOW",
+          title: `🎓 Regroupement d'Option ${option} Impossible sur 1 Classe`,
+          message: `L'option ${option} concerne ${optionCount} élèves, mais l'effectif maximal d'une classe est limité à ${maxPerClass} élèves. L'option ne peut pas être regroupée sur une seule classe.`,
+          suggestedFix: {
+            recommendedMaxSize: optionCount,
+            label: `Passer en mode "Diluer / Équilibrer" OU augmenter la capacité max à ${optionCount} élèves/classe.`,
+          },
+        });
+      }
+    }
+  }
+
+  return {
+    isFeasible: errors.length === 0,
+    errors,
+  };
+}
+
 export function generateScenario(
   input: DispatchInput,
   seed: number,
   weights: DispatchWeights = defaultWeights,
 ): DispatchScenario {
   if (input.classrooms.length === 0) throw new Error("Au moins une classe cible est requise.");
-  if (sum(input.classrooms, (classroom) => classroom.maxSize) < input.students.length) {
-    throw new Error("La capacité totale des classes est insuffisante.");
+  const feasibility = validateDispatchFeasibility(input, weights);
+  if (!feasibility.isFeasible && feasibility.errors.length > 0) {
+    throw new Error(feasibility.errors[0].message);
   }
   const random = seededRandom(seed);
   const targets = targetStats(input, weights);
