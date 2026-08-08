@@ -872,12 +872,14 @@ export default function App() {
                               if (!course) return null;
                               return (
                                 <div key={placement.courseId} className={`course-badge ${subjectColorClass(course.subject)}`}>
-                                  <strong>
-                                    {course.subject} ({course.classroomId})
-                                  </strong>
-                                  <small>
-                                    {teacher?.displayName} · {room?.label}
-                                  </small>
+                                  <div className="course-title-row">
+                                    <span className="course-subject">{course.subject}</span>
+                                    <span className="course-class-tag">{course.classroomId}</span>
+                                  </div>
+                                  <div className="course-details-row">
+                                    <span>👤 {teacher?.displayName}</span>
+                                    <span>📍 {room?.label}</span>
+                                  </div>
                                 </div>
                               );
                             })

@@ -665,27 +665,29 @@ button:disabled {
 }
 
 .grid-header {
-  background: linear-gradient(135deg, #000091, #4f46e5);
-  color: #ffffff;
+  background: var(--bg-card);
+  color: var(--text-main);
   padding: 16px;
   text-align: center;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.95rem;
+  border-bottom: 2px solid var(--border-light);
 }
 
 [data-theme="dark"] .grid-header {
-  background: linear-gradient(135deg, #1e1b4b, #312e81);
-  color: #e0e7ff;
+  background: var(--bg-card);
+  color: var(--text-main);
 }
 
 .time-col-header {
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
   padding: 16px 8px;
   text-align: center;
   font-weight: 800;
   font-size: 0.88rem;
+  border-bottom: 2px solid var(--border-light);
 }
 
 .time-label {
@@ -700,7 +702,7 @@ button:disabled {
 
 .grid-slot {
   background: var(--bg-card);
-  min-height: 85px;
+  min-height: 95px;
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -717,14 +719,46 @@ button:disabled {
 }
 
 .course-badge {
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  font-weight: 700;
   border-left: 4px solid var(--indigo-accent);
   background: var(--bg-subtle);
   color: var(--text-main);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.course-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.course-subject {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.course-class-tag {
+  background: var(--indigo-accent);
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.course-details-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .course-badge.math { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.12); }

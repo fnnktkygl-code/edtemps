@@ -729,9 +729,19 @@ export function generateSchedule(input: TimetablingInput, seed = 42): Timetablin
   // Mélanger pour variabilité déterministe
   const sortedCourses = [...remainingCourses].sort((a, b) => b.hoursPerWeek - a.hoursPerWeek || random() - 0.5);
 
+  const days: TimeSlotDay[] = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+  let courseIdx = 0;
   for (const course of sortedCourses) {
+    courseIdx++;
     let placed = false;
-    for (const slot of input.timeSlots) {
+    // Étalement uniforme des créneaux sur les 5 jours de la semaine
+    const shuffledSlots = [...input.timeSlots].sort((a, b) => {
+      const rankA = (days.indexOf(a.day) + courseIdx * 2) % 5;
+      const rankB = (days.indexOf(b.day) + courseIdx * 2) % 5;
+      return rankA - rankB;
+    });
+
+    for (const slot of shuffledSlots) {
       if (slot.isMeridienne) continue;
 
       const teacher = teachersById.get(course.teacherId);
