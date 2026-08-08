@@ -417,14 +417,35 @@ export function calculateMetrics(input: DispatchInput, assignments: Assignment, 
     Math.abs(members.filter((student) => student.options.includes(option)).length - target),
   ));
   const violations = validateAssignment(input, assignments).length;
-  const penalty = genderDeviation * weights.genderBalance + academicDeviation * weights.academicBalance + supportDeviation * weights.supportBalance + optionDeviation * weights.optionBalance + violations * 1000;
-  const normalized = (value: number) => Math.max(0, Math.round(100 - value * 12));
+
+  const totalStudents = Math.max(1, input.students.length);
+  const classCount = Math.max(1, input.classrooms.length);
+  const totalSupport = Math.max(1, input.students.filter((s) => s.supportFlags.length > 0).length);
+  const totalOptions = Math.max(1, input.students.filter((s) => s.options.length > 0).length);
+
+  // Calibrage des sous-scores entre 0% et 100%
+  const genderBalance = Math.max(0, Math.min(100, Math.round(100 - (genderDeviation / totalStudents) * 150)));
+  const academicBalance = Math.max(0, Math.min(100, Math.round(100 - (academicDeviation / (classCount * 2.5)) * 100)));
+  const supportBalance = Math.max(0, Math.min(100, Math.round(100 - (supportDeviation / totalSupport) * 100)));
+  const optionBalance = Math.max(0, Math.min(100, Math.round(100 - (optionDeviation / (totalOptions * 1.5)) * 100)));
+
+  // Score global pondéré (0 à 1000 points)
+  const totalWeight = weights.genderBalance + weights.academicBalance + weights.supportBalance + weights.optionBalance;
+  const weightedSum =
+    genderBalance * weights.genderBalance +
+    academicBalance * weights.academicBalance +
+    supportBalance * weights.supportBalance +
+    optionBalance * weights.optionBalance;
+
+  const baseScore = totalWeight > 0 ? (weightedSum / totalWeight) * 10 : 850;
+  const score = Math.max(0, Math.min(1000, Math.round(baseScore - violations * 250)));
+
   return {
-    score: Math.max(0, Math.round(1000 - penalty * 10)),
-    genderBalance: normalized(genderDeviation),
-    academicBalance: normalized(academicDeviation),
-    supportBalance: normalized(supportDeviation),
-    optionBalance: normalized(optionDeviation),
+    score,
+    genderBalance,
+    academicBalance,
+    supportBalance,
+    optionBalance,
     hardConstraintViolations: violations,
   };
 }
