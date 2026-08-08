@@ -325,26 +325,27 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const [importMenuOpen, setImportMenuOpen] = useState(false);
+
   return (
     <main className="page">
       <header className="masthead">
-        <div>
-          <p className="eyebrow">🇫🇷 RÉPUBLIQUE FRANÇAISE · ÉDUCATION NATIONALE</p>
-          <h1>
-            EdTemps <span>— Répartition & Emplois du Temps</span>
-          </h1>
+        <div className="brand-section">
+          <span className="brand-badge">🇫🇷 ÉDUCATION NATIONALE</span>
+          <h1>EdTemps</h1>
         </div>
         <div className="header-actions">
+          <label className="toggle-pill" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
+            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser
+          </label>
           <button
             className="theme-toggle-btn"
             onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
-            data-tooltip="Basculez entre le mode clair et le mode sombre haute lisibilité"
+            data-tooltip="Basculez entre le mode clair et le mode sombre"
           >
-            {theme === "light" ? "🌙 Mode Sombre" : "☀️ Mode Clair"}
+            {theme === "light" ? "🌙" : "☀️"}
           </button>
-          <label className="toggle" data-tooltip="Anonymise les noms des élèves (INE et Identités) conformément au RGPD">
-            <input type="checkbox" checked={anonymous} onChange={(event) => setAnonymous(event.target.checked)} /> Anonymiser les élèves
-          </label>
+
           <input
             ref={fileInput}
             className="visually-hidden"
@@ -378,45 +379,85 @@ export default function App() {
               if (file) void scanOCRDocument(file);
             }}
           />
-          <button
-            className="secondary"
-            onClick={() => fileInput.current?.click()}
-            disabled={busy}
-            data-tooltip="Importer SIECLE : Fichier officiel ministériel d'import des élèves et options"
-          >
-            📦 SIECLE (Élèves)
-          </button>
-          <button
-            className="secondary"
-            onClick={() => stsFileInput.current?.click()}
-            disabled={busy}
-            data-tooltip="Importer STS-Web : Fichier ministériel d'import des services enseignants et barrettes"
-          >
-            🏛️ STS-Web (Profs)
-          </button>
-          <button
-            className="secondary"
-            onClick={() => ocrFileInput.current?.click()}
-            disabled={busy}
-            data-tooltip="Mistral OCR (Pixtral) : Scanner une fiche de vœux papier d'enseignant imprimée ou manuscrite"
-          >
-            📷 OCR Vœux (Pixtral)
-          </button>
-          <button
-            className="secondary"
-            onClick={() => void triggerVoiceCommand()}
-            disabled={busy}
-            data-tooltip="Mistral Dictée Vocale (Voxtral) : Formuler une contrainte ou une absence oralement au micro"
-          >
-            🎙️ Dictée Vocale (Voxtral)
-          </button>
+
+          <div style={{ position: "relative" }}>
+            <button
+              className="secondary"
+              onClick={() => setImportMenuOpen(!importMenuOpen)}
+              data-tooltip="Menu d'importation des fichiers SIECLE, STS-Web et outils IA Mistral"
+            >
+              📥 Importer & IA ▾
+            </button>
+            {importMenuOpen && (
+              <div
+                className="dropdown-menu"
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "110%",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "var(--radius-md)",
+                  boxShadow: "var(--shadow-lg)",
+                  padding: "8px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                  zIndex: 2000,
+                  minWidth: "220px",
+                }}
+              >
+                <button
+                  className="secondary"
+                  style={{ textAlign: "left", justifyContent: "flex-start" }}
+                  onClick={() => {
+                    setImportMenuOpen(false);
+                    fileInput.current?.click();
+                  }}
+                >
+                  📦 SIECLE (Élèves)
+                </button>
+                <button
+                  className="secondary"
+                  style={{ textAlign: "left", justifyContent: "flex-start" }}
+                  onClick={() => {
+                    setImportMenuOpen(false);
+                    stsFileInput.current?.click();
+                  }}
+                >
+                  🏛️ STS-Web (Profs & Services)
+                </button>
+                <button
+                  className="secondary"
+                  style={{ textAlign: "left", justifyContent: "flex-start" }}
+                  onClick={() => {
+                    setImportMenuOpen(false);
+                    ocrFileInput.current?.click();
+                  }}
+                >
+                  📷 Mistral OCR (Pixtral)
+                </button>
+                <button
+                  className="secondary"
+                  style={{ textAlign: "left", justifyContent: "flex-start" }}
+                  onClick={() => {
+                    setImportMenuOpen(false);
+                    void triggerVoiceCommand();
+                  }}
+                >
+                  🎙️ Dictée Vocale (Voxtral)
+                </button>
+              </div>
+            )}
+          </div>
+
           {activeTab === "dispatch" && (
-            <button className="primary" onClick={generate} disabled={busy} data-tooltip="Lancer l'algorithme d'optimisation sous contraintes pour générer 3 propositions équilibrées">
+            <button className="primary" onClick={generate} disabled={busy} data-tooltip="Générer 3 propositions de répartition sous contraintes">
               {busy ? "Calcul en cours…" : "✨ Générer 3 scénarios"}
             </button>
           )}
           {activeTab === "timetabling" && (
-            <button className="primary" onClick={generateTimetable} disabled={busy} data-tooltip="Calculer un emploi du temps optimal anti-collision avec le solveur de contraintes CP-SAT">
+            <button className="primary" onClick={generateTimetable} disabled={busy} data-tooltip="Calculer un emploi du temps optimal avec le solveur CP-SAT">
               {busy ? "Calcul en cours…" : "⚡ Générer l'Emploi du temps"}
             </button>
           )}
@@ -428,14 +469,14 @@ export default function App() {
         <button
           className={`tab-button ${activeTab === "dispatch" ? "active" : ""}`}
           onClick={() => setActiveTab("dispatch")}
-          data-tooltip="Module 1 : Répartition équilibrée des élèves par niveau et options dans les classes"
+          data-tooltip="Module 1 : Répartition équilibrée des élèves dans les classes"
         >
           🏫 Répartition des élèves
         </button>
         <button
           className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`}
           onClick={() => setActiveTab("timetabling")}
-          data-tooltip="Module 2 : Emplois du temps des classes/enseignants et gestion des remplacements d'urgence"
+          data-tooltip="Module 2 : Emplois du temps et gestion des remplacements d'urgence"
         >
           📅 Emplois du temps & Remplacements
         </button>
@@ -445,9 +486,9 @@ export default function App() {
             setActiveTab("compliance");
             void refreshAudit();
           }}
-          data-tooltip="Module 3 : Dossier CNIL/RGPD, Analyse d'Impact (AIPD) et Homologation de Sécurité (RGS)"
+          data-tooltip="Module 3 : Conformité CNIL/RGPD et Dossier d'Homologation RGS"
         >
-          📋 Protection des données (DPO) & RGS
+          📋 Conformité, DPO & Homologation RGS
         </button>
       </nav>
 
