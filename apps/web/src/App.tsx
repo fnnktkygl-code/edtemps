@@ -55,6 +55,23 @@ function getAvatarColor(id: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
+const SUPPORT_FLAG_TITLES: Record<string, string> = {
+  PAP: "Plan d'Accompagnement Personnalisé (Dys, TDAH, troubles des apprentissages)",
+  PPS: "Projet Personnalisé de Scolarisation (Situation de handicap / AESH)",
+  PPRE: "Programme Personnalisé de Réussite Éducative (Soutien pédagogique renforcé)",
+  PAI: "Projet d'Accueil Individualisé (Troubles de la santé / Médicaments)",
+  ULIS: "Unité Localisée pour l'Inclusion Scolaire (Dispositif d'inclusion)",
+};
+
+const OPTION_TITLES: Record<string, string> = {
+  Latin: "Option Linguistique : Latin / Langues et Cultures de l'Antiquité",
+  LCR: "Option : Langue et Culture Régionale",
+  Allemand: "Langue Vivante : Allemand (LVA / LVB)",
+  Espagnol: "Langue Vivante : Espagnol (LVB)",
+  Anglais: "Langue Vivante : Anglais (LVA)",
+  CHAM: "Classe à Horaires Aménagés Musique / Danse / Théâtre",
+};
+
 export default function App() {
   const [activeTab, setActiveTabState] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">(() => {
     const saved = localStorage.getItem("edtemps_activeTab");
@@ -139,6 +156,7 @@ export default function App() {
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
   const [dragOverClassId, setDragOverClassId] = useState<string | null>(null);
   const [lastMove, setLastMove] = useState<{ studentId: string; studentName: string; fromClassId: string; toClassId: string } | null>(null);
+  const [openSupportModalClassId, setOpenSupportModalClassId] = useState<string | null>(null);
 
   // Weights slider state
   const [weights, setWeightsState] = useState<{ genderBalance: number; academicBalance: number; supportBalance: number; optionBalance: number }>(() => {
@@ -1862,12 +1880,83 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* Ligne de Synthèse : ⚖️ 2F / 1G | ∅ 14.4/20 | ✦ X disp. */}
+                              {/* Ligne de Synthèse : ⚖️ Parité | ∅ Moyenne | ✦ Accompagnements & Besoins */}
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-light)", whiteSpace: "nowrap" }}>
-                                <span style={{ whiteSpace: "nowrap" }}>⚖️ <strong>{countF}F</strong>/<strong>{countM}G</strong></span>
-                                <span style={{ whiteSpace: "nowrap" }}>∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
-                                <span style={{ whiteSpace: "nowrap" }}>✦ <strong>{supportCount}</strong> disp.</span>
+                                <span style={{ whiteSpace: "nowrap" }} title={`Parité filles / garçons : ${countF} Filles et ${countM} Garçons`}>
+                                  ⚖️ <strong>{countF}F</strong>/<strong>{countM}G</strong>
+                                </span>
+                                <span style={{ whiteSpace: "nowrap" }} title={`Moyenne générale calculée pour ${classroom.label} : ${avg} / 20`}>
+                                  ∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong>
+                                </span>
+                                <button
+                                  style={{
+                                    background: openSupportModalClassId === classroom.id ? "var(--primary-brand)" : "transparent",
+                                    color: openSupportModalClassId === classroom.id ? "#ffffff" : "var(--text-muted)",
+                                    border: "1px solid var(--border-light)",
+                                    borderRadius: "var(--radius-sm)",
+                                    padding: "2px 6px",
+                                    fontSize: "0.72rem",
+                                    fontWeight: 800,
+                                    cursor: "pointer",
+                                    whiteSpace: "nowrap",
+                                    transition: "var(--transition-fast)",
+                                  }}
+                                  onClick={() => setOpenSupportModalClassId(openSupportModalClassId === classroom.id ? null : classroom.id)}
+                                  title="Cliquez pour afficher le détail des accompagnements (PAP, PPS, PAI...) de la classe"
+                                >
+                                  ✦ <strong>{supportCount}</strong> besoins ℹ️
+                                </button>
                               </div>
+
+                              {/* Popover Informatif Interactif des Accompagnements */}
+                              {openSupportModalClassId === classroom.id && (
+                                <div
+                                  style={{
+                                    marginTop: "10px",
+                                    padding: "12px",
+                                    background: "var(--bg-subtle)",
+                                    border: "1px solid var(--border-light)",
+                                    borderRadius: "var(--radius-sm)",
+                                    fontSize: "0.78rem",
+                                    color: "var(--text-main)",
+                                    boxShadow: "var(--shadow-md)",
+                                  }}
+                                >
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", fontWeight: 800 }}>
+                                    <span>📋 Aménagements ({classroom.label})</span>
+                                    <button
+                                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: "var(--text-muted)" }}
+                                      onClick={() => setOpenSupportModalClassId(null)}
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+
+                                  {supportCount === 0 && classroom.students.every((s) => s.options.length === 0) ? (
+                                    <div style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>Aucun aménagement particulier dans cette classe.</div>
+                                  ) : (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "160px", overflowY: "auto" }}>
+                                      {classroom.students.filter((s) => s.supportFlags.length > 0 || s.options.length > 0).map((s) => (
+                                        <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px", fontSize: "0.74rem" }}>
+                                          <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nameOf(s, anonymous)}</span>
+                                          <div style={{ display: "flex", gap: "3px", flexShrink: 0 }}>
+                                            {s.supportFlags.map((f) => (
+                                              <span key={f} title={SUPPORT_FLAG_TITLES[f] || f} style={{ background: "#fef3c7", color: "#b45309", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
+                                                {f}
+                                              </span>
+                                            ))}
+                                            {s.options.map((o) => (
+                                              <span key={o} title={OPTION_TITLES[o] || o} style={{ background: "#f3e8ff", color: "#6b21a8", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
+                                                {o}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </header>
 
                             <div className="student-list">
@@ -1966,6 +2055,7 @@ export default function App() {
                                       {student.supportFlags.map((flag) => (
                                         <span
                                           key={flag}
+                                          title={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           style={{
                                             background: flag === "PAP" ? "#ffedd5" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
                                             color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
@@ -1974,6 +2064,7 @@ export default function App() {
                                             fontSize: "0.68rem",
                                             fontWeight: 800,
                                             lineHeight: 1.2,
+                                            cursor: "help",
                                           }}
                                         >
                                           {flag}
@@ -1982,6 +2073,7 @@ export default function App() {
                                       {student.options.map((opt) => (
                                         <span
                                           key={opt}
+                                          title={OPTION_TITLES[opt] || `Option linguistique ou artistique : ${opt}`}
                                           style={{
                                             background: "#f3e8ff",
                                             color: "#6b21a8",
@@ -1990,6 +2082,7 @@ export default function App() {
                                             fontSize: "0.68rem",
                                             fontWeight: 800,
                                             lineHeight: 1.2,
+                                            cursor: "help",
                                           }}
                                         >
                                           {opt}
