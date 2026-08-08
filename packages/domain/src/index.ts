@@ -51,6 +51,7 @@ export type DispatchWeights = {
   subjectBalance?: number;
   optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
   supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
+  optionClassroomMap?: Record<string, string>;
 };
 
 export type Assignment = Record<string, string>;
@@ -105,10 +106,13 @@ function seededRandom(seed: number): Random {
   };
 }
 
-function groupStudents(students: Student[]): Student[][] {
+function groupStudents(students: Student[], weights?: DispatchWeights): Student[][] {
   const grouped = new Map<string, Student[]>();
   for (const student of students) {
-    const key = student.coLocateGroupId ?? `single:${student.id}`;
+    let key = student.coLocateGroupId ?? `single:${student.id}`;
+    if (weights?.optionGroupingMode === "STRICT_SINGLE_CLASS" && student.options.length > 0) {
+      key = `option:${student.options.slice().sort().join(",")}`;
+    }
     const group = grouped.get(key) ?? [];
     group.push(student);
     grouped.set(key, group);
@@ -403,7 +407,7 @@ export function generateScenario(
   const random = seededRandom(seed);
   const targets = targetStats(input, weights);
   const assignments: Assignment = {};
-  const groups = groupStudents(input.students).sort((left, right) => {
+  const groups = groupStudents(input.students, weights).sort((left, right) => {
     const importance = (group: Student[]) => sum(group, (student) => student.conflictsWith.length * 10 + student.supportFlags.length * 2);
     return importance(right) - importance(left) || random() - 0.5;
   });
@@ -502,10 +506,31 @@ function refineAssignmentWithSimulatedAnnealing(
     );
     const academicDev = sum(byClass, (members) => Math.abs(average(members.map((s) => s.levelAverage)) - targets.average));
     const supportDev = sum(byClass, (members) => Math.abs(members.filter((s) => s.supportFlags.length > 0).length - targets.support));
-    const optionDev = sum(byClass, (members) =>
-      sum(Object.entries(targets.options), ([opt, target]) => Math.abs(members.filter((s) => s.options.includes(opt)).length - target))
-    );
+    let optionDev = 0;
+    for (const [opt, target] of Object.entries(targets.options)) {
+      const countPerClass = byClass.map((m) => m.filter((s) => s.options.includes(opt)).length);
+      const classesWithOpt = countPerClass.filter((c) => c > 0).length;
+
+      if (weights.optionGroupingMode === "STRICT_SINGLE_CLASS") {
+        if (classesWithOpt > 1) {
+          optionDev += (classesWithOpt - 1) * 300;
+        }
+      } else {
+        optionDev += sum(countPerClass, (c) => Math.abs(c - target));
+      }
+
+      if (weights.optionClassroomMap && weights.optionClassroomMap[opt]) {
+        const targetClassId = weights.optionClassroomMap[opt];
+        const misplacedCount = students.filter((s) => s.options.includes(opt) && assignments[s.id] !== targetClassId).length;
+        optionDev += misplacedCount * 500;
+      }
+    }
+
     const hardViolations = validateAssignment(input, assignments).length;
+    const effectiveOptionWeight =
+      weights.optionGroupingMode === "STRICT_SINGLE_CLASS" || (weights.optionClassroomMap && Object.keys(weights.optionClassroomMap).length > 0)
+        ? Math.max(weights.optionBalance, 6)
+        : weights.optionBalance;
 
     return (
       sizeDev * 25 +
@@ -513,7 +538,7 @@ function refineAssignmentWithSimulatedAnnealing(
       genderDev * weights.genderBalance * 5 +
       academicDev * weights.academicBalance * 10 +
       supportDev * weights.supportBalance * 5 +
-      optionDev * weights.optionBalance * 3 +
+      optionDev * effectiveOptionWeight * 3 +
       hardViolations * 2000
     );
   }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { validateAssignment, generateScenario, calculateMetrics } from "@edtemps/domain";
+import { validateAssignment, generateScenario, calculateMetrics, type DispatchWeights } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, validateDispatchFeasibility, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type { FeasibilityError } from "@edtemps/domain";
 import type {
@@ -180,14 +180,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   const [impossibilityErrors, setImpossibilityErrors] = useState<FeasibilityError[]>([]);
 
   // Weights slider state
-  const [weights, setWeightsState] = useState<{
-    genderBalance: number;
-    academicBalance: number;
-    supportBalance: number;
-    optionBalance: number;
-    optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
-    supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
-  }>(() => {
+  const [weights, setWeightsState] = useState<DispatchWeights>(() => {
     const saved = localStorage.getItem("edtemps_weights");
     if (saved) {
       try {
@@ -205,30 +198,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   });
 
   const setWeights = (
-    newWeights:
-      | {
-          genderBalance: number;
-          academicBalance: number;
-          supportBalance: number;
-          optionBalance: number;
-          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
-          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
-        }
-      | ((prev: {
-          genderBalance: number;
-          academicBalance: number;
-          supportBalance: number;
-          optionBalance: number;
-          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
-          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
-        }) => {
-          genderBalance: number;
-          academicBalance: number;
-          supportBalance: number;
-          optionBalance: number;
-          optionGroupingMode?: "BALANCED_DISPERSION" | "STRICT_SINGLE_CLASS";
-          supportGroupingMode?: "BALANCED_DISPERSION" | "GROUP_AESH_CLASSES";
-        })
+    newWeights: DispatchWeights | ((prev: DispatchWeights) => DispatchWeights)
   ) => {
     setWeightsState((prev) => {
       const next = typeof newWeights === "function" ? newWeights(prev) : newWeights;
@@ -344,6 +314,76 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
     }));
   }, [dataset, selected]);
   const selectedStudent = dataset.students.find((student) => student.id === selectedStudentId);
+
+  const ruleAuditList = useMemo(() => {
+    if (!selected) return [];
+    const audits: {
+      id: string;
+      type: "CONFLICT" | "COLOCATION";
+      studentAName: string;
+      studentBName: string;
+      classALabel: string;
+      classBLabel: string;
+      isViolated: boolean;
+    }[] = [];
+
+    const processedPairs = new Set<string>();
+
+    for (const studentA of dataset.students) {
+      const classIdA = selected.assignments[studentA.id];
+      const classroomA = dataset.classrooms.find((c) => c.id === classIdA);
+
+      for (const conflictId of studentA.conflictsWith) {
+        const pairKey = [studentA.id, conflictId].sort().join(":");
+        if (!processedPairs.has(`conflict:${pairKey}`)) {
+          processedPairs.add(`conflict:${pairKey}`);
+          const studentB = dataset.students.find((s) => s.id === conflictId);
+          if (studentB) {
+            const classIdB = selected.assignments[studentB.id];
+            const classroomB = dataset.classrooms.find((c) => c.id === classIdB);
+            const isViolated = classIdA === classIdB && Boolean(classIdA);
+            audits.push({
+              id: `conflict:${pairKey}`,
+              type: "CONFLICT",
+              studentAName: nameOf(studentA, anonymous),
+              studentBName: nameOf(studentB, anonymous),
+              classALabel: classroomA?.label ?? classIdA ?? "Non affecté",
+              classBLabel: classroomB?.label ?? classIdB ?? "Non affecté",
+              isViolated,
+            });
+          }
+        }
+      }
+
+      if (studentA.coLocateGroupId) {
+        const gKey = studentA.coLocateGroupId;
+        if (!processedPairs.has(`coloc:${gKey}`)) {
+          processedPairs.add(`coloc:${gKey}`);
+          const groupMembers = dataset.students.filter((s) => s.coLocateGroupId === gKey);
+          if (groupMembers.length >= 2) {
+            const sA = groupMembers[0];
+            const sB = groupMembers[1];
+            const cA = selected.assignments[sA.id];
+            const cB = selected.assignments[sB.id];
+            const roomA = dataset.classrooms.find((c) => c.id === cA);
+            const roomB = dataset.classrooms.find((c) => c.id === cB);
+            const isViolated = cA !== cB;
+            audits.push({
+              id: `coloc:${gKey}`,
+              type: "COLOCATION",
+              studentAName: nameOf(sA, anonymous),
+              studentBName: nameOf(sB, anonymous),
+              classALabel: roomA?.label ?? cA ?? "Non affecté",
+              classBLabel: roomB?.label ?? cB ?? "Non affecté",
+              isViolated,
+            });
+          }
+        }
+      }
+    }
+
+    return audits;
+  }, [dataset, selected, anonymous]);
 
   async function refreshAudit(): Promise<void> {
     const response = await api.audit();
@@ -1594,7 +1634,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setWeights({ ...weights, optionGroupingMode: "STRICT_SINGLE_CLASS" })}
+                      onClick={() =>
+                        setWeights({
+                          ...weights,
+                          optionGroupingMode: "STRICT_SINGLE_CLASS",
+                          optionBalance: Math.max(weights.optionBalance, 8),
+                        })
+                      }
                       style={{
                         flex: 1,
                         padding: "7px 10px",
@@ -1610,6 +1656,47 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       🎯 Regrouper sur 1 Classe
                     </button>
                   </div>
+
+                  {/* AFFECTATION SUR-MESURE PAR LANGUE / OPTION */}
+                  {(() => {
+                    const uniqueOptions = [...new Set(dataset.students.flatMap((s) => s.options))];
+                    if (uniqueOptions.length === 0) return null;
+                    return (
+                      <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px dashed var(--border-light)" }}>
+                        <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "#1e293b", marginBottom: "6px" }}>
+                          📌 Affectation Dédiée par Langue (Disposition sur-mesure) :
+                        </div>
+                        {uniqueOptions.map((opt) => (
+                          <div key={opt} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "6px" }}>
+                            <span style={{ fontSize: "0.76rem", fontWeight: 700, color: "#6b21a8", background: "#f3e8ff", padding: "2px 8px", borderRadius: "10px" }}>
+                              🎓 Option {opt}
+                            </span>
+                            <select
+                              value={weights.optionClassroomMap?.[opt] || ""}
+                              onChange={(e) => {
+                                const classId = e.target.value;
+                                const nextMap = { ...weights.optionClassroomMap };
+                                if (classId) nextMap[opt] = classId;
+                                else delete nextMap[opt];
+                                setWeights({
+                                  ...weights,
+                                  optionClassroomMap: nextMap,
+                                  optionGroupingMode: "STRICT_SINGLE_CLASS",
+                                  optionBalance: Math.max(weights.optionBalance, 8),
+                                });
+                              }}
+                              style={{ padding: "4px 8px", fontSize: "0.78rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", fontWeight: 700 }}
+                            >
+                              <option value="">🎲 Choix Automatique IA</option>
+                              {dataset.classrooms.map((c) => (
+                                <option key={c.id} value={c.id}>📌 Transférer tout {opt} sur {c.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
@@ -1961,6 +2048,55 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </button>
                   </div>
                 </div>
+
+                {/* PANNEAU AUDIT & VÉRIFICATEUR DES RÈGLES D'ÉLÈVES */}
+                {selected && (
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "12px 16px", marginBottom: "16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "1rem" }}>🔍</span>
+                        <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "#1e293b" }}>
+                          Audit & Vérificateur de Conformité des Règles (Séparations & Binômes d'Élèves)
+                        </h4>
+                      </div>
+                      <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                        {ruleAuditList.length} règle{ruleAuditList.length > 1 ? "s" : ""} active{ruleAuditList.length > 1 ? "s" : ""} · {ruleAuditList.filter((a) => a.isViolated).length} conflit(s) détecté(s)
+                      </span>
+                    </div>
+
+                    {ruleAuditList.length === 0 ? (
+                      <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                        Aucune règle de séparation ou d'association enregistrée. Définissez vos paires d'élèves dans l'onglet "Pondération & Cohorte" pour les auditer ici.
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                        {ruleAuditList.map((audit) => (
+                          <div
+                            key={audit.id}
+                            style={{
+                              padding: "6px 12px",
+                              borderRadius: "12px",
+                              fontSize: "0.78rem",
+                              fontWeight: 700,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              background: audit.isViolated ? "#fef2f2" : "#f0fdf4",
+                              border: `1px solid ${audit.isViolated ? "#fecaca" : "#bbf7d0"}`,
+                              color: audit.isViolated ? "#991b1b" : "#166534",
+                            }}
+                          >
+                            <span>{audit.isViolated ? "❌ VIOLATION (Même classe !)" : "✅ RESPECTÉ (Bien séparés)"}</span>
+                            <span>
+                              {audit.type === "CONFLICT" ? "⛔ Séparation :" : "🤝 Association :"} <strong>{audit.studentAName}</strong> ({audit.classALabel}) ⬄ <strong>{audit.studentBName}</strong> ({audit.classBLabel})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="scenario-grid">
                   {busy ? (
                     <>
