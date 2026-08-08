@@ -47,6 +47,40 @@
 /* ==========================================================================
    Shimmer Loading & Skeleton Animations
    ========================================================================== */
+/* Modale de Confirmation Anti Fausse Manœuvre */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  color: var(--text-main);
+  animation: scaleUp 0.2s ease-out;
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(0.94); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 @keyframes shimmerWave {
   0% {
     background-position: -200% 0;

@@ -258,6 +258,47 @@ export default function App() {
     }
   }
 
+  // Confirmation de déplacement d'élève (Validation check anti fausses manœuvres)
+  const [pendingMove, setPendingMove] = useState<{
+    studentId: string;
+    studentName: string;
+    fromClassLabel: string;
+    toClassId: string;
+    toClassLabel: string;
+    currentCount: number;
+    maxSize: number;
+  } | null>(null);
+
+  function requestMove(studentId: string, targetClassroomId: string): void {
+    if (!selected) return;
+    const student = dataset.students.find((s) => s.id === studentId);
+    const studentName = student ? nameOf(student, anonymous) : studentId;
+    const fromClassId = selected.assignments[studentId];
+    const fromClass = dataset.classrooms.find((c) => c.id === fromClassId);
+    const toClass = dataset.classrooms.find((c) => c.id === targetClassroomId);
+
+    if (!toClass || fromClassId === targetClassroomId) return;
+
+    const currentCount = dataset.students.filter((s) => selected.assignments[s.id] === targetClassroomId).length;
+
+    setPendingMove({
+      studentId,
+      studentName,
+      fromClassLabel: fromClass?.label ?? "Classe actuelle",
+      toClassId: targetClassroomId,
+      toClassLabel: toClass.label,
+      currentCount,
+      maxSize: toClass.maxSize,
+    });
+  }
+
+  async function confirmMove(): Promise<void> {
+    if (!pendingMove) return;
+    const { studentId, toClassId } = pendingMove;
+    setPendingMove(null);
+    await move(studentId, toClassId);
+  }
+
   async function move(studentId: string, targetClassroomId: string): Promise<void> {
     if (!selected) return;
     setBusy(true);
@@ -1503,7 +1544,7 @@ export default function App() {
                                       key={classroom.id}
                                       className="target-pill"
                                       disabled={busy || selected.state === "APPROVED"}
-                                      onClick={() => move(selectedStudentId!, classroom.id)}
+                                      onClick={() => requestMove(selectedStudentId!, classroom.id)}
                                     >
                                       <span>➡️ {classroom.label}</span>
                                       <small style={{ fontSize: "0.72rem", opacity: 0.8 }}>({currentCount}/{classroom.maxSize} él.)</small>
@@ -1549,7 +1590,7 @@ export default function App() {
                               e.preventDefault();
                               setDragOverClassId(null);
                               if (draggedStudentId && selected.assignments[draggedStudentId] !== classroom.id) {
-                                void move(draggedStudentId, classroom.id);
+                                requestMove(draggedStudentId, classroom.id);
                               }
                             }}
                           >
@@ -1629,7 +1670,7 @@ export default function App() {
                                           onClick={(e) => e.stopPropagation()}
                                           onChange={(e) => {
                                             e.stopPropagation();
-                                            if (e.target.value) void move(student.id, e.target.value);
+                                            if (e.target.value) requestMove(student.id, e.target.value);
                                           }}
                                           title="Transférer vers une autre classe"
                                         >
@@ -2202,6 +2243,57 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button className="primary" onClick={() => setInspectStudent(null)}>
                 Fermer le dossier
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE DE CONFIRMATION DE DÉPLACEMENT (VALIDATION CHECK ANTI ERREUR) */}
+      {pendingMove && (
+        <div className="modal-backdrop" onClick={() => setPendingMove(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <span className="eyebrow" style={{ color: "var(--primary-brand)" }}>⚠️ CONFIRMATION DE TRANSFERT</span>
+              <button
+                className="icon-btn-subtle"
+                onClick={() => setPendingMove(null)}
+                style={{ padding: "2px 6px", fontSize: "0.9rem" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem", fontWeight: 800 }}>
+              Transférer l'élève {pendingMove.studentName} ?
+            </h3>
+
+            <div style={{ background: "var(--bg-subtle)", padding: "14px 16px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", marginBottom: "18px", fontSize: "0.88rem" }}>
+              <p style={{ margin: "0 0 8px 0", fontWeight: 700 }}>
+                📍 Provenance : <strong style={{ color: "var(--text-main)" }}>{pendingMove.fromClassLabel}</strong>
+              </p>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                ➡️ Destination : <strong style={{ color: "var(--primary-brand)" }}>{pendingMove.toClassLabel}</strong>{" "}
+                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginLeft: "4px" }}>
+                  (Effectif cible : {pendingMove.currentCount + 1}/{pendingMove.maxSize} él.)
+                </span>
+              </p>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                className="secondary"
+                onClick={() => setPendingMove(null)}
+                style={{ padding: "8px 16px", fontWeight: 700 }}
+              >
+                Annuler
+              </button>
+              <button
+                className="primary"
+                onClick={confirmMove}
+                style={{ padding: "8px 18px", fontWeight: 800 }}
+              >
+                ✓ Confirmer le Transfert
               </button>
             </div>
           </div>
