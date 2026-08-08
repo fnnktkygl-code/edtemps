@@ -69,6 +69,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
   const [dragOverClassId, setDragOverClassId] = useState<string | null>(null);
+  const [lastMove, setLastMove] = useState<{ studentId: string; studentName: string; fromClassId: string; toClassId: string } | null>(null);
 
   // Weights slider state
   const [weights, setWeights] = useState({ genderBalance: 4, academicBalance: 4, supportBalance: 3, optionBalance: 2 });
@@ -163,13 +164,35 @@ export default function App() {
   async function move(studentId: string, targetClassroomId: string): Promise<void> {
     if (!selected) return;
     setBusy(true);
+    const fromClassId = selected.assignments[studentId];
+    const student = dataset.students.find((s) => s.id === studentId);
+    const studentName = student ? nameOf(student, anonymous) : studentId;
     try {
       const response = await api.move(selected.id, studentId, targetClassroomId);
       setScenarios((current) => current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario)));
-      setNotice("Modification enregistrée. Les contraintes dures ont été vérifiées.");
+      if (fromClassId && fromClassId !== targetClassroomId) {
+        setLastMove({ studentId, studentName, fromClassId, toClassId: targetClassroomId });
+      }
+      setNotice(`Élève ${studentName} transféré avec succès en ${dataset.classrooms.find(c => c.id === targetClassroomId)?.label ?? targetClassroomId}.`);
       await refreshAudit();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Déplacement refusé.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function undoLastMove(): Promise<void> {
+    if (!lastMove || !selected) return;
+    setBusy(true);
+    try {
+      const response = await api.move(selected.id, lastMove.studentId, lastMove.fromClassId);
+      setScenarios((current) => current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario)));
+      setNotice(`Déplacement annulé : ${lastMove.studentName} réaffecté en classe.`);
+      setLastMove(null);
+      await refreshAudit();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Annulation impossible.");
     } finally {
       setBusy(false);
     }
@@ -1153,157 +1176,242 @@ export default function App() {
               </section>
 
               {selected && (
-                <section className="workspace" aria-labelledby="assignment-title">
-                  <aside className="inspector">
-                    <p className="eyebrow">Qualité du scénario</p>
-                    <h2 id="assignment-title">Scénario sélectionné</h2>
-                    <dl className="metrics">
-                      <Metric name="Parité" value={selected.metrics.genderBalance} />
-                      <Metric name="Niveaux" value={selected.metrics.academicBalance} />
-                      <Metric name="Accompagnements" value={selected.metrics.supportBalance} />
-                      <Metric name="Options" value={selected.metrics.optionBalance} />
-                    </dl>
-                    <p className="constraint-ok">✓ Aucune contrainte dure violée</p>
-
-                    <div className="export-actions">
-                      <a href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
-                        📥 Export CSV
-                      </a>
-                      <a href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
-                        📦 Export PRONOTE
-                      </a>
+                <>
+                  {lastMove && (
+                    <div className="undo-banner">
+                      <span>
+                        ↔️ <strong>{lastMove.studentName}</strong> a été transféré(e) en classe.
+                      </span>
+                      <button className="undo-btn" onClick={undoLastMove}>
+                        ↩️ Annuler le dernier déplacement
+                      </button>
                     </div>
+                  )}
 
-                    <hr />
-                    <h3>Modifier au clavier</h3>
-                    <label htmlFor="student">Élève à déplacer</label>
-                    <select
-                      id="student"
-                      value={selectedStudentId ?? ""}
-                      onChange={(event) => setSelectedStudentId(event.target.value || undefined)}
-                      disabled={selected.state === "APPROVED"}
-                    >
-                      <option value="">Sélectionner un élève</option>
-                      {dataset.students.map((student) => (
-                        <option key={student.id} value={student.id}>
-                          {nameOf(student, anonymous)} — {dataset.classrooms.find((item) => item.id === selected.assignments[student.id])?.label}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedStudent && <Explanation student={selectedStudent} scenario={selected} />}
-                    <fieldset disabled={!selectedStudentId || busy || selected.state === "APPROVED"}>
-                      <legend>Déplacer vers</legend>
-                      {dataset.classrooms
-                        .filter((classroom) => classroom.id !== selected.assignments[selectedStudentId ?? ""])
-                        .map((classroom) => (
-                          <button key={classroom.id} className="secondary move-button" onClick={() => move(selectedStudentId!, classroom.id)}>
-                            {classroom.label}
-                          </button>
-                        ))}
-                    </fieldset>
-                    <button className="validate" onClick={validate} disabled={busy || selected.state === "APPROVED"}>
-                      {selected.state === "APPROVED" ? "Validation enregistrée" : "Valider humainement"}
-                    </button>
-                    <p className="hint">La validation n'est pas une publication et ne remplace pas la relecture CPE / direction.</p>
-                  </aside>
+                  <section className="workspace" aria-labelledby="assignment-title">
+                    <aside className="inspector">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <span className="eyebrow">🎛️ PANNEAU D'INSPECTION & AJUSTEMENT</span>
+                          <h2 id="assignment-title" style={{ margin: "4px 0 0", fontSize: "1.2rem", fontWeight: 800 }}>
+                            Scénario Sélectionné
+                          </h2>
+                        </div>
+                        <span className={selected.state === "APPROVED" ? "chip approved" : "chip"}>
+                          {selected.state === "APPROVED" ? "✓ Scellé" : "📋 Scénario d'Étape"}
+                        </span>
+                      </div>
 
-                  {/* KANBAN DES CLASSES AVEC DRAG & DROP & SCEAU D'ÉQUILIBRAGE */}
-                  <div className="board" aria-label="Répartition des élèves par classe">
-                    {studentsByClass.map((classroom) => {
-                      const countF = classroom.students.filter((s) => s.gender === "F").length;
-                      const countM = classroom.students.filter((s) => s.gender === "M").length;
-                      const pctF = classroom.students.length > 0 ? (countF / classroom.students.length) * 100 : 50;
-                      const pctM = 100 - pctF;
-                      const avg = classroom.students.length > 0 ? (classroom.students.reduce((sum, s) => sum + s.levelAverage, 0) / classroom.students.length).toFixed(1) : "0.0";
-                      const supportCount = classroom.students.filter((s) => s.supportFlags.length > 0).length;
-                      const isBalanced = classroom.students.length >= classroom.minSize && classroom.students.length <= classroom.maxSize && Math.abs(countF - countM) <= 4;
+                      <dl className="metrics">
+                        <Metric name="Parité" value={selected.metrics.genderBalance} />
+                        <Metric name="Niveaux" value={selected.metrics.academicBalance} />
+                        <Metric name="Accompagnements" value={selected.metrics.supportBalance} />
+                        <Metric name="Options" value={selected.metrics.optionBalance} />
+                      </dl>
+                      <p className="constraint-ok" style={{ margin: 0, padding: "8px 12px", background: "#f0fdf4", color: "#166534", borderRadius: "var(--radius-sm)", fontSize: "0.82rem", fontWeight: 700, border: "1px solid #bbf7d0" }}>
+                        ✓ Aucune contrainte dure violée
+                      </p>
 
-                      return (
-                        <section
-                          className={`class-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
-                          key={classroom.id}
-                          aria-labelledby={`title-${classroom.id}`}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            setDragOverClassId(classroom.id);
-                          }}
-                          onDragLeave={() => setDragOverClassId(null)}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            setDragOverClassId(null);
-                            if (draggedStudentId && selected.assignments[draggedStudentId] !== classroom.id) {
-                              void move(draggedStudentId, classroom.id);
-                            }
-                          }}
+                      {/* ACTIONS D'EXPORT STYLISÉES DSFR */}
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
+                          Export de la répartition officielle
+                        </label>
+                        <div className="export-actions-grid">
+                          <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
+                            📥 Exporter CSV
+                          </a>
+                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
+                            📦 Export PRONOTE
+                          </a>
+                        </div>
+                      </div>
+
+                      <hr style={{ border: 0, borderTop: "1px solid var(--border-light)", margin: "4px 0" }} />
+
+                      {/* SECTEUR D'AFFINAGE ET DE TRANSFERT MANUEL */}
+                      <div className="transfer-card">
+                        <h4>✏️ Transfert & Analyse d'Affectation</h4>
+
+                        <label htmlFor="student" style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-muted)" }}>
+                          Sélectionner un élève à examiner / déplacer :
+                        </label>
+                        <select
+                          id="student"
+                          value={selectedStudentId ?? ""}
+                          onChange={(event) => setSelectedStudentId(event.target.value || undefined)}
+                          disabled={selected.state === "APPROVED"}
+                          style={{ padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, width: "100%" }}
                         >
-                          <header>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)" }}>{classroom.label}</h3>
-                              <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.88rem" }}>
-                                {classroom.students.length}/{classroom.maxSize} él.
-                              </span>
-                            </div>
+                          <option value="">-- Choisir un élève dans la cohorte --</option>
+                          {dataset.students.map((student) => (
+                            <option key={student.id} value={student.id}>
+                              {nameOf(student, anonymous)} — {dataset.classrooms.find((item) => item.id === selected.assignments[student.id])?.label} ({student.levelAverage.toFixed(1)}/20)
+                            </option>
+                          ))}
+                        </select>
 
-                            {/* Sceau d'Équilibrage Institutionnel */}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}>
-                                {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
-                              </span>
-                              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
-                                {countF} F / {countM} G
-                              </span>
-                            </div>
+                        {selectedStudent && <Explanation student={selectedStudent} scenario={selected} />}
 
-                            {/* Barre de Parité Visuelle Bi-couleur */}
-                            <div className="parity-bar" title={`Parité : ${countF} Filles / ${countM} Garçons`}>
-                              <div className="parity-fill-f" style={{ width: `${pctF}%` }} />
-                              <div className="parity-fill-m" style={{ width: `${pctM}%` }} />
+                        {selectedStudentId && (
+                          <div style={{ marginTop: "8px" }}>
+                            <span style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
+                              Transférer l'élève vers une autre classe :
+                            </span>
+                            <div className="target-pills-grid">
+                              {dataset.classrooms
+                                .filter((classroom) => classroom.id !== selected.assignments[selectedStudentId ?? ""])
+                                .map((classroom) => {
+                                  const currentCount = dataset.students.filter((s) => selected.assignments[s.id] === classroom.id).length;
+                                  return (
+                                    <button
+                                      key={classroom.id}
+                                      className="target-pill"
+                                      disabled={busy || selected.state === "APPROVED"}
+                                      onClick={() => move(selectedStudentId!, classroom.id)}
+                                    >
+                                      <span>➡️ {classroom.label}</span>
+                                      <small style={{ fontSize: "0.72rem", opacity: 0.8 }}>({currentCount}/{classroom.maxSize} él.)</small>
+                                    </button>
+                                  );
+                                })}
                             </div>
-
-                            {/* Synthèse Moyenne & Besoins */}
-                            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem" }}>
-                              <span>Moy : <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
-                              <span>🤝 <strong>{supportCount}</strong> PAP/PPS</span>
-                            </div>
-                          </header>
-
-                          <div className="student-list">
-                            {classroom.students.map((student) => (
-                              <div
-                                key={student.id}
-                                draggable={selected.state !== "APPROVED"}
-                                onDragStart={() => setDraggedStudentId(student.id)}
-                                onDragEnd={() => setDraggedStudentId(null)}
-                                className={`student-card ${selectedStudentId === student.id ? "active" : ""}`}
-                                onClick={() => setSelectedStudentId(student.id)}
-                                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "grab" }}
-                              >
-                                <div>
-                                  <span style={{ fontWeight: 700, display: "block" }}>{nameOf(student, anonymous)}</span>
-                                  <small style={{ fontFamily: "var(--font-mono)" }}>
-                                    {student.levelAverage.toFixed(1)}/20{" "}
-                                    {student.supportFlags.length > 0 ? `· ${student.supportFlags.join("/")}` : ""}
-                                  </small>
-                                </div>
-                                <button
-                                  className="secondary"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setInspectStudent(student);
-                                  }}
-                                  style={{ padding: "2px 6px", fontSize: "0.72rem", fontWeight: 700 }}
-                                  title="Consulter la fiche élève complète"
-                                >
-                                  📋
-                                </button>
-                              </div>
-                            ))}
                           </div>
-                        </section>
-                      );
-                    })}
-                  </div>
-                </section>
+                        )}
+                      </div>
+
+                      <button className="validate" onClick={validate} disabled={busy || selected.state === "APPROVED"} style={{ width: "100%", padding: "12px", fontSize: "0.95rem" }}>
+                        {selected.state === "APPROVED" ? "✓ Scénario Validé & Officialisé" : "🔒 Valider Humainement & Officialiser"}
+                      </button>
+                      <p className="hint" style={{ margin: 0, textAlign: "center", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                        La validation est une décision humaine traçable dans le journal d'audit CNIL.
+                      </p>
+                    </aside>
+
+                    {/* KANBAN DES CLASSES AVEC DRAG & DROP & SCEAU D'ÉQUILIBRAGE */}
+                    <div className="board" aria-label="Répartition des élèves par classe">
+                      {studentsByClass.map((classroom) => {
+                        const countF = classroom.students.filter((s) => s.gender === "F").length;
+                        const countM = classroom.students.filter((s) => s.gender === "M").length;
+                        const pctF = classroom.students.length > 0 ? (countF / classroom.students.length) * 100 : 50;
+                        const pctM = 100 - pctF;
+                        const avg = classroom.students.length > 0 ? (classroom.students.reduce((sum, s) => sum + s.levelAverage, 0) / classroom.students.length).toFixed(1) : "0.0";
+                        const supportCount = classroom.students.filter((s) => s.supportFlags.length > 0).length;
+                        const isBalanced = classroom.students.length >= classroom.minSize && classroom.students.length <= classroom.maxSize && Math.abs(countF - countM) <= 4;
+                        const otherClasses = dataset.classrooms.filter((c) => c.id !== classroom.id);
+
+                        return (
+                          <section
+                            className={`class-column ${dragOverClassId === classroom.id ? "drag-over" : ""}`}
+                            key={classroom.id}
+                            aria-labelledby={`title-${classroom.id}`}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              setDragOverClassId(classroom.id);
+                            }}
+                            onDragLeave={() => setDragOverClassId(null)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setDragOverClassId(null);
+                              if (draggedStudentId && selected.assignments[draggedStudentId] !== classroom.id) {
+                                void move(draggedStudentId, classroom.id);
+                              }
+                            }}
+                          >
+                            <header>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <h3 id={`title-${classroom.id}`} style={{ margin: 0, fontFamily: "var(--font-heading)" }}>{classroom.label}</h3>
+                                <span style={{ fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: "0.88rem" }}>
+                                  {classroom.students.length}/{classroom.maxSize} él.
+                                </span>
+                              </div>
+
+                              {/* Sceau d'Équilibrage Institutionnel */}
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span className={`stamp-badge ${isBalanced ? "ok" : "warn"}`}>
+                                  {isBalanced ? "✓ ÉQUILIBRÉE" : "⚠️ À AJUSTER"}
+                                </span>
+                                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                                  {countF} F / {countM} G
+                                </span>
+                              </div>
+
+                              {/* Barre de Parité Visuelle Bi-couleur */}
+                              <div className="parity-bar" title={`Parité : ${countF} Filles / ${countM} Garçons`}>
+                                <div className="parity-fill-f" style={{ width: `${pctF}%` }} />
+                                <div className="parity-fill-m" style={{ width: `${pctM}%` }} />
+                              </div>
+
+                              {/* Synthèse Moyenne & Besoins */}
+                              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-muted)", fontSize: "0.78rem" }}>
+                                <span>Moy : <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong></span>
+                                <span>🤝 <strong>{supportCount}</strong> PAP/PPS</span>
+                              </div>
+                            </header>
+
+                            <div className="student-list">
+                              {classroom.students.map((student) => (
+                                <div
+                                  key={student.id}
+                                  draggable={selected.state !== "APPROVED"}
+                                  onDragStart={() => setDraggedStudentId(student.id)}
+                                  onDragEnd={() => setDraggedStudentId(null)}
+                                  className={`student-card ${selectedStudentId === student.id ? "active" : ""}`}
+                                  onClick={() => setSelectedStudentId(student.id)}
+                                  style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+                                >
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                      <span className="drag-handle" title="Glisser-déposer pour déplacer dans une autre classe">⋮⋮</span>
+                                      <span style={{ fontWeight: 800 }}>{nameOf(student, anonymous)}</span>
+                                    </div>
+                                    <button
+                                      className="secondary"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setInspectStudent(student);
+                                      }}
+                                      style={{ padding: "2px 6px", fontSize: "0.72rem", fontWeight: 700 }}
+                                      title="Consulter le dossier pédagogique complet"
+                                    >
+                                      📋
+                                    </button>
+                                  </div>
+
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <small style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem" }}>
+                                      <strong style={{ color: "var(--primary-brand)" }}>{student.levelAverage.toFixed(1)}/20</strong>{" "}
+                                      {student.supportFlags.length > 0 ? `· ${student.supportFlags.join("/")}` : ""}
+                                    </small>
+
+                                    {/* Puces de transfert rapide 1-clic */}
+                                    {selected.state !== "APPROVED" && (
+                                      <div style={{ display: "flex", gap: "4px" }}>
+                                        {otherClasses.map((targetC) => (
+                                          <button
+                                            key={targetC.id}
+                                            className="quick-move-chip"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              void move(student.id, targetC.id);
+                                            }}
+                                            title={`Transférer directement vers ${targetC.label}`}
+                                          >
+                                            ➡️ {targetC.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </section>
+                        );
+                      })}
+                    </div>
+                  </section>
+                </>
               )}
             </>
           )}
@@ -1851,18 +1959,22 @@ function Explanation({ student, scenario }: { student: Student; scenario: Scenar
   const explanation = scenario.explanations[student.id];
   if (!explanation) return null;
   return (
-    <div className="explanation">
-      <h3>Pourquoi cette affectation ?</h3>
-      <ul>
-        {explanation.hardConstraints.map((value) => (
-          <li key={value}>✓ {value}</li>
-        ))}
-      </ul>
-      <ul>
-        {explanation.softConsiderations.map((value) => (
-          <li key={value}>↗ {value}</li>
-        ))}
-      </ul>
+    <div className="explanation-box">
+      <h4 style={{ margin: "4px 0 2px", fontSize: "0.86rem", fontWeight: 800, color: "var(--text-main)" }}>
+        💡 Explication de l'Affectation
+      </h4>
+      {explanation.hardConstraints.map((value) => (
+        <div key={value} className="explanation-item hard-ok">
+          <span style={{ fontWeight: 800 }}>✓</span>
+          <span>{value}</span>
+        </div>
+      ))}
+      {explanation.softConsiderations.map((value) => (
+        <div key={value} className="explanation-item soft-info">
+          <span style={{ fontWeight: 800 }}>↗</span>
+          <span>{value}</span>
+        </div>
+      ))}
     </div>
   );
 }
