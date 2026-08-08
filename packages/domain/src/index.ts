@@ -302,8 +302,22 @@ export function calculateMetrics(input: DispatchInput, assignments: Assignment, 
 }
 
 export function generateScenarios(input: DispatchInput, count = 3, weights: DispatchWeights = defaultWeights): DispatchScenario[] {
-  return Array.from({ length: Math.min(Math.max(count, 1), 5) }, (_, index) => generateScenario(input, 10_000 + index * 7_919, weights))
-    .sort((left, right) => right.metrics.score - left.metrics.score);
+  const result: DispatchScenario[] = [];
+  let attempts = 0;
+  const targetCount = Math.min(Math.max(count, 1), 5);
+  while (result.length < targetCount && attempts < 50) {
+    attempts++;
+    try {
+      const scenario = generateScenario(input, 10_000 + attempts * 7_919, weights);
+      result.push(scenario);
+    } catch {
+      // Réessai avec une graine différente en cas de conflit de contraintes dures
+    }
+  }
+  if (result.length === 0) {
+    return Array.from({ length: targetCount }, (_, index) => generateScenario(input, 10_000 + index * 7_919, defaultWeights));
+  }
+  return result.sort((left, right) => right.metrics.score - left.metrics.score);
 }
 
 export function moveStudent(input: DispatchInput, scenario: DispatchScenario, studentId: string, targetClassroomId: string): DispatchScenario {

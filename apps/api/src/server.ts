@@ -494,7 +494,8 @@ app.addHook("onClose", async () => { await stateStore.close(); });
 
 app.setErrorHandler((error, _request, reply) => {
   app.log.error(error);
-  reply.code(500).send({ error: "INTERNAL_ERROR", message: "Une erreur technique est survenue." });
+  const err = error as Error;
+  reply.code(500).send({ error: "INTERNAL_ERROR", message: err.message, stack: err.stack });
 });
 
 const port = Number(process.env.PORT ?? 3001);
