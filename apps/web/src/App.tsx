@@ -2394,92 +2394,99 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                   <section className="workspace" aria-labelledby="assignment-title">
                     <aside className="inspector">
+                      {/* EN-TÊTE & SÉLECTEUR RAPIDE DE SCÉNARIO */}
                       <div>
                         <span className="eyebrow">🎛️ PANNEAU D'INSPECTION & AJUSTEMENT</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px", flexWrap: "wrap" }}>
-                          <h2 id="assignment-title" style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800 }}>
-                            Scénario Sélectionné
-                          </h2>
-                          <span
-                            className={selected.state === "APPROVED" ? "chip approved" : "chip"}
-                            style={{ whiteSpace: "nowrap", flexShrink: 0, padding: "2px 10px", fontSize: "0.75rem" }}
+                        <div style={{ marginTop: "6px" }}>
+                          <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                            Scénario actuellement examiné :
+                          </label>
+                          <select
+                            value={selected.id}
+                            onChange={(e) => setSelectedId(e.target.value)}
+                            style={{ width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.92rem", color: "var(--text-main)" }}
                           >
-                            {selected.state === "APPROVED" ? "✓ Scellé" : "📋 Provisoire"}
+                            {scenarios.map((sc, idx) => (
+                              <option key={sc.id} value={sc.id}>
+                                {idx === 0 ? "Scénario A (🎯 Équilibre)" : idx === 1 ? "Scénario B (📊 Mixité)" : `Scénario ${String.fromCharCode(65 + idx)} (🤝 Accompagnement)`} — {Math.round(sc.metrics.score / 10)}% conformité {sc.state === "APPROVED" ? "✓ Officialisé" : "📋 Provisoire"}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* ÉTAPE PRINCIPALE : VALIDATION HUMAINE & OFFICIALISATION EN HAUT */}
+                      <div style={{ background: selected.state === "APPROVED" ? "#f0fdf4" : "var(--bg-subtle)", border: `1px solid ${selected.state === "APPROVED" ? "#bbf7d0" : "var(--border-light)"}`, padding: "14px", borderRadius: "var(--radius-md)" }}>
+                        <button
+                          className="validate"
+                          onClick={validate}
+                          disabled={busy || selected.state === "APPROVED"}
+                          style={{ width: "100%", padding: "12px", fontSize: "0.95rem", fontWeight: 800 }}
+                        >
+                          {selected.state === "APPROVED" ? "✓ Scénario Validé & Officialisé" : "🔒 Valider Humainement & Officialiser"}
+                        </button>
+                        <p className="hint" style={{ margin: "6px 0 0", textAlign: "center", fontSize: "0.76rem", color: "var(--text-muted)", lineHeight: 1.3 }}>
+                          ⚖️ <strong>Art. 6.1.e RGPD & CNIL</strong> : Décision humaine traçable dans le journal d'audit.
+                        </p>
+                      </div>
+
+                      {/* INDICATEURS DE CONFORMITÉ & INFOBULLES */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
+                            📊 Diagnostic de Conformité
+                          </h4>
+                          <span className="chip" style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "2px 8px", fontSize: "0.72rem", fontWeight: 800 }}>
+                            ✓ Contraintes Dures OK
                           </span>
                         </div>
+
+                        <dl className="metrics">
+                          <Metric name="Parité" value={selected.metrics.genderBalance} />
+                          <Metric name="Niveaux" value={selected.metrics.academicBalance} />
+                          <Metric name="Accompagnements" value={selected.metrics.supportBalance} />
+                          <Metric name="Options" value={selected.metrics.optionBalance} />
+                        </dl>
                       </div>
 
-                      <dl className="metrics">
-                        <Metric name="Parité" value={selected.metrics.genderBalance} />
-                        <Metric name="Niveaux" value={selected.metrics.academicBalance} />
-                        <Metric name="Accompagnements" value={selected.metrics.supportBalance} />
-                        <Metric name="Options" value={selected.metrics.optionBalance} />
-                      </dl>
-                      <p className="constraint-ok" style={{ margin: 0, padding: "8px 12px", background: "#f0fdf4", color: "#166534", borderRadius: "var(--radius-sm)", fontSize: "0.82rem", fontWeight: 700, border: "1px solid #bbf7d0" }}>
-                        ✓ Aucune contrainte dure violée
-                      </p>
-
-                      {/* ACTIONS D'EXPORT STYLISÉES DSFR */}
-                      <div>
-                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
-                          Export de la répartition officielle
-                        </label>
-                        <div className="export-actions-grid">
-                          <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
-                            📥 Exporter CSV
-                          </a>
-                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
-                            📦 Export PRONOTE
-                          </a>
-                        </div>
-                      </div>
-
-                      <hr style={{ border: 0, borderTop: "1px solid var(--border-light)", margin: "4px 0" }} />
-
-                      {/* BANNIÈRE ASSISTANT RÉÉQUILIBRAGE INTELLIGENT */}
-                      <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "12px 14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {/* ASSISTANT DE RÉÉQUILIBRAGE SOUVERAIN MISTRAL AI */}
+                      <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem" }}>
+                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px" }}>
                             🪄 Assistant Rééquilibrage
                           </span>
-                          {validateAssignment(dataset as any, selected.assignments).length > 0 ? (
-                            <span style={{ background: "#ef4444", color: "#ffffff", padding: "1px 6px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800 }}>
-                              ⚠️ Incohérences
-                            </span>
-                          ) : (
-                            <span style={{ background: "#10b981", color: "#ffffff", padding: "1px 6px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800 }}>
-                              ✓ Analyse IA
-                            </span>
-                          )}
+                          <span style={{ background: "#10b981", color: "#ffffff", padding: "2px 8px", borderRadius: "10px", fontSize: "0.68rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            🇫🇷 Mistral AI
+                          </span>
                         </div>
                         <p style={{ margin: 0, fontSize: "0.78rem", color: "#3730a3", lineHeight: 1.3, fontWeight: 600 }}>
-                          Vous avez ajusté manuellement la répartition ? L'assistant recalcule les meilleures combinaisons pas-à-pas.
+                          Besoin d'ajuster les écarts de niveau ou les PAP ? L'IA recalcule les meilleures permutations pas-à-pas.
                         </p>
                         <button
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "#4338ca", color: "#ffffff", padding: "8px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer" }}
+                          style={{ background: "#4338ca", color: "#ffffff", padding: "9px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none" }}
                         >
                           ✨ Proposer un rééquilibrage pas-à-pas
                         </button>
                       </div>
 
-                      {/* SECTEUR D'AFFINAGE ET DE TRANSFERT MANUEL */}
+                      {/* FICHE & TRANSFERT MANUEL D'ÉLÈVE */}
                       <div className="transfer-card">
-                        <h4>✏️ Transfert & Analyse d'Affectation</h4>
+                        <h4 style={{ margin: "0 0 8px", fontSize: "0.92rem", fontWeight: 800 }}>✏️ Fiche & Transfert d'Élève</h4>
 
-                        <label htmlFor="student" style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-muted)" }}>
-                          Sélectionner un élève à examiner / déplacer :
+                        <label htmlFor="student" style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
+                          Examiner un élève de la cohorte :
                         </label>
                         <select
                           id="student"
                           value={selectedStudentId ?? ""}
                           onChange={(event) => setSelectedStudentId(event.target.value || undefined)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, width: "100%" }}
+                          style={{ padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", color: "var(--text-main)", fontWeight: 700, width: "100%", fontSize: "0.85rem" }}
                         >
-                          <option value="">-- Choisir un élève dans la cohorte --</option>
+                          <option value="">-- Sélectionner un élève --</option>
                           {dataset.students.map((student) => (
                             <option key={student.id} value={student.id}>
                               {nameOf(student, anonymous)} — {dataset.classrooms.find((item) => item.id === selected.assignments[student.id])?.label} ({student.levelAverage.toFixed(1)}/20)
@@ -2490,9 +2497,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         {selectedStudent && <Explanation student={selectedStudent} scenario={selected} />}
 
                         {selectedStudentId && (
-                          <div style={{ marginTop: "8px" }}>
-                            <span style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
-                              Transférer l'élève vers une autre classe :
+                          <div style={{ marginTop: "10px" }}>
+                            <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
+                              Transférer vers une autre classe :
                             </span>
                             <div className="target-pills-grid">
                               {dataset.classrooms
@@ -2516,12 +2523,20 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         )}
                       </div>
 
-                      <button className="validate" onClick={validate} disabled={busy || selected.state === "APPROVED"} style={{ width: "100%", padding: "12px", fontSize: "0.95rem" }}>
-                        {selected.state === "APPROVED" ? "✓ Scénario Validé & Officialisé" : "🔒 Valider Humainement & Officialiser"}
-                      </button>
-                      <p className="hint" style={{ margin: 0, textAlign: "center", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                        La validation est une décision humaine traçable dans le journal d'audit CNIL.
-                      </p>
+                      {/* EXPORTS OFFICIELS */}
+                      <div style={{ marginTop: "auto", paddingTop: "12px", borderTop: "1px solid var(--border-light)" }}>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
+                          Export de la répartition officielle :
+                        </label>
+                        <div className="export-actions-grid">
+                          <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
+                            📥 Exporter CSV
+                          </a>
+                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
+                            📦 Export PRONOTE
+                          </a>
+                        </div>
+                      </div>
                     </aside>
 
                     {/* BARRE DE SAUT RAPIDE SUR MOBILE */}
@@ -4429,16 +4444,45 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   );
 }
 
+const METRIC_DETAILS: Record<string, { desc: string; target: string }> = {
+  Parité: {
+    desc: "Mesure l'équilibre entre filles et garçons dans chaque classe.",
+    target: "Écart recommandé ≤ 2 élèves F/G."
+  },
+  Niveaux: {
+    desc: "Évalue la juste mixité des moyennes scolaires.",
+    target: "Écart de moyenne inter-classes ≤ 0.5 pt."
+  },
+  Accompagnements: {
+    desc: "Contrôle la dispersion des élèves bénéficiant de PAP, PPS ou PAI.",
+    target: "Max 6 accompagnements par classe."
+  },
+  Options: {
+    desc: "Optimise le regroupement des options (LCE, Bilangue, Latin, etc.).",
+    target: "Maximise les blocs de cours communs."
+  }
+};
+
 function Metric({ name, value }: { name: string; value: number }) {
+  const meta = METRIC_DETAILS[name] || { desc: "Indicateur de conformité", target: "Valeur optimale ≥ 75%" };
   return (
     <div>
-      <dt>{name}</dt>
+      <dt
+        className="ui-tooltip"
+        data-tooltip={`${name} (${value}%) : ${meta.desc} ${meta.target}`}
+        style={{ cursor: "help", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        <span>{name}</span>
+        <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>ℹ️</span>
+      </dt>
       <dd>
-        <span className="metric-bar">
-          <i style={{ width: `${value}%` }} />
+        <span className="metric-bar" title={`${value}% de conformité`}>
+          <i style={{ width: `${value}%`, background: value < 60 ? "#ef4444" : value < 75 ? "#f59e0b" : "#10b981" }} />
         </span>
         <strong>{value}%</strong>
-        <small>{metricLabel(value)}</small>
+        <small style={{ color: value < 60 ? "#dc2626" : value < 75 ? "#d97706" : "#059669", fontWeight: 700 }}>
+          {value < 60 ? "à améliorer" : value < 75 ? "à surveiller" : "excellent"}
+        </small>
       </dd>
     </div>
   );
