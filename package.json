@@ -1,0 +1,35 @@
+{
+  "name": "edtemps",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Socle de répartition des classes et d'emplois du temps pour établissements scolaires français.",
+  "packageManager": "npm@10.8.2",
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch apps/api/src/server.ts",
+    "dev:web": "npm run dev --workspace=@edtemps/web",
+    "db:migrate": "tsx apps/api/src/migrate.ts",
+    "check": "tsc --noEmit && npm run check --workspace=@edtemps/web",
+    "test": "tsx --test packages/domain/test/dispatch.test.ts packages/domain/test/timetabling.test.ts packages/domain/test/substitutions.test.ts packages/domain/test/pronote_dpo.test.ts apps/api/test/siecle-import.test.ts",
+    "build": "npm run check && npm run build --workspace=@edtemps/web"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.0.3",
+    "@fastify/cors": "^10.0.0",
+    "adm-zip": "^0.6.0",
+    "fastify": "^5.2.1",
+    "fast-xml-parser": "^5.10.1",
+    "pg": "^8.13.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

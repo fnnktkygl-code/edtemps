@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edtemps-postgres
+    environment:
+      POSTGRES_DB: edtemps
+      POSTGRES_USER: edtemps_user
+      POSTGRES_PASSWORD: edtemps_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres:/docker-entrypoint-initdb.d
+
+  api:
+    build: .
+    container_name: edtemps-api
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      DATABASE_URL: postgresql://edtemps_user:edtemps_password@postgres:5432/edtemps
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
