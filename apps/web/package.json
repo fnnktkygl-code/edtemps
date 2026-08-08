@@ -9,7 +9,6 @@
     "check": "tsc -b --pretty false"
   },
   "dependencies": {
-    "@edtemps/domain": "*",
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^6.0.1",
     "react": "^18.3.1",
