@@ -305,13 +305,32 @@ export default function App() {
     const fromClassId = selected.assignments[studentId];
     const student = dataset.students.find((s) => s.id === studentId);
     const studentName = student ? nameOf(student, anonymous) : studentId;
+
+    // Mise à jour immédiate et réactive de l'affectation dans le scénario local
+    const updatedAssignments = {
+      ...selected.assignments,
+      [studentId]: targetClassroomId,
+    };
+    const updatedScenario: Scenario = {
+      ...selected,
+      assignments: updatedAssignments,
+    };
+
+    setScenarios((current) =>
+      current.map((scenario) => (scenario.id === selected.id ? updatedScenario : scenario))
+    );
+
     try {
       const response = await api.move(selected.id, studentId, targetClassroomId);
-      setScenarios((current) => current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario)));
+      if (response && response.scenario) {
+        setScenarios((current) =>
+          current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
+        );
+      }
       if (fromClassId && fromClassId !== targetClassroomId) {
         setLastMove({ studentId, studentName, fromClassId, toClassId: targetClassroomId });
       }
-      setNotice(`Élève ${studentName} transféré avec succès en ${dataset.classrooms.find(c => c.id === targetClassroomId)?.label ?? targetClassroomId}.`);
+      setNotice(`Élève ${studentName} transféré avec succès en ${dataset.classrooms.find((c) => c.id === targetClassroomId)?.label ?? targetClassroomId}.`);
       await refreshAudit();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Déplacement refusé.");
@@ -323,9 +342,24 @@ export default function App() {
   async function undoLastMove(): Promise<void> {
     if (!lastMove || !selected) return;
     setBusy(true);
+    const updatedAssignments = {
+      ...selected.assignments,
+      [lastMove.studentId]: lastMove.fromClassId,
+    };
+    const updatedScenario: Scenario = {
+      ...selected,
+      assignments: updatedAssignments,
+    };
+    setScenarios((current) =>
+      current.map((scenario) => (scenario.id === selected.id ? updatedScenario : scenario))
+    );
     try {
       const response = await api.move(selected.id, lastMove.studentId, lastMove.fromClassId);
-      setScenarios((current) => current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario)));
+      if (response && response.scenario) {
+        setScenarios((current) =>
+          current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
+        );
+      }
       setNotice(`Déplacement annulé : ${lastMove.studentName} réaffecté en classe.`);
       setLastMove(null);
       await refreshAudit();

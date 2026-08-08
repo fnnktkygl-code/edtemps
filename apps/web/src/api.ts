@@ -109,10 +109,12 @@ export const api = {
   ) => {
     const ds = overrideDataset || activeDataset || fallbackDataset;
     try {
-      return await request<{ scenarios: Scenario[] }>("/dispatch/generate", {
+      const res = await request<{ scenarios: Scenario[] }>("/dispatch/generate", {
         method: "POST",
         body: JSON.stringify({ scenarioCount: 3, weights }),
       });
+      fallbackScenarios = res.scenarios;
+      return res;
     } catch {
       fallbackScenarios = generateDomainScenarios(ds as unknown as Parameters<typeof generateDomainScenarios>[0], 3, weights) as unknown as Scenario[];
       return { scenarios: fallbackScenarios };
@@ -120,10 +122,13 @@ export const api = {
   },
   move: async (scenarioId: string, studentId: string, targetClassroomId: string) => {
     try {
-      return await request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/move`, {
+      const res = await request<{ scenario: Scenario }>(`/dispatch/scenarios/${scenarioId}/move`, {
         method: "POST",
         body: JSON.stringify({ studentId, targetClassroomId }),
       });
+      const idx = fallbackScenarios.findIndex((s) => s.id === scenarioId);
+      if (idx !== -1) fallbackScenarios[idx] = res.scenario;
+      return res;
     } catch {
       const targetScenario = fallbackScenarios.find((s) => s.id === scenarioId);
       if (targetScenario) {
