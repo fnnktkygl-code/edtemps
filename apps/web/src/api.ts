@@ -178,12 +178,22 @@ export const api = {
       if (idx !== -1) fallbackScenarios[idx] = res.scenario;
       return res;
     } catch {
-      const targetScenario = fallbackScenarios.find((s) => s.id === scenarioId);
+      let targetScenario = fallbackScenarios.find((s) => s.id === scenarioId);
       if (targetScenario) {
         targetScenario.assignments = {
           ...targetScenario.assignments,
           [studentId]: targetClassroomId,
         };
+      } else if (fallbackScenarios.length > 0) {
+        targetScenario = {
+          ...fallbackScenarios[0],
+          id: scenarioId,
+          assignments: {
+            ...fallbackScenarios[0].assignments,
+            [studentId]: targetClassroomId,
+          },
+        };
+        fallbackScenarios.push(targetScenario);
       }
       return { scenario: targetScenario || fallbackScenarios[0] };
     }

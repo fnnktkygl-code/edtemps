@@ -228,14 +228,33 @@ export default function App() {
 
   const selected = scenarios.find((scenario) => scenario.id === selectedId) ?? scenarios[0];
 
-  const studentsByClass = useMemo(
-    () =>
-      dataset.classrooms.map((classroom) => ({
-        ...classroom,
-        students: dataset.students.filter((student) => selected?.assignments[student.id] === classroom.id),
-      })),
-    [dataset, selected]
-  );
+  const studentsByClass = useMemo(() => {
+    if (!selected || !dataset.classrooms || dataset.classrooms.length === 0) return [];
+
+    // Garde-fou d'intégrité anti-zéro : si des élèves ne sont pas affectés ou ont un mauvais ID, réparer immédiatement
+    const unassigned = dataset.students.filter(
+      (student) => !selected.assignments[student.id] || !dataset.classrooms.some((c) => c.id === selected.assignments[student.id])
+    );
+    if (unassigned.length > 0) {
+      const repairedAssignments = { ...selected.assignments };
+      unassigned.forEach((student, idx) => {
+        const targetClass = dataset.classrooms[idx % dataset.classrooms.length];
+        if (targetClass) repairedAssignments[student.id] = targetClass.id;
+      });
+      setTimeout(() => {
+        setScenarios((current) =>
+          current.map((s) => (s.id === selected.id ? { ...s, assignments: repairedAssignments } : s))
+        );
+      }, 0);
+    }
+
+    return dataset.classrooms.map((classroom) => ({
+      ...classroom,
+      students: dataset.students.filter(
+        (student) => (selected.assignments[student.id] ?? dataset.classrooms[0]?.id) === classroom.id
+      ),
+    }));
+  }, [dataset, selected]);
   const selectedStudent = dataset.students.find((student) => student.id === selectedStudentId);
 
   async function refreshAudit(): Promise<void> {
@@ -387,10 +406,13 @@ export default function App() {
 
     try {
       const response = await api.move(selected.id, studentId, targetClassroomId);
-      if (response && response.scenario) {
-        setScenarios((current) =>
-          current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
-        );
+      if (response && response.scenario && response.scenario.assignments) {
+        const isValid = dataset.students.some((s) => response.scenario.assignments[s.id] !== undefined);
+        if (isValid) {
+          setScenarios((current) =>
+            current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
+          );
+        }
       }
       if (fromClassId && fromClassId !== targetClassroomId) {
         setLastMove({ studentId, studentName, fromClassId, toClassId: targetClassroomId });
@@ -420,10 +442,13 @@ export default function App() {
     );
     try {
       const response = await api.move(selected.id, lastMove.studentId, lastMove.fromClassId);
-      if (response && response.scenario) {
-        setScenarios((current) =>
-          current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
-        );
+      if (response && response.scenario && response.scenario.assignments) {
+        const isValid = dataset.students.some((s) => response.scenario.assignments[s.id] !== undefined);
+        if (isValid) {
+          setScenarios((current) =>
+            current.map((scenario) => (scenario.id === response.scenario.id ? response.scenario : scenario))
+          );
+        }
       }
       setNotice(`Déplacement annulé : ${lastMove.studentName} réaffecté en classe.`);
       setLastMove(null);
