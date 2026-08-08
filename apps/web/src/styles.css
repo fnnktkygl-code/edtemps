@@ -44,6 +44,61 @@
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================================
+   Shimmer Loading & Skeleton Animations
+   ========================================================================== */
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spinIcon {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.shimmer-banner {
+  background: linear-gradient(90deg, var(--primary-brand) 0%, #2563eb 50%, var(--primary-brand) 100%);
+  background-size: 200% 100%;
+  animation: shimmerWave 2s infinite ease-in-out;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+}
+
+.shimmer-spinner {
+  display: inline-block;
+  font-size: 1.1rem;
+  animation: spinIcon 1.2s infinite linear;
+}
+
+.shimmer-card {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-subtle) 50%, var(--bg-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s infinite ease-in-out;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--bg-subtle) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+
 /* Mode Sombre Adaptatif */
 [data-theme="dark"] {
   --primary-brand: #6366f1;

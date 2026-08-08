@@ -589,9 +589,17 @@ export default function App() {
           {actorRole === "DPO" && "🔒 Session DPO / RSSI : Accès au Registre CNIL, modèle AIPD et journal d'audit immuable."}
         </span>
         <span className="chip approved" style={{ fontSize: "0.75rem" }}>
-          Rôle : {actorRole}
+          Rôle : {actorRole === "SCHOOL_ADMIN" ? "Chef d'Établissement" : actorRole === "TEACHER" ? "Enseignant" : actorRole === "CPE" ? "CPE / Vie Scolaire" : actorRole === "DPO" ? "DPO / RSSI" : actorRole}
         </span>
       </div>
+
+      {/* SHIMMER BANNER PENDANT LA GÉNÉRATION OU LE CALCUL */}
+      {busy && (
+        <div className="shimmer-banner">
+          <span className="shimmer-spinner">⚡</span>
+          <span>Calcul et optimisation algorithmique sous contraintes par l'IA en cours... Veuillez patienter quelques instants.</span>
+        </div>
+      )}
 
       <section className="safety-banner" aria-label="Information importante">
         <strong>Décision humaine obligatoire.</strong> Le produit formule des propositions algorithmiques explicables ; seul un professionnel habilité (chef d'établissement / adjoint) peut les valider.
@@ -1191,67 +1199,86 @@ export default function App() {
                   </p>
                 </div>
                 <div className="scenario-grid">
-                  {scenarios.map((scenario, index) => {
-                    const qualityPct = Math.round(scenario.metrics.score / 10);
-                    const meta =
-                      index === 0
-                        ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: "🏆 Recommandé IA", color: "#10b981" }
-                        : index === 1
-                        ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: "⚡ Option Hétérogénéité", color: "#4f46e5" }
-                        : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: "💡 Option Équilibre PAP", color: "#0284c7" };
+                  {busy ? (
+                    <>
+                      {[1, 2, 3].map((idx) => (
+                        <div key={idx} className="shimmer-card" style={{ padding: "20px", minHeight: "180px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <div className="shimmer-line" style={{ width: "40%", height: "24px" }} />
+                            <div className="shimmer-line" style={{ width: "20%", height: "32px" }} />
+                          </div>
+                          <div className="shimmer-line" style={{ width: "85%", height: "16px" }} />
+                          <div className="shimmer-line" style={{ width: "65%", height: "14px" }} />
+                          <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
+                            <div className="shimmer-line" style={{ width: "30%", height: "20px" }} />
+                            <div className="shimmer-line" style={{ width: "30%", height: "20px" }} />
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    scenarios.map((scenario, index) => {
+                      const qualityPct = Math.round(scenario.metrics.score / 10);
+                      const meta =
+                        index === 0
+                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: "🏆 Recommandé IA", color: "#10b981" }
+                          : index === 1
+                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: "⚡ Option Hétérogénéité", color: "#4f46e5" }
+                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: "💡 Option Équilibre PAP", color: "#0284c7" };
 
-                    return (
-                      <button
-                        key={scenario.id}
-                        className={`scenario ${selected?.id === scenario.id ? "selected" : ""}`}
-                        onClick={() => setSelectedId(scenario.id)}
-                        aria-pressed={selected?.id === scenario.id}
-                        style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "20px", textAlign: "left" }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                          <div>
-                            <span className="chip" style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}40`, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 800, marginBottom: "6px", display: "inline-block" }}>
-                              {meta.badge}
+                      return (
+                        <button
+                          key={scenario.id}
+                          className={`scenario ${selected?.id === scenario.id ? "selected" : ""}`}
+                          onClick={() => setSelectedId(scenario.id)}
+                          aria-pressed={selected?.id === scenario.id}
+                          style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "20px", textAlign: "left" }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                              <span className="chip" style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}40`, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 800, marginBottom: "6px", display: "inline-block" }}>
+                                {meta.badge}
+                              </span>
+                              <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-heading)" }}>
+                                {meta.title}
+                              </h3>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <strong style={{ fontSize: "1.6rem", fontWeight: 800, color: meta.color, fontFamily: "var(--font-mono)", display: "block", lineHeight: 1 }}>
+                                {qualityPct}%
+                              </strong>
+                              <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700 }}>Conformité IA</small>
+                            </div>
+                          </div>
+
+                          <p style={{ margin: 0, fontSize: "0.84rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                            {meta.desc}
+                          </p>
+
+                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px" }}>
+                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                              ⚖️ Parité {scenario.metrics.genderBalance ?? 90}%
                             </span>
-                            <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-heading)" }}>
-                              {meta.title}
-                            </h3>
+                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                              📊 Niveaux {scenario.metrics.academicBalance ?? 90}%
+                            </span>
+                            <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
+                              🤝 PAP {scenario.metrics.supportBalance ?? 90}%
+                            </span>
                           </div>
-                          <div style={{ textAlign: "right" }}>
-                            <strong style={{ fontSize: "1.6rem", fontWeight: 800, color: meta.color, fontFamily: "var(--font-mono)", display: "block", lineHeight: 1 }}>
-                              {qualityPct}%
-                            </strong>
-                            <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700 }}>Conformité IA</small>
+
+                          <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "10px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span className={scenario.state === "APPROVED" ? "chip approved" : "chip"}>
+                              {scenario.state === "APPROVED" ? "✓ Validé & Scellé" : "📋 En cours de relecture"}
+                            </span>
+                            <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--primary-brand)" }}>
+                              {selected?.id === scenario.id ? "Actif ▸" : "Examiner ▸"}
+                            </span>
                           </div>
-                        </div>
-
-                        <p style={{ margin: 0, fontSize: "0.84rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
-                          {meta.desc}
-                        </p>
-
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "auto", paddingTop: "8px" }}>
-                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                            ⚖️ Parité {selected?.metrics.genderBalance ?? 90}%
-                          </span>
-                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                            📊 Niveaux {selected?.metrics.academicBalance ?? 90}%
-                          </span>
-                          <span style={{ background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-main)" }}>
-                            🤝 PAP {selected?.metrics.supportBalance ?? 90}%
-                          </span>
-                        </div>
-
-                        <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "10px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span className={scenario.state === "APPROVED" ? "chip approved" : "chip"}>
-                            {scenario.state === "APPROVED" ? "✓ Validé & Scellé" : "📋 En cours de relecture"}
-                          </span>
-                          <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--primary-brand)" }}>
-                            {selected?.id === scenario.id ? "Actif ▸" : "Examiner ▸"}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </section>
 
@@ -1671,17 +1698,17 @@ export default function App() {
           <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-card)", padding: "20px 24px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)", marginBottom: "24px" }}>
             <div>
               <p className="eyebrow">Service Numérique Enseignant</p>
-              <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800 }}>👩‍🏫 Espace Enseignant (Self-Service)</h2>
+              <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800 }}>👩‍🏫 Espace Personnel Enseignant</h2>
               <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
                 Consultez votre emploi du temps en temps réel, saisissez vos vœux d'aménagement horaire et organisez vos remplacements d'urgence.
               </p>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-muted)" }}>Profil enseignant :</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>Profil enseignant :</span>
               <select
                 value={selectedTeacherId}
                 onChange={(e) => setSelectedTeacherId(e.target.value)}
-                style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.9rem" }}
+                style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontWeight: 700, fontSize: "0.9rem" }}
               >
                 {timetablingData?.teachers.map((t) => (
                   <option key={t.id} value={t.id}>
