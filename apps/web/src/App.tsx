@@ -2391,7 +2391,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           )}
 
           {/* SUBTAB 3: SCÉNARIOS & KANBAN */}
-          {(dispatchSubTab === "kanban" || scenarios.length > 0) && (
+          {dispatchSubTab === "kanban" && (
             <>
               <section aria-labelledby="scenarios-title">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
@@ -2665,10 +2665,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         </div>
 
                         <dl className="metrics">
-                          <Metric name="Parité" value={selected.metrics.genderBalance} />
-                          <Metric name="Niveaux" value={selected.metrics.academicBalance} />
-                          <Metric name="Accompagnements" value={selected.metrics.supportBalance} />
-                          <Metric name="Options" value={selected.metrics.optionBalance} />
+                          <Metric name="Parité" value={selected.metrics.genderBalance} weight={weights.genderBalance} />
+                          <Metric name="Niveaux" value={selected.metrics.academicBalance} weight={weights.academicBalance} />
+                          <Metric name="Accompagnements" value={selected.metrics.supportBalance} weight={weights.supportBalance} />
+                          <Metric name="Options" value={selected.metrics.optionBalance} weight={weights.optionBalance} />
                         </dl>
                       </div>
 
@@ -5109,8 +5109,34 @@ const METRIC_DETAILS: Record<string, { desc: string; target: string }> = {
   }
 };
 
-function Metric({ name, value }: { name: string; value: number }) {
+function Metric({ name, value, weight }: { name: string; value: number; weight?: number }) {
   const meta = METRIC_DETAILS[name] || { desc: "Indicateur de conformité", target: "Valeur optimale ≥ 75%" };
+  const isDisabled = weight === 0;
+
+  if (isDisabled) {
+    return (
+      <div>
+        <dt
+          className="ui-tooltip"
+          data-tooltip={`${name} : Critère volontairement ignoré dans vos réglages (poids 0/10)`}
+          style={{ cursor: "help", display: "inline-flex", alignItems: "center", gap: "4px" }}
+        >
+          <span>{name}</span>
+          <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>⚪</span>
+        </dt>
+        <dd style={{ margin: "4px 0 0", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span className="metric-bar" style={{ flex: 1, minWidth: "60px", background: "var(--bg-subtle)" }} title="Critère désactivé">
+            <i style={{ width: `0%`, background: "#94a3b8" }} />
+          </span>
+          <strong style={{ fontSize: "0.82rem", color: "var(--text-light)", whiteSpace: "nowrap" }}>Ignoré</strong>
+          <span style={{ color: "var(--text-light)", fontWeight: 700, fontSize: "0.74rem", whiteSpace: "nowrap" }}>
+            (Désactivé)
+          </span>
+        </dd>
+      </div>
+    );
+  }
+
   return (
     <div>
       <dt

@@ -16,7 +16,7 @@
     "dev:web": "npm run dev --workspace=@edtemps/web",
     "db:migrate": "tsx apps/api/src/migrate.ts",
     "check": "tsc --noEmit && npm run check --workspace=@edtemps/web",
-    "test": "tsx --test packages/domain/test/dispatch.test.ts packages/domain/test/timetabling.test.ts packages/domain/test/substitutions.test.ts packages/domain/test/pronote_dpo.test.ts apps/api/test/siecle-import.test.ts",
+    "test": "tsx --test packages/domain/test/dispatch.test.ts packages/domain/test/load.test.ts packages/domain/test/timetabling.test.ts packages/domain/test/substitutions.test.ts packages/domain/test/pronote_dpo.test.ts apps/api/test/siecle-import.test.ts",
     "build:api": "tsc --noEmit",
     "build": "npm run check && npm run build --workspace=@edtemps/web"
   },

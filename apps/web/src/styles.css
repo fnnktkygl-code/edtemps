@@ -4,10 +4,10 @@
    ========================================================================== */
 
 :root {
-  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: 'Fraunces', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Palette Carnet de Bord & Institutionnelle Éducation Nationale */
   --primary-brand: #1e3a8a; /* Encre bleue institutionnelle */
@@ -2175,4 +2175,15 @@ html, body {
   .compact-status-bar {
     font-size: 0.76rem;
   }
+}
+
+/* Accessibility Focus Rings (RGAA AA / DSFR) */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
 }
