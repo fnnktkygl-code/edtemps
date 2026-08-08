@@ -2429,7 +2429,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   ⚡ Calculer & Générer les 3 Scénarios d'Équilibrage
                 </button>
                 <p style={{ margin: "8px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                  Le moteur combinera la recherche gloutonne et le recuit simulé pour proposer 3 alternatives optimisées.
+                  Le solveur algorithmique sous contraintes (Recherche gloutonne & Recuit simulé déterministe) calcule 3 alternatives d'optimisation.
                 </p>
               </div>
             </div>
@@ -2445,7 +2445,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     ⚖️ ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
                   </div>
                   <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", marginTop: "2px" }}>
-                    Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "#15803d" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Conformité IA</span>
+                    Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "#15803d" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Score d'Équilibrage</span>
                   </div>
                 </div>
 
@@ -2586,10 +2586,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       const isBest = scenario.id === bestScenarioId;
                       const meta =
                         index === 0
-                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé IA" : "🎯 Équilibre Global", color: isBest ? "#10b981" : "#475569" }
+                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "🎯 Équilibre Global", color: isBest ? "#10b981" : "#475569" }
                           : index === 1
-                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictly les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé IA" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
-                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé IA" : "💡 Option Équilibre PAP", color: isBest ? "#10b981" : "#0284c7" };
+                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
+                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "💡 Option Équilibre PAP", color: isBest ? "#10b981" : "#0284c7" };
 
                       return (
                         <button
@@ -2612,7 +2612,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               <strong style={{ fontSize: "1.6rem", fontWeight: 800, color: meta.color, fontFamily: "var(--font-mono)", display: "block", lineHeight: 1 }}>
                                 {qualityPct}%
                               </strong>
-                              <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700, display: "block" }}>Conformité IA</small>
+                              <small style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontWeight: 700, display: "block" }}>Score d'Équilibrage</small>
                               <span
                                 className="ui-tooltip"
                                 data-tooltip={`📌 Origine des Métriques du Scénario :\n• Parité (${weights.genderBalance}/10) : Équilibre F/M vs cohorte (${femaleCount}F/${maleCount}M).\n• Niveaux (${weights.academicBalance}/10) : Écart inter-classes ≤ 0.3pt vs moyenne globale ${avgGrade.toFixed(1)}/20.\n• PAP/PPS (${weights.supportBalance}/10) : ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "Mutualisation AESH sur 1-2 classes" : "Dispersion équilibrée"}.\n• Options (${weights.optionBalance}/10) : Respect des réservations multi-classes et regroupements.`}
@@ -2648,14 +2648,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               data-tooltip={`Accompagnements PAP/PPS (Poids ${weights.supportBalance}/10) : ${scenario.metrics.supportBalance}%`}
                               style={{ background: weights.supportBalance === 0 ? "var(--bg-subtle)" : "#fef3c7", color: weights.supportBalance === 0 ? "var(--text-muted)" : "#b45309", border: `1px solid ${weights.supportBalance === 0 ? "var(--border-light)" : "#fde68a"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              🤝 PAP {weights.supportBalance === 0 ? "Ignorés" : `${scenario.metrics.supportBalance}%`}
+                              🤝 PAP {weights.supportBalance === 0 ? "Ignoré" : `${scenario.metrics.supportBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Regroupement d'Options (Poids ${weights.optionBalance}/10) : ${scenario.metrics.optionBalance}%`}
                               style={{ background: weights.optionBalance === 0 ? "var(--bg-subtle)" : "#f3e8ff", color: weights.optionBalance === 0 ? "var(--text-muted)" : "#6b21a8", border: `1px solid ${weights.optionBalance === 0 ? "var(--border-light)" : "#e9d5ff"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              🎓 Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}%`}
+                              🎓 Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}% respectées`}
                             </span>
                           </div>
 
@@ -2755,7 +2755,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           </span>
                         </div>
                         <p style={{ margin: 0, fontSize: "0.78rem", color: "#3730a3", lineHeight: 1.3, fontWeight: 600 }}>
-                          Besoin d'ajuster les écarts de niveau ou les PAP ? L'IA recalcule les meilleures permutations pas-à-pas.
+                          Besoin d'ajuster les écarts de niveau ou les PAP ? L'Assistant Mistral AI analyse le scénario et s'appuie sur le solveur algorithmique pour recommander des permutations explicables pas-à-pas.
                         </p>
                         <button
                           className="primary"
@@ -4701,18 +4701,18 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" }}>
                 <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
                   <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
-                    ⚡ Équilibrage des classes (Recuit Simulé)
+                    ⚡ Équilibrage des classes (Solveur Déterministe)
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
-                    L'IA calcule des milliers de combinaisons pour équilibrer la parité F/M, les niveaux scolaires, les options et les AESH. Elle vous propose 3 scénarios optimisés sans jamais décider seule.
+                    Un algorithme sous contraintes déterministe (recherche gloutonne + recuit simulé) évalue des milliers de combinaisons pour calculer 3 scénarios d'équilibrage parité/niveaux/options/AESH. Calcul 100% reproductible sans modèle génératif.
                   </p>
                 </div>
                 <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
                   <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
-                    🚨 Détection d'impossibilités mathématiques
+                    🇫🇷 IA Générative & Explication (Mistral AI)
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
-                    L'IA vérifie vos contraintes de structure (ex: 100 élèves dans 2 classes de 30 max) et vous propose des corrections automatiques en 1 clic.
+                    Le modèle souverain français Mistral AI intervient exclusivement pour la génération textuelle : explications naturelles du rééquilibrage, dictée vocale de consignes et analyse OCR de documents SIECLE.
                   </p>
                 </div>
                 <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
