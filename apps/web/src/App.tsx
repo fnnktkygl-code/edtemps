@@ -1967,14 +1967,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                         style={{
                                           width: "28px",
                                           height: "28px",
-                                          borderRadius: "50%",
+                                          borderRadius: "8px",
                                           background: getAvatarColor(student.id),
                                           color: "#ffffff",
                                           display: "flex",
                                           alignItems: "center",
                                           justifyContent: "center",
                                           fontWeight: 800,
-                                          fontSize: "0.72rem",
+                                          fontSize: "0.74rem",
                                           flexShrink: 0,
                                         }}
                                         title={`Initiales : ${student.initials}`}
@@ -1984,13 +1984,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                                       <div style={{ display: "flex", alignItems: "baseline", gap: "6px", minWidth: 0, flex: 1, overflow: "hidden" }}>
                                         <span
-                                          style={{ fontWeight: 800, fontSize: "0.86rem", color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
+                                          style={{ fontWeight: 700, fontSize: "0.88rem", color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
                                           title={nameOf(student, anonymous)}
                                         >
                                           {nameOf(student, anonymous)}
                                         </span>
-                                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", flexShrink: 0 }}>
-                                          {student.levelAverage.toFixed(1)}/20
+                                        <span style={{ fontSize: "0.78rem", color: "#64748b", fontWeight: 500, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", flexShrink: 0 }}>
+                                          {student.levelAverage.toFixed(1)}<span style={{ color: "#94a3b8", fontSize: "0.7rem", fontWeight: 400 }}>/20</span>
                                         </span>
                                       </div>
                                     </div>
