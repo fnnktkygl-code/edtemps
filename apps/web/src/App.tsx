@@ -178,6 +178,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
   const [ruleStudentBId, setRuleStudentBId] = useState<string>("");
   const [ruleType, setRuleType] = useState<"CONFLICT" | "COLOCATION">("CONFLICT");
   const [impossibilityErrors, setImpossibilityErrors] = useState<FeasibilityError[]>([]);
+  const [showAiTransparencyModal, setShowAiTransparencyModal] = useState<boolean>(false);
 
   // Weights slider state
   const [weights, setWeightsState] = useState<DispatchWeights>(() => {
@@ -990,9 +991,30 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
         </span>
         {isOfflineFallback && (
           <span className="offline-tag">
-            ⚡ Mode Simulation Locale (Données RGPD Fictives)
+            ⚡ Mode Staging & Simulation (Données RGPD Fictives)
           </span>
         )}
+        <button
+          type="button"
+          onClick={() => setShowAiTransparencyModal(true)}
+          style={{
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+            color: "#1d4ed8",
+            padding: "3px 10px",
+            borderRadius: "12px",
+            fontSize: "0.76rem",
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
+            marginLeft: "auto",
+          }}
+          title="Consulter la notice claire de transparence IA, RGPD et d'hébergement souverain Mistral AI / OVHcloud"
+        >
+          🇪🇺 IA Souveraine Mistral AI (France) & OVHcloud ℹ️
+        </button>
       </div>
 
       {/* SHIMMER BANNER PENDANT LA GÉNÉRATION OU LE CALCUL */}
@@ -3457,6 +3479,172 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 style={{ padding: "8px 18px", fontWeight: 700 }}
               >
                 Fermer et modifier manuellement
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TRANSPARENCE IA, RGPD & SOUVERAINETÉ EUROPÉENNE (MISTRAL AI & OVHCLOUD) */}
+      {showAiTransparencyModal && (
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.75)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 6000,
+            padding: "20px",
+          }}
+          onClick={() => setShowAiTransparencyModal(false)}
+        >
+          <div
+            className="modal-card"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-light)",
+              borderRadius: "var(--radius-md)",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              maxWidth: "740px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "22px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "#eff6ff", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>
+                  🇪🇺
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)" }}>
+                    Transparence IA, RGPD & Souveraineté Européenne
+                  </h3>
+                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                    Notice explicative claire sur les algorithmes, la protection des données et l'hébergement d'EdTemps
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="icon-btn-subtle"
+                onClick={() => setShowAiTransparencyModal(false)}
+                style={{ padding: "6px 12px", fontSize: "1rem", borderRadius: "50%", cursor: "pointer" }}
+                title="Fermer la notice"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Section 1 : Explications pour le grand public */}
+            <div>
+              <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🤖</span> 1. Comment et où l'IA est-elle utilisée dans EdTemps ?
+              </h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" }}>
+                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                    ⚡ Équilibrage des classes (Recuit Simulé)
+                  </strong>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                    L'IA calcule des milliers de combinaisons pour équilibrer la parité F/M, les niveaux scolaires, les options et les AESH. Elle vous propose 3 scénarios optimisés sans jamais décider seule.
+                  </p>
+                </div>
+                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                    🚨 Détection d'impossibilités mathématiques
+                  </strong>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                    L'IA vérifie vos contraintes de structure (ex: 100 élèves dans 2 classes de 30 max) et vous propose des corrections automatiques en 1 clic.
+                  </p>
+                </div>
+                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                    📄 OCR & Procès-Verbaux (Mistral Pixtral)
+                  </strong>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                    Mistral AI analyse les bilans de conseils de classe et extraits SIECLE scannés pour extraire automatiquement les aménagements (PAP/PPS) et avis pédagogiques.
+                  </p>
+                </div>
+                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                    🚨 Remplacements d'enseignants
+                  </strong>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                    L'IA croise les compétences disciplinaires et les créneaux libres pour recommander immédiatement des enseignants remplaçants disponibles.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2 : Infrastructures Souveraines (Mistral AI & OVHcloud) */}
+            <div>
+              <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🇫🇷</span> 2. Modèles Souverains Mistral AI & Hébergement OVHcloud (100% France / UE)
+              </h4>
+              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "14px 16px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+                  <div>
+                    <strong style={{ fontSize: "0.88rem", color: "#166534", display: "block" }}>
+                      Garantie de Souveraineté & Protection Anti US Cloud Act
+                    </strong>
+                    <span style={{ fontSize: "0.78rem", color: "#15803d" }}>
+                      EdTemps refuse tout recours aux géants américains (GAFAM : pas de Google Cloud, AWS ou Azure en production).
+                    </span>
+                  </div>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "0.8rem", color: "#166534", lineHeight: 1.5 }}>
+                  <li><strong>IA Générative / OCR / Dictée</strong> : Développés et propulsés exclusivement sur l'API souveraine <strong>Mistral AI</strong> (France / UE). Aucun prompt n'est transmis hors de l'Union Européenne.</li>
+                  <li><strong>Infrastructure de Production</strong> : En production, l'hébergement est assuré sur <strong>OVHcloud</strong> (Cloud souverain français certifié <em>SecNumCloud</em> par l'ANSSI et <em>HDS</em> pour les données sensibles d'Éducation).</li>
+                  <li><strong>Environnement Actuel (Staging / Démo)</strong> : Cet environnement de pré-production utilise **exclusivement des données de test synthétiques et fictives**, strictement isolées de tout fichier élève réel.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Section 3 : Garanties Éthiques & RGPD */}
+            <div>
+              <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>⚖️</span> 3. Conduite Éthique, RGPD & EU AI Act (Règlement Européen IA)
+              </h4>
+              <div style={{ background: "#faf5ff", border: "1px solid #e9d5ff", padding: "14px 16px", borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "#6b21a8", lineHeight: 1.5 }}>
+                <div style={{ marginBottom: "6px" }}>
+                  <strong>• Prise de décision humaine obligatoire (Art. 22 RGPD) :</strong> Aucun élève n'est réaffecté automatiquement par la machine. Tous les scénarios sont délivrés à l'état de brouillon (<code>DRAFT</code>). Seule une action explicite de la direction officialise la répartition (<code>APPROVED</code>).
+                </div>
+                <div style={{ marginBottom: "6px" }}>
+                  <strong>• Base Légale (Art. 6.1.e RGPD) :</strong> Traitement effectué dans le cadre d'une mission d'intérêt public pour le Ministère de l'Éducation Nationale.
+                </div>
+                <div>
+                  <strong>• Pseudonymisation par design :</strong> Les numéros INE des élèves sont instantanément hachés sous HMAC SHA-256 (<code>student-*</code>). Aucune donnée médicale brute n'est conservée.
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", paddingTop: "14px", marginTop: "4px" }}>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                🔒 Traitement certifié RGPD & SecNumCloud — République Française
+              </span>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setShowAiTransparencyModal(false)}
+                style={{ padding: "8px 20px", fontWeight: 800 }}
+              >
+                Fermer la notice
               </button>
             </div>
           </div>

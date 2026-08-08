@@ -46,3 +46,12 @@ Ce skill définit les **règles d'or et contraintes non négociables** à respec
 
 ## 6. Traçabilité et Audit Immuable
 - **Journal d'Audit Append-Only** : Tout événement critique (`SIECLE_IMPORTED`, `SCENARIOS_GENERATED`, `ASSIGNMENT_MOVED`, `SCENARIO_VALIDATED`, `SCHEDULE_GENERATED`, `COURSE_MOVED`, `SCHEDULE_VALIDATED`) doit inscrire un événement immuable traçant l'acteur, l'horodatage et les détails.
+
+---
+
+## 7. Transparence IA, Souveraineté Numérique & Maintenance du Skill
+- **Modèle d'IA Français Souverain (Mistral AI)** : Les traitements génératifs et d'analyse multimodale/OCR s'appuient exclusivement sur l'API souveraine **Mistral AI** (France / UE). Aucun prompt ni donnée n'est envoyé vers des modèles tiers soumis à des juridictions extraterritoriales (ex: US Cloud Act).
+- **Hébergement de Production Souverain (OVHcloud SecNumCloud)** : L'infrastructure de production est déployée sur **OVHcloud** (Hébergement souverain français certifié SecNumCloud et HDS pour la santé/Éducation). Les environnements de staging/dev doivent respecter l'isolation stricte des données synthétiques. Pas de dépendance GAFAM (Google Cloud, AWS, Azure) en production.
+- **Espace de Transparence Utilisateur (Grand Public / Éducation Nationale)** : L'application doit maintenir une modale/page d'information claire ("pour le commun des mortels") expliquant explicitement le rôle de l'IA (Recuit simulé, OCR, explications), les garanties RGPD (Art. 6.1.e et 22) et l'alignement avec le règlement européen sur l'IA (EU AI Act).
+- **Mise à Jour Automatique du Skill** : Dès qu'une nouvelle fonctionnalité basée sur l'IA ou un nouveau modèle est ajouté à l'application, ce fichier `SKILL.md` et la modale de transparence UI doivent être immédiatement mis à jour pour maintenir la documentation à jour.
+
