@@ -1013,13 +1013,32 @@ button:disabled {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: 20px 18px;
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.inspector select,
+.modal-card select,
+select {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.inspector button,
+.modal-card button,
+button.validate {
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.25;
 }
 
 .export-actions-grid {
@@ -1239,10 +1258,9 @@ button:disabled {
 
 .metrics dd {
   margin: 4px 0 0;
-  display: grid;
-  grid-template-columns: 1fr 45px;
-  gap: 8px;
+  display: flex;
   align-items: center;
+  gap: 8px;
   font-weight: 800;
   font-size: 0.95rem;
 }

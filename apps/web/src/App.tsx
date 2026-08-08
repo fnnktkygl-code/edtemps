@@ -2465,11 +2465,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <select
                             value={selected.id}
                             onChange={(e) => setSelectedId(e.target.value)}
-                            style={{ width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.92rem", color: "var(--text-main)" }}
+                            style={{ width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.86rem", color: "var(--text-main)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", boxSizing: "border-box" }}
                           >
                             {scenarios.map((sc, idx) => (
                               <option key={sc.id} value={sc.id}>
-                                {idx === 0 ? "Scénario A (🎯 Équilibre)" : idx === 1 ? "Scénario B (📊 Mixité)" : `Scénario ${String.fromCharCode(65 + idx)} (🤝 Accompagnement)`} — {Math.round(sc.metrics.score / 10)}% conformité {sc.state === "APPROVED" ? "✓ Officialisé" : "📋 Provisoire"}
+                                {idx === 0 ? "Scénario A (🎯 Équilibre)" : idx === 1 ? "Scénario B (📊 Mixité)" : `Scénario ${String.fromCharCode(65 + idx)} (🤝 Accompagnement)`} — {Math.round(sc.metrics.score / 10)}% {sc.state === "APPROVED" ? "(Officialisé)" : "(Provisoire)"}
                               </option>
                             ))}
                           </select>
@@ -2482,7 +2482,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           className="validate"
                           onClick={validate}
                           disabled={busy || selected.state === "APPROVED"}
-                          style={{ width: "100%", padding: "12px", fontSize: "0.95rem", fontWeight: 800 }}
+                          style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", fontWeight: 800, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25, textAlign: "center" }}
                         >
                           {selected.state === "APPROVED" ? "✓ Scénario Validé & Officialisé" : "🔒 Valider Humainement & Officialiser"}
                         </button>
@@ -2493,11 +2493,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                       {/* INDICATEURS DE CONFORMITÉ & INFOBULLES */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                          <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)", whiteSpace: "nowrap" }}>
                             📊 Diagnostic de Conformité
                           </h4>
-                          <span className="chip" style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "2px 8px", fontSize: "0.72rem", fontWeight: 800 }}>
+                          <span className="chip" style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "3px 8px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap" }}>
                             ✓ Contraintes Dures OK
                           </span>
                         </div>
@@ -2512,7 +2512,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                       {/* ASSISTANT DE RÉÉQUILIBRAGE SOUVERAIN MISTRAL AI */}
                       <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "nowrap" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                           <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
                             🪄 Assistant Rééquilibrage
                           </span>
@@ -2527,7 +2527,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "#4338ca", color: "#ffffff", padding: "9px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none" }}
+                          style={{ background: "#4338ca", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
                         >
                           ✨ Proposer un rééquilibrage pas-à-pas
                         </button>
@@ -4764,14 +4764,14 @@ function Metric({ name, value }: { name: string; value: number }) {
         <span>{name}</span>
         <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>ℹ️</span>
       </dt>
-      <dd>
-        <span className="metric-bar" title={`${value}% de conformité`}>
+      <dd style={{ margin: "4px 0 0", display: "flex", alignItems: "center", gap: "8px" }}>
+        <span className="metric-bar" style={{ flex: 1, minWidth: "60px" }} title={`${value}% de conformité`}>
           <i style={{ width: `${value}%`, background: value < 60 ? "#ef4444" : value < 75 ? "#f59e0b" : "#10b981" }} />
         </span>
-        <strong>{value}%</strong>
-        <small style={{ color: value < 60 ? "#dc2626" : value < 75 ? "#d97706" : "#059669", fontWeight: 700 }}>
-          {value < 60 ? "à améliorer" : value < 75 ? "à surveiller" : "excellent"}
-        </small>
+        <strong style={{ fontSize: "0.85rem", whiteSpace: "nowrap", minWidth: "36px", textAlign: "right" }}>{value}%</strong>
+        <span style={{ color: value < 60 ? "#dc2626" : value < 75 ? "#d97706" : "#059669", fontWeight: 800, fontSize: "0.74rem", whiteSpace: "nowrap" }}>
+          {value < 60 ? "à surveiller" : value < 75 ? "moyen" : "OK"}
+        </span>
       </dd>
     </div>
   );
