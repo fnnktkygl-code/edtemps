@@ -26,6 +26,7 @@ import {
 } from "./constants/referentiels";
 import { subjectColorClass, getAvatarColor, nameOf, getWeightLabel } from "./utils/format";
 import { computeRebalanceSteps } from "./utils/rebalance";
+import { days, periods } from "./constants/schedule";
 import { Metric } from "./components/Metric";
 import { Explanation } from "./components/Explanation";
 import { OfficialPdfModal } from "./components/OfficialPdfModal";
@@ -714,17 +715,7 @@ export default function App() {
 
   const selectedSchedule = schedules.find((s) => s.id === selectedScheduleId) ?? schedules[0];
 
-  const days: TimeSlot["day"][] = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
-  const periods = [
-    "08h00 - 08h55",
-    "09h00 - 09h55",
-    "10h05 - 11h00",
-    "11h05 - 12h00",
-    "12h00 - 13h00",
-    "13h00 - 13h55",
-    "14h00 - 14h55",
-    "15h05 - 16h00",
-  ];
+  // Créneaux d'emploi du temps (jours/périodes) : voir constants/schedule.ts
 
   // Thème adaptatif (Clair / Sombre)
   const [theme, setTheme] = useState<"light" | "dark">(() => (localStorage.getItem("theme") as "light" | "dark") || "light");
