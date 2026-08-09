@@ -5624,8 +5624,8 @@ function OfficialPdfModal({
             </p>
           </div>
 
-          {/* GRILLE PAR CLASSE */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px", marginBottom: "32px" }}>
+          {/* LISTE DES CLASSES (UNE CLASSE PAR LIGNE / PLEINE LARGEUR POUR UN DOCUMENT RESPIRANT) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "28px", marginBottom: "36px" }}>
             {dataset.classrooms.map((c) => {
               const students = dataset.students.filter((s) => scenario.assignments[s.id] === c.id);
               const girls = students.filter((s) => s.gender === "F").length;
@@ -5633,44 +5633,56 @@ function OfficialPdfModal({
               const avg = students.length > 0 ? students.reduce((acc, st) => acc + st.levelAverage, 0) / students.length : 0;
               const papCount = students.filter((s) => s.supportFlags.length > 0).length;
 
+              const classLabelDisplay = c.label.toUpperCase().startsWith("CLASSE")
+                ? c.label.toUpperCase()
+                : `CLASSE DE ${c.label.toUpperCase()}`;
+
               return (
-                <div key={c.id} style={{ border: "1px solid #cbd5e1", borderRadius: "6px", padding: "16px", background: "#ffffff" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "2px solid #1e3a8a", paddingBottom: "8px" }}>
-                    <strong style={{ fontSize: "1.1rem", fontWeight: 900, color: "#1e3a8a" }}>
-                      CLASSE DE {c.label.toUpperCase()}
+                <div key={c.id} style={{ border: "1px solid #cbd5e1", borderRadius: "8px", padding: "20px 24px", background: "#ffffff", pageBreakInside: "avoid" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "2px solid #1e3a8a", paddingBottom: "10px" }}>
+                    <strong style={{ fontSize: "1.2rem", fontWeight: 900, color: "#1e3a8a", letterSpacing: "0.02em" }}>
+                      {classLabelDisplay}
                     </strong>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#1e3a8a" }}>
-                      {students.length} / {c.maxSize} él.
+                    <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1e3a8a" }}>
+                      {students.length} / {c.maxSize} élèves affectés
                     </span>
                   </div>
 
-                  <div style={{ fontSize: "0.78rem", color: "#475569", marginBottom: "12px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", background: "#f8fafc", padding: "6px 8px", borderRadius: "4px" }}>
-                    <span>Parité : <strong>{girls}F / {boys}M</strong></span>
-                    <span>Moyenne : <strong>{avg.toFixed(1)}/20</strong></span>
-                    <span>PAP/PPS : <strong>{papCount}</strong></span>
+                  <div style={{ fontSize: "0.85rem", color: "#334155", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", background: "#f8fafc", padding: "10px 16px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <span>Parité : <strong style={{ color: "#0f172a" }}>{girls} F / {boys} M</strong> ({students.length > 0 ? Math.round((girls / students.length) * 100) : 0}% F)</span>
+                    <span>Moyenne générale de classe : <strong style={{ color: "#1e3a8a", fontFamily: "var(--font-mono)" }}>{avg.toFixed(1)} / 20</strong></span>
+                    <span>Accompagnements (PAP / PPS / PAI) : <strong style={{ color: "#9a3412" }}>{papCount} él.</strong></span>
                   </div>
 
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.76rem" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.84rem" }}>
                     <thead>
-                      <tr style={{ background: "#f1f5f9", borderBottom: "1px solid #cbd5e1" }}>
-                        <th style={{ textAlign: "left", padding: "5px 6px", color: "#334155" }}>#</th>
-                        <th style={{ textAlign: "left", padding: "5px 6px", color: "#334155" }}>Nom & Prénom / Identité</th>
-                        <th style={{ textAlign: "center", padding: "5px 6px", color: "#334155" }}>Moy.</th>
-                        <th style={{ textAlign: "right", padding: "5px 6px", color: "#334155" }}>Options / PAP</th>
+                      <tr style={{ background: "#f1f5f9", borderBottom: "2px solid #cbd5e1" }}>
+                        <th style={{ textAlign: "left", padding: "8px 10px", width: "45px", color: "#334155", fontWeight: 800 }}>#</th>
+                        <th style={{ textAlign: "left", padding: "8px 10px", color: "#334155", fontWeight: 800 }}>Nom & Prénom / Identité Élève</th>
+                        <th style={{ textAlign: "center", padding: "8px 10px", width: "70px", color: "#334155", fontWeight: 800 }}>Sexe</th>
+                        <th style={{ textAlign: "center", padding: "8px 10px", width: "110px", color: "#334155", fontWeight: 800 }}>Moyenne</th>
+                        <th style={{ textAlign: "left", padding: "8px 10px", color: "#334155", fontWeight: 800 }}>Options & Langues</th>
+                        <th style={{ textAlign: "left", padding: "8px 10px", color: "#334155", fontWeight: 800 }}>Accompagnements / Aménagements</th>
                       </tr>
                     </thead>
                     <tbody>
                       {students.map((st, i) => (
-                        <tr key={st.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                          <td style={{ padding: "5px 6px", color: "#64748b" }}>{i + 1}</td>
-                          <td style={{ padding: "5px 6px", fontWeight: 700, color: "#0f172a" }}>
+                        <tr key={st.id} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 1 ? "#fafafa" : "#ffffff" }}>
+                          <td style={{ padding: "8px 10px", color: "#64748b", fontWeight: 600 }}>{i + 1}</td>
+                          <td style={{ padding: "8px 10px", fontWeight: 700, color: "#0f172a", fontSize: "0.88rem" }}>
                             {getStudentDisplayName(st)}
                           </td>
-                          <td style={{ textAlign: "center", padding: "5px 6px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "#1e3a8a" }}>
+                          <td style={{ textAlign: "center", padding: "8px 10px", fontWeight: 700, color: st.gender === "F" ? "#831843" : "#075985" }}>
+                            {st.gender}
+                          </td>
+                          <td style={{ textAlign: "center", padding: "8px 10px", fontFamily: "var(--font-mono)", fontWeight: 800, color: "#1e3a8a", fontSize: "0.88rem" }}>
                             {st.levelAverage.toFixed(1)}
                           </td>
-                          <td style={{ textAlign: "right", padding: "5px 6px", fontSize: "0.72rem", color: "#475569" }}>
-                            {[...st.supportFlags, ...st.options].join(", ")}
+                          <td style={{ padding: "8px 10px", fontSize: "0.8rem", color: "#334155", fontWeight: 600 }}>
+                            {st.options.length > 0 ? st.options.join(", ") : "—"}
+                          </td>
+                          <td style={{ padding: "8px 10px", fontSize: "0.8rem", color: st.supportFlags.length > 0 ? "#9a3412" : "#64748b", fontWeight: st.supportFlags.length > 0 ? 700 : 500 }}>
+                            {st.supportFlags.length > 0 ? st.supportFlags.join(", ") : "—"}
                           </td>
                         </tr>
                       ))}
