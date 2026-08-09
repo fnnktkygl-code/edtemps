@@ -2463,7 +2463,7 @@ export default function App() {
           {dispatchSubTab === "kanban" && (
             <>
               {/* BANDEAU PERMANENT D'ACTION ET DE VALIDATION HUMAINE EN HAUT DE PAGE */}
-              <div style={{ background: selected?.state === "APPROVED" ? "var(--card-success-bg)" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "var(--card-success-border)" : "var(--primary-brand)"}`, padding: "14px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
+              <div style={{ background: selected?.state === "APPROVED" ? "var(--card-success-bg)" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "var(--card-success-border)" : "var(--primary-brand)"}`, padding: "16px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
                 <div>
                   <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     ⚖️ ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
@@ -2473,15 +2473,76 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                   <button
                     className="validate"
                     onClick={validate}
                     disabled={busy || selected?.state === "APPROVED"}
-                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--button-primary-bg)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                    style={{ padding: "10px 18px", fontSize: "0.9rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--button-primary-bg)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    {selected?.state === "APPROVED" ? "✓ Scénario Officialisé (CNIL Traçable)" : "🔒 Valider Humainement & Officialiser Ce Scénario"}
+                    {selected?.state === "APPROVED" ? "✓ Officialisé (CNIL)" : "🔒 Officialiser Ce Scénario"}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPdfModal(true)}
+                    style={{
+                      padding: "10px 18px",
+                      fontSize: "0.9rem",
+                      fontWeight: 800,
+                      background: "#059669",
+                      color: "#ffffff",
+                      borderRadius: "var(--radius-sm)",
+                      cursor: "pointer",
+                      border: "none",
+                      boxShadow: "var(--shadow-sm)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    📄 Exporter PDF (Procès-Verbal)
+                  </button>
+
+                  <a
+                    href={selected ? api.exportCsvUrl(selected.id) : "#"}
+                    download={selected ? `repartition-${selected.id}.csv` : "repartition.csv"}
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      background: "var(--bg-subtle)",
+                      color: "var(--text-main)",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border-light)",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    📥 CSV
+                  </a>
+
+                  <a
+                    href={selected ? api.exportPronoteUrl(selected.id) : "#"}
+                    download={selected ? `repartition-${selected.id}-pronote.json` : "repartition-pronote.json"}
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      background: "var(--bg-subtle)",
+                      color: "var(--text-main)",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border-light)",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    📦 PRONOTE JSON
+                  </a>
                 </div>
               </div>
               <section aria-labelledby="scenarios-title">
