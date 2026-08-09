@@ -1,3 +1,5 @@
+import type { Student } from "../types";
+
 /**
  * NOTE: metricLabel n'est actuellement appelée nulle part dans App.tsx (code mort
  * détecté lors de l'extraction). Conservée telle quelle pour ne rien casser ;
@@ -5,6 +7,17 @@
  */
 export function metricLabel(value: number): string {
   return value >= 85 ? "bon" : value >= 65 ? "à surveiller" : "à améliorer";
+}
+
+export function nameOf(student: Student, anonymous: boolean): string {
+  return anonymous ? student.initials : student.displayName;
+}
+
+export function getWeightLabel(value: number): { label: string; color: string; bg: string; border: string } {
+  if (value === 0) return { label: "Ignoré (0/10)", color: "var(--text-muted)", bg: "var(--bg-subtle)", border: "1px solid var(--border-light)" };
+  if (value <= 3) return { label: `Secondaire (${value}/10)`, color: "var(--card-highlight-text)", bg: "var(--card-highlight-bg)", border: "1px solid var(--card-highlight-border)" };
+  if (value <= 7) return { label: `Équilibré (${value}/10)`, color: "var(--card-success-text)", bg: "var(--card-success-bg)", border: "1px solid var(--card-success-border)" };
+  return { label: `Priorité Haute (${value}/10)`, color: "var(--card-purple-text)", bg: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)" };
 }
 
 export function subjectColorClass(subject: string): string {
