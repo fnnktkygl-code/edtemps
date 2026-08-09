@@ -947,7 +947,8 @@ export default function App() {
   };
 
   return (
-    <main className="page">
+    <>
+      <main className="page">
       <header className="masthead">
         <div className="brand-section" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <h1>EdTemps</h1>
@@ -5190,6 +5191,7 @@ export default function App() {
           <span>DPO</span>
         </button>
       </nav>
+    </main>
       {showPdfModal && selected && (
         <OfficialPdfModal
           scenario={selected}
@@ -5198,7 +5200,7 @@ export default function App() {
           onClose={() => setShowPdfModal(false)}
         />
       )}
-    </main>
+    </>
   );
 }
 
