@@ -2449,4 +2449,13 @@ a:focus-visible {
   .official-pdf-document td {
     border: 1px solid #cbd5e1 !important;
   }
+
+  .pdf-page-class {
+    break-before: page !important;
+    page-break-before: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin: 0 !important;
+    padding-top: 15px !important;
+  }
 }
