@@ -2903,28 +2903,7 @@ export default function App() {
                         )}
                       </div>
 
-                      {/* EXPORTS OFFICIELS */}
-                      <div style={{ marginTop: "auto", paddingTop: "12px", borderTop: "1px solid var(--border-light)" }}>
-                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, marginBottom: "6px", color: "var(--text-muted)" }}>
-                          Export de la répartition officielle :
-                        </label>
-                        <div className="export-actions-grid">
-                          <button
-                            type="button"
-                            className="export-btn secondary-export"
-                            style={{ gridColumn: "span 2", cursor: "pointer", width: "100%", justifyContent: "center" }}
-                            onClick={() => setShowPdfModal(true)}
-                          >
-                            📄 Export Document PDF Officiel
-                          </button>
-                          <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
-                            📥 Exporter CSV
-                          </a>
-                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
-                            📦 Export PRONOTE
-                          </a>
-                        </div>
-                      </div>
+
                     </aside>
 
                     {/* BARRE DE SAUT RAPIDE SUR MOBILE */}
