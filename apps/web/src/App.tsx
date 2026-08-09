@@ -15,133 +15,16 @@ import type {
   TimetablingDataset,
   TimetablingSchedule,
 } from "./types";
-
-const emptyDataset: Dataset = {
-  establishmentId: "demo-college",
-  level: "6e",
-  students: [],
-  classrooms: [],
-  dataClassification: "SYNTHETIC_DEMO_ONLY",
-};
-
-function metricLabel(value: number): string {
-  return value >= 85 ? "bon" : value >= 65 ? "à surveiller" : "à améliorer";
-}
-
-function subjectColorClass(subject: string): string {
-  const norm = subject.toLowerCase();
-  if (norm.includes("math")) return "math";
-  if (norm.includes("français")) return "fra";
-  if (norm.includes("histoire") || norm.includes("géo")) return "hg";
-  if (norm.includes("physique") || norm.includes("chimie")) return "pc";
-  if (norm.includes("svt")) return "svt";
-  if (norm.includes("anglais")) return "ang";
-  if (norm.includes("eps")) return "eps";
-  return "";
-}
-
-function getAvatarColor(id: string): string {
-  // Palette corrigée : les valeurs Tailwind "500" d'origine échouaient au contraste
-  // AA (4.5:1) avec des initiales blanches (ex. #f59e0b = 2.15:1, #10b981 = 2.54:1).
-  // Ces teintes plus saturées passent toutes ≥ 5:1 en conservant des teintes proches.
-  const colors = [
-    "#7c3aed", // violet (était #8b5cf6, 4.23:1 → 5.70:1)
-    "#0e7490", // cyan (était #06b6d4, 2.43:1 → 5.36:1)
-    "#047857", // émeraude (était #10b981, 2.54:1 → 5.48:1)
-    "#b45309", // ambre (était #f59e0b, 2.15:1 → 5.02:1)
-    "#be185d", // rose (était #ec4899, 3.53:1 → 6.04:1)
-    "#1d4ed8", // bleu (était #3b82f6, 3.68:1 → 6.70:1)
-    "#b91c1c", // rouge (était #ef4444, 3.76:1 → 6.47:1)
-    "#4f46e5", // indigo (était #6366f1, 4.47:1 → 6.29:1)
-  ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
-
-const SUPPORT_FLAG_TITLES: Record<string, string> = {
-  PAP: "Plan d'Accompagnement Personnalisé (Dys, TDAH, troubles des apprentissages)",
-  PPS: "Projet Personnalisé de Scolarisation (Situation de handicap / AESH)",
-  PPRE: "Programme Personnalisé de Réussite Éducative (Soutien pédagogique renforcé)",
-  PAI: "Projet d'Accueil Individualisé (Troubles de la santé / Médicaments)",
-  ULIS: "Unité Localisée pour l'Inclusion Scolaire (Dispositif d'inclusion)",
-};
-
-const OFFICIAL_NATIONAL_SUBJECTS = [
-  "Français",
-  "Mathématiques",
-  "Histoire-Géographie & EMC",
-  "Physique-Chimie",
-  "SVT (Sciences de la Vie et de la Terre)",
-  "Technologie",
-  "Anglais (LVA / LV1)",
-  "Allemand (LVB / LV2)",
-  "Espagnol (LVB / LV2)",
-  "Italien (LVB / LV2)",
-  "Arts Plastiques",
-  "Éducation Musicale",
-  "EPS (Éducation Physique et Sportive)",
-  "Philosophie",
-  "SES (Sciences Économiques et Sociales)",
-  "Sciences Numériques et Technologie (SNT)",
-  "Enseignement Scientifique",
-];
-
-const OFFICIAL_LV1_LIST = [
-  { code: "LVA_ANG", label: "Anglais (LVA / LV1)" },
-  { code: "LVA_ALL", label: "Allemand (LVA / LV1 - Bilangue)" },
-  { code: "LVA_ARA", label: "Arabe (LVA / LV1)" },
-  { code: "LVA_ESP", label: "Espagnol (LVA / LV1)" },
-  { code: "LVA_POR", label: "Portugais (LVA / LV1)" },
-];
-
-const OFFICIAL_LV2_LIST = [
-  { code: "LVB_ESP", label: "Espagnol (LVB / LV2)" },
-  { code: "LVB_ALL", label: "Allemand (LVB / LV2)" },
-  { code: "LVB_ITA", label: "Italien (LVB / LV2)" },
-  { code: "LVB_ANG", label: "Anglais (LVB / LV2)" },
-  { code: "LVB_ARA", label: "Arabe (LVB / LV2)" },
-  { code: "LVB_CHI", label: "Chinois (LVB / LV2)" },
-  { code: "LVB_POR", label: "Portugais (LVB / LV2)" },
-  { code: "LVB_RUS", label: "Russe (LVB / LV2)" },
-  { code: "LVB_JAP", label: "Japonais (LVB / LV2)" },
-];
-
-const OFFICIAL_OPTIONS_ONLY = [
-  { code: "LATIN", label: "Latin (LCA - Langues & Cultures Antiquité)" },
-  { code: "GREC", label: "Grec Ancien (LCA - Langues & Cultures Antiquité)" },
-  { code: "LCR", label: "Langues & Cultures Régionales (Occitan, Basque, Breton, etc.)" },
-  { code: "LCE", label: "LCE (Langues et Cultures Européennes)" },
-  { code: "CHAM", label: "CHAM / CHAD / CHAT (Musique / Danse / Théâtre)" },
-  { code: "SEL", label: "Section Européenne & Langues Orientales" },
-];
-
-const OPTION_TITLES: Record<string, string> = {
-  LVA_ANG: "LVA / LV1 : Anglais",
-  LVA_ALL: "LVA / LV1 : Allemand (Bilangue)",
-  LVA_ARA: "LVA / LV1 : Arabe",
-  LVA_ESP: "LVA / LV1 : Espagnol",
-  LVA_POR: "LVA / LV1 : Portugais",
-  LVB_ESP: "LVB / LV2 : Espagnol",
-  LVB_ALL: "LVB / LV2 : Allemand",
-  LVB_ITA: "LVB / LV2 : Italien",
-  LVB_ANG: "LVB / LV2 : Anglais",
-  LVB_ARA: "LVB / LV2 : Arabe",
-  LVB_CHI: "LVB / LV2 : Chinois",
-  LVB_POR: "LVB / LV2 : Portugais",
-  LVB_RUS: "LVB / LV2 : Russe",
-  LVB_JAP: "LVB / LV2 : Japonais",
-  LATIN: "Option LCA : Latin",
-  Latin: "Option LCA : Latin",
-  GREC: "Option LCA : Grec Ancien",
-  LCR: "Option : Langue et Culture Régionale",
-  BILANGUE: "Section Bilangue",
-  LCE: "LCE : Langues et Cultures Européennes",
-  CHAM: "CHAM : Classes à Horaires Aménagés",
-  SEL: "Section Européenne et de Langues Orientales",
-};
+import {
+  emptyDataset,
+  SUPPORT_FLAG_TITLES,
+  OFFICIAL_NATIONAL_SUBJECTS,
+  OFFICIAL_LV1_LIST,
+  OFFICIAL_LV2_LIST,
+  OFFICIAL_OPTIONS_ONLY,
+  OPTION_TITLES,
+} from "./constants/referentiels";
+import { subjectColorClass, getAvatarColor } from "./utils/format";
 
 export default function App() {
   const [activeTab, setActiveTabState] = useState<"dispatch" | "timetabling" | "compliance" | "teacher">(() => {
