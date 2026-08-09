@@ -1,0 +1,263 @@
+/* Modern Compact App Header Navbar */
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.brand-badge {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--primary-brand);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Modern Tab Navigation Line inside Masthead */
+.masthead .nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-subtle);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0;
+  border: 1px solid var(--border-light);
+  box-shadow: none;
+}
+
+.masthead .tab-button {
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.theme-toggle-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  transform: scale(1.05);
+}
+
+.toggle-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.toggle-pill input {
+  accent-color: var(--primary-brand);
+  cursor: pointer;
+}
+
+/* Compact Unified Status Bar */
+.compact-status-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.compact-status-bar .status-tag {
+  background: var(--bg-subtle);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 800;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  font-size: 0.78rem;
+}
+
+.compact-status-bar .status-text {
+  color: var(--text-muted);
+  font-weight: 600;
+  flex: 1;
+}
+
+.compact-status-bar .offline-tag {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.78rem;
+}
+
+.tab-button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 18px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  color: var(--text-main);
+  background: var(--bg-subtle);
+}
+
+.tab-button.active {
+  background: var(--button-primary-bg);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.active-subtab {
+  background: var(--button-primary-bg) !important;
+  color: #ffffff !important;
+  border-color: var(--button-primary-bg) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.active-filter {
+  background: var(--button-primary-bg) !important;
+  color: #ffffff !important;
+  border-color: var(--button-primary-bg) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] {
+  scrollbar-color: #25334d #090d16;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #090d16 !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #25334d !important;
+  border-radius: 4px;
+  border: 2px solid #090d16 !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #3b4d6e !important;
+}
+
+/* Tooltip Custom Styled */
+/* Step-by-Step Workflow Stepper */
+.step-pill {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.step-pill.active-step {
+  background: var(--button-primary-bg);
+  color: #ffffff;
+  border-color: var(--button-primary-bg);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.step-pill.done-step {
+  background: var(--button-success-bg);
+  /* était #10b981 codé en dur : 2.54:1 avec du blanc, sous tous les seuils */
+  color: #ffffff;
+  border-color: var(--button-success-bg);
+}
+

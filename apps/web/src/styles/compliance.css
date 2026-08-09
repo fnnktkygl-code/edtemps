@@ -1,0 +1,37 @@
+/* Compliance Module */
+.compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.compliance-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 28px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.compliance-card h3 {
+  font-family: var(--font-heading);
+  color: var(--primary-brand);
+  font-size: 1.2rem;
+  margin: 0 0 20px;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 10px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+

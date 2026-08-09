@@ -1,0 +1,117 @@
+/* Mode Sombre Adaptatif */
+[data-theme="dark"] {
+  --primary-brand: #818cf8;
+  /* Bleu indigo pastel clair (6.8:1 de contraste avec texte sur bg-card #131b2e) */
+  --primary-hover: #a5b4fc;
+  --button-primary-bg: #4f46e5;
+  /* Fond de bouton plein avec texte blanc (6.29:1 avec du blanc) */
+  --button-primary-hover: #4338ca;
+  --indigo-accent: #818cf8;
+  --blue-accent: #3b82f6;
+  --emerald-accent: #34d399;
+  --amber-accent: #fbbf24;
+  --rose-accent: #fb7185;
+
+  --bg-page: #090d16;
+  --bg-card: #131b2e;
+  --bg-subtle: #1c273e;
+  --bg-hover: #273554;
+
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-light: #94a3b8;
+
+  --border-light: #33456b;
+  /* était #25334d = 1.36:1 sur bg-card, sous le seuil 3:1 (WCAG 1.4.11) */
+  --border-strong: #57709c;
+  /* était #3b4d6e = 2.29:1, désormais 3.4–3.9:1 sur bg-page/bg-card */
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.35);
+
+  /* Soft Badge & Card Highlight Tokens (Dark Mode RGAA AA High Contrast) */
+  --badge-female-bg: #831843;
+  --badge-female-text: #fbcfe8;
+  --badge-female-border: #9d174d;
+
+  --badge-male-bg: #075985;
+  --badge-male-text: #bae6fd;
+  --badge-male-border: #0369a1;
+
+  --badge-need-bg: #78350f;
+  --badge-need-text: #fef3c7;
+  --badge-need-border: #92400e;
+
+  --badge-option-bg: #312e81;
+  --badge-option-text: #e0e7ff;
+  --badge-option-border: #3730a3;
+
+  --card-highlight-bg: #1e293b;
+  --card-highlight-border: #3b82f6;
+  --card-highlight-text: #93c5fd;
+
+  --card-success-bg: #064e3b;
+  --card-success-border: #059669;
+  --card-success-text: #6ee7b7;
+
+  --card-warning-bg: #451a03;
+  --card-warning-border: #d97706;
+  --card-warning-text: #fde68a;
+
+  --card-purple-bg: #3b0764;
+  --card-purple-border: #8b5cf6;
+  --card-purple-text: #ddd6fe;
+
+  --card-info-bg: #0c4a6e;
+  --card-info-border: #0284c7;
+  --card-info-text: #7dd3fc;
+
+  --card-error-bg: #7f1d1d;
+  --card-error-border: #dc2626;
+  --card-error-text: #fecdd3;
+  /* 7.1:1 sur #7f1d1d — n'existait pas côté dark, sweep utilisait #fef2f2/#991b1b codés en dur */
+
+  --button-success-bg: #047857;
+  /* identique aux deux thèmes : 5.48:1 avec texte blanc (vs 2.54:1 pour #10b981 utilisé avant) */
+
+  --card-legend-bg: linear-gradient(135deg, #131b2e 0%, #1e293b 100%);
+  --card-legend-border: #25334d;
+}
+
+/* Surcharges globales pour garantir un contraste 100% parfait en mode sombre */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .weight-card,
+[data-theme="dark"] .option-matrix-table,
+[data-theme="dark"] .kanban-column,
+[data-theme="dark"] .scenario-card,
+[data-theme="dark"] .inspector,
+[data-theme="dark"] .modal-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] table th {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] table td {
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+

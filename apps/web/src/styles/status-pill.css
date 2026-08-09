@@ -1,0 +1,106 @@
+/* Sceau d'Équilibrage Pédagogique (Status Pill) */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+}
+
+.stamp-badge.ok {
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  background: #d1fae5;
+}
+
+.stamp-badge.warn {
+  color: #b45309;
+  border: 1px solid #fde68a;
+  background: #fef3c7;
+}
+
+[data-theme="dark"] .stamp-badge.ok {
+  color: #6ee7b7;
+  border-color: #047857;
+  background: #064e3b;
+}
+
+[data-theme="dark"] .stamp-badge.warn {
+  color: #fde047;
+  border-color: #78350f;
+  background: #451a03;
+}
+
+.icon-btn-subtle {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn-subtle:hover {
+  background: var(--bg-card);
+  border-color: var(--primary-brand);
+  color: var(--primary-brand);
+}
+
+.compact-move-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-align-last: center;
+}
+
+.compact-move-select:hover {
+  border-color: var(--primary-brand);
+  background: var(--bg-card);
+}
+
+.student-grade-pill {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: var(--primary-brand);
+  background: var(--bg-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.student-support-pill {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+

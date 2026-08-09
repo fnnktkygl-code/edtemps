@@ -1,0 +1,29 @@
+/* Barre de Parité visuelle */
+.parity-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--bg-subtle);
+  overflow: hidden;
+  display: flex;
+}
+
+.parity-fill-f {
+  background: #ec4899;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.parity-fill-m {
+  background: #0284c7;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Glisser-déposer sur colonne de classe */
+.classroom-column.drag-over {
+  border-color: var(--primary-brand) !important;
+  background: rgba(79, 70, 229, 0.06) !important;
+  box-shadow: var(--shadow-glow);
+}
+

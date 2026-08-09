@@ -1,0 +1,84 @@
+/* ==========================================================================
+   EdTemps 2026 Premium SaaS Design System
+   UI/UX & Ergonomie de Niveau Mondial (Theme Light & Dark Adaptatif)
+   ========================================================================== */
+
+:root {
+  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Palette Carnet de Bord & Institutionnelle Éducation Nationale */
+  --primary-brand: #1e3a8a;
+  /* Encre bleue institutionnelle (titres, liens, textes sur fond clair) */
+  --primary-hover: #1e40af;
+  --button-primary-bg: #1d4ed8;
+  /* Fond de bouton plein avec texte blanc (6.70:1 avec du blanc) */
+  --button-primary-hover: #1e40af;
+  --indigo-accent: #2563eb;
+  --blue-accent: #1d4ed8;
+  --emerald-accent: #059669;
+  --amber-accent: #d97706;
+  --rose-accent: #dc2626;
+
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-hover: #e2e8f0;
+
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-light: #64748b;
+
+  --border-light: #cbd5e1;
+  --border-strong: #7c8fac;
+
+  /* Tokens sémantiques (badges, diagnostics, cartes) — formalisation des couleurs
+     déjà utilisées en inline dans App.tsx, désormais pilotables par thème */
+  --card-success-bg: #f0fdf4;
+  --card-success-border: #bbf7d0;
+  --card-success-text: #166534;
+
+  --card-error-bg: #fef2f2;
+  --card-error-border: #fca5a5;
+  --card-error-text: #991b1b;
+
+  --card-warning-bg: #fff7ed;
+  --card-warning-border: #fed7aa;
+  --card-warning-text: #9a3412;
+
+  --card-purple-bg: #f3e8ff;
+  --card-purple-border: #e9d5ff;
+  --card-purple-text: #6b21a8;
+
+  --card-info-bg: #e0f2fe;
+  --card-info-border: #bae6fd;
+  --card-info-text: #0369a1;
+
+  --card-highlight-bg: #eff6ff;
+  --card-highlight-border: #bfdbfe;
+  --card-highlight-text: #1d4ed8;
+
+  --badge-option-bg: #e0e7ff;
+  --badge-option-text: #3730a3;
+  --badge-option-border: #c7d2fe;
+
+  /* Couleur de bouton "succès" plein (texte blanc) — stable entre les deux thèmes,
+     vérifiée ≥ 4.5:1 avec du blanc (contrairement à #10b981/#059669 utilisés avant) */
+  --button-success-bg: #047857;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 20px rgba(30, 58, 138, 0.2);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

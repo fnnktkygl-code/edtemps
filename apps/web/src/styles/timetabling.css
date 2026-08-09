@@ -1,0 +1,208 @@
+/* Absence Panel */
+.substitutions-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--amber-accent);
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.substitutions-panel h3 {
+  margin: 0 0 16px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.substitutions-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.substitutions-form label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.substitutions-form select,
+.substitutions-form input {
+  padding: 9px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: var(--transition-fast);
+}
+
+.substitutions-form select:focus,
+.substitutions-form input:focus {
+  border-color: var(--primary-brand);
+  background: var(--bg-card);
+}
+
+/* Timetable Grid & Cards */
+.timetabling-grid {
+  display: grid;
+  grid-template-columns: 100px repeat(5, 1fr);
+  gap: 12px;
+  background: transparent;
+  margin-top: 16px;
+}
+
+.grid-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 14px 8px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.92rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.time-col-header {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 14px 8px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+
+.time-label {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-slot {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  min-height: 90px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.grid-slot:hover {
+  border-color: var(--border-strong);
+}
+
+.grid-slot.meridienne {
+  background: var(--bg-subtle);
+  color: var(--text-light);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Course Card (Carte de cours) */
+.course-badge {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--primary-brand);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: var(--transition-fast);
+}
+
+.course-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.course-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.course-subject {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.course-class-tag {
+  background: var(--button-primary-bg);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.course-details-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.course-badge.math {
+  border-left-color: #ef4444;
+}
+
+.course-badge.fra {
+  border-left-color: #3b82f6;
+}
+
+.course-badge.hg {
+  border-left-color: #f59e0b;
+}
+
+.course-badge.pc {
+  border-left-color: #8b5cf6;
+}
+
+.course-badge.svt {
+  border-left-color: #10b981;
+}
+
+.course-badge.ang {
+  border-left-color: #06b6d4;
+}
+
+.course-badge.eps {
+  border-left-color: #f43f5e;
+}
+

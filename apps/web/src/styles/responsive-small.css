@@ -1,0 +1,15 @@
+@media (max-width: 480px) {
+  .brand-section h1 {
+    font-size: 1.2rem;
+  }
+
+  .classroom-column {
+    flex: 0 0 92vw !important;
+    max-width: 92vw !important;
+  }
+
+  .compact-status-bar {
+    font-size: 0.76rem;
+  }
+}
+
