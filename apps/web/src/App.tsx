@@ -41,15 +41,18 @@ function subjectColorClass(subject: string): string {
 }
 
 function getAvatarColor(id: string): string {
+  // Palette corrigée : les valeurs Tailwind "500" d'origine échouaient au contraste
+  // AA (4.5:1) avec des initiales blanches (ex. #f59e0b = 2.15:1, #10b981 = 2.54:1).
+  // Ces teintes plus saturées passent toutes ≥ 5:1 en conservant des teintes proches.
   const colors = [
-    "#8b5cf6",
-    "#06b6d4",
-    "#10b981",
-    "#f59e0b",
-    "#ec4899",
-    "#3b82f6",
-    "#ef4444",
-    "#6366f1",
+    "#7c3aed", // violet (était #8b5cf6, 4.23:1 → 5.70:1)
+    "#0e7490", // cyan (était #06b6d4, 2.43:1 → 5.36:1)
+    "#047857", // émeraude (était #10b981, 2.54:1 → 5.48:1)
+    "#b45309", // ambre (était #f59e0b, 2.15:1 → 5.02:1)
+    "#be185d", // rose (était #ec4899, 3.53:1 → 6.04:1)
+    "#1d4ed8", // bleu (était #3b82f6, 3.68:1 → 6.70:1)
+    "#b91c1c", // rouge (était #ef4444, 3.76:1 → 6.47:1)
+    "#4f46e5", // indigo (était #6366f1, 4.47:1 → 6.29:1)
   ];
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -195,7 +198,6 @@ export default function App() {
   };
 
   const [showBenchmark, setShowBenchmark] = useState<boolean>(true);
-  const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
 
   // Module 1 State (Dispatch) avec persistance LocalStorage
   const [dataset, setDatasetState] = useState<Dataset>(emptyDataset);
@@ -207,7 +209,7 @@ export default function App() {
     setActiveDataset(ds);
     try {
       localStorage.setItem("edtemps_savedDataset", JSON.stringify(ds));
-    } catch {}
+    } catch { }
   };
 
   const setScenarios = (scens: Scenario[] | ((prev: Scenario[]) => Scenario[])) => {
@@ -215,15 +217,15 @@ export default function App() {
       const next = typeof scens === "function" ? scens(prev) : scens;
       try {
         localStorage.setItem("edtemps_savedScenarios", JSON.stringify(next));
-      } catch {}
+      } catch { }
       return next;
     });
   };
 
-function getBestScenarioId(scens: Scenario[]): string | undefined {
-  if (!scens || scens.length === 0) return undefined;
-  return scens.reduce((best, curr) => (curr.metrics.score > best.metrics.score ? curr : best), scens[0])?.id;
-}
+  function getBestScenarioId(scens: Scenario[]): string | undefined {
+    if (!scens || scens.length === 0) return undefined;
+    return scens.reduce((best, curr) => (curr.metrics.score > best.metrics.score ? curr : best), scens[0])?.id;
+  }
 
   const setSelectedId = (id?: string) => {
     setSelectedIdState(id);
@@ -253,7 +255,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
     return {
       genderBalance: 4,
@@ -321,14 +323,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           setSelectedIdState(savedSelectedId || getBestScenarioId(parsedScens) || parsedScens[0].id);
           setNotice(`Session et scénarios restaurés (${parsedDs.students.length} élèves, ${parsedDs.classrooms.length} classes).`);
 
-          api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => {});
+          api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => { });
           api.timetablingSchedules().then((res) => {
             setSchedules(res.schedules);
             if (res.schedules.length > 0) setSelectedScheduleId(res.schedules[0].id);
-          }).catch(() => {});
+          }).catch(() => { });
           return;
         }
-      } catch {}
+      } catch { }
     }
 
     api.dataset()
@@ -341,15 +343,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             const bestId = getBestScenarioId(res.scenarios);
             if (bestId) setSelectedId(bestId);
           })
-          .catch(() => {});
+          .catch(() => { });
       })
       .catch((error: Error) => setNotice(error.message));
 
-    api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => {});
+    api.timetablingDataset().then((data) => setTimetablingData(data)).catch(() => { });
     api.timetablingSchedules().then((res) => {
       setSchedules(res.schedules);
       if (res.schedules.length > 0) setSelectedScheduleId(res.schedules[0].id);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const selected = scenarios.find((scenario) => scenario.id === selectedId) ?? scenarios[0];
@@ -624,7 +626,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           );
         }
       }
-      refreshAudit().catch(() => {});
+      refreshAudit().catch(() => { });
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Déplacement refusé par l'API.");
     }
@@ -1130,7 +1132,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 </button>
                 <button
                   className="secondary"
-                  style={{ textAlign: "left", justifyContent: "flex-start", background: "#fef3c7", color: "#b45309", border: "1px solid #fde68a", fontWeight: 800 }}
+                  style={{ textAlign: "left", justifyContent: "flex-start", background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", fontWeight: 800 }}
                   onClick={() => {
                     setImportMenuOpen(false);
                     void handleRegenerateCohort();
@@ -1170,9 +1172,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           type="button"
           onClick={() => setShowAiTransparencyModal(true)}
           style={{
-            background: "#eff6ff",
-            border: "1px solid #bfdbfe",
-            color: "#1d4ed8",
+            background: "var(--card-highlight-bg)",
+            border: "1px solid var(--card-highlight-border)",
+            color: "var(--card-highlight-text)",
             padding: "3px 10px",
             borderRadius: "12px",
             fontSize: "0.76rem",
@@ -1198,13 +1200,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
       )}
 
       {ocrSummary && (
-        <div className="safety-banner" style={{ background: "#e8f5e9", borderColor: "#18753c" }}>
+        <div className="safety-banner" style={{ background: "var(--card-success-bg)", borderColor: "var(--card-success-border)", color: "var(--card-success-text)" }}>
           <strong>📷 Analyse OCR Mistral Pixtral :</strong> {ocrSummary}
         </div>
       )}
 
       {voiceSummary && (
-        <div className="safety-banner" style={{ background: "#e3f2fd", borderColor: "#0288d1" }}>
+        <div className="safety-banner" style={{ background: "var(--card-info-bg)", borderColor: "var(--card-info-border)", color: "var(--card-info-text)" }}>
           <strong>🎙️ Dictée Vocale Mistral Voxtral :</strong> {voiceSummary}
         </div>
       )}
@@ -1430,7 +1432,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   <button
                     className="secondary"
                     onClick={() => void handleRegenerateCohort()}
-                    style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", fontWeight: 800 }}
+                    style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", fontWeight: 800 }}
                     title="Générer une nouvelle cohorte aléatoire de 70 élèves complètement remplis (LV1, LV2, options, 9 notes)"
                   >
                     🎲 Régénérer 70 Élèves
@@ -1523,7 +1525,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   {nameOf(student, anonymous)}
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
-                                  <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                                  <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
                                     {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
                                   </span>
                                 </td>
@@ -1534,10 +1536,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
                                   <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                                    <span className="ui-tooltip" data-tooltip={`Autonomie comportementale : ${student.behavior?.conductScore ?? 4}/5 étoiles`} style={{ fontSize: "0.82rem", fontWeight: 700, color: "#d97706", cursor: "help" }}>
+                                    <span className="ui-tooltip" data-tooltip={`Autonomie comportementale : ${student.behavior?.conductScore ?? 4}/5 étoiles`} style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--amber-accent)", cursor: "help" }}>
                                       {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
                                     </span>
-                                    <span className="ui-tooltip" data-tooltip={`Cumul d'absences signalées : ${student.behavior?.absencesHours ?? 0}h`} style={{ fontSize: "0.76rem", fontWeight: 700, color: (student.behavior?.absencesHours ?? 0) > 5 ? "#dc2626" : "var(--text-muted)", cursor: "help" }}>
+                                    <span className="ui-tooltip" data-tooltip={`Cumul d'absences signalées : ${student.behavior?.absencesHours ?? 0}h`} style={{ fontSize: "0.76rem", fontWeight: 700, color: (student.behavior?.absencesHours ?? 0) > 5 ? "var(--rose-accent)" : "var(--text-muted)", cursor: "help" }}>
                                       ⏱️ {student.behavior?.absencesHours ?? 0}h abs.
                                     </span>
                                   </div>
@@ -1545,7 +1547,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                 <td style={{ padding: "10px 14px" }}>
                                   {student.supportFlags.length > 0 ? (
                                     student.supportFlags.map((need) => (
-                                      <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                      <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
                                         🤝 {need}
                                       </span>
                                     ))
@@ -1556,7 +1558,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                 <td style={{ padding: "10px 14px" }}>
                                   {student.options.length > 0 ? (
                                     student.options.map((opt) => (
-                                      <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
+                                      <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
                                         🎓 {opt}
                                       </span>
                                     ))
@@ -1610,7 +1612,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "0.78rem" }}>
-                              <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "#fce7f3" : "#e0f2fe", color: student.gender === "F" ? "#be185d" : "#0369a1" }}>
+                              <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
                                 {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
                               </span>
                               <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>
@@ -1621,12 +1623,12 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             {(student.supportFlags.length > 0 || student.options.length > 0) && (
                               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                 {student.supportFlags.map((need) => (
-                                  <span key={need} className="chip" style={{ background: "#fef3c7", color: "#b45309", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
+                                  <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
                                     🤝 {need}
                                   </span>
                                 ))}
                                 {student.options.map((opt) => (
-                                  <span key={opt} className="chip" style={{ background: "#e0e7ff", color: "#3730a3", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
+                                  <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
                                     🎓 {opt}
                                   </span>
                                 ))}
@@ -1827,7 +1829,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         <h5 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)" }}>
                           📊 Performance Mesurée en Temps Réel sur la Cohorte ({dataset.students.length} Élèves)
                         </h5>
-                        <span style={{ fontSize: "0.7rem", background: "#e0f2fe", color: "#0369a1", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
+                        <span style={{ fontSize: "0.7rem", background: "var(--card-info-bg)", color: "var(--card-info-text)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
                           ⚡ CALCUL DIRECT
                         </span>
                       </div>
@@ -1837,30 +1839,30 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #10b981", boxShadow: "var(--shadow-sm)" }}>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid var(--emerald-accent)", boxShadow: "var(--shadow-sm)" }}>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Équilibre Parité F/M</span>
-                        <strong style={{ fontSize: "1.08rem", color: "#10b981" }}>
+                        <strong style={{ fontSize: "1.08rem", color: "var(--emerald-accent)" }}>
                           {selected ? Math.round(selected.metrics.genderBalance) : 94}% de conformité
                         </strong>
                         <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem", marginTop: "2px" }}>vs ~55% en tirage manuel</small>
                       </div>
-                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #3b82f6", boxShadow: "var(--shadow-sm)" }}>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid var(--indigo-accent)", boxShadow: "var(--shadow-sm)" }}>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Homogénéité Académique</span>
-                        <strong style={{ fontSize: "1.08rem", color: "#3b82f6" }}>
+                        <strong style={{ fontSize: "1.08rem", color: "var(--indigo-accent)" }}>
                           {selected ? Math.round(selected.metrics.academicBalance) : 98}% de convergence
                         </strong>
                         <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem", marginTop: "2px" }}>vs ~50% sans lissage des moyennes</small>
                       </div>
-                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid #f59e0b", boxShadow: "var(--shadow-sm)" }}>
+                      <div style={{ background: "var(--bg-card)", padding: "10px 14px", borderRadius: "var(--radius-sm)", borderLeft: "4px solid var(--amber-accent)", boxShadow: "var(--shadow-sm)" }}>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>Besoins PAP/PPS / AESH</span>
-                        <strong style={{ fontSize: "1.08rem", color: "#f59e0b" }}>
+                        <strong style={{ fontSize: "1.08rem", color: "var(--amber-accent)" }}>
                           {selected ? Math.round(selected.metrics.supportBalance) : 100}% sans surcharge
                         </strong>
                         <small style={{ display: "block", color: "var(--text-light)", fontSize: "0.74rem", marginTop: "2px" }}>Groupements AESH préserve</small>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: "10px", fontSize: "0.75rem", color: "#64748b", background: "#f8fafc", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ marginTop: "10px", fontSize: "0.75rem", color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
                       ℹ️ <strong>Origine des métriques :</strong> Ces indicateurs mesurent l'efficacité de l'algorithme sur le scénario actuellement sélectionné (<strong>{scenarios.findIndex((s) => s.id === selected?.id) === 0 ? "Scénario A — Équilibre Global" : scenarios.findIndex((s) => s.id === selected?.id) === 1 ? "Scénario B — Focus Mixité" : "Scénario C — Focus Accompagnements"}</strong>). Ils sont calculés en temps réel sur vos {dataset.students.length} élèves et comparés à la déviation statistique moyenne d'une répartition naïve à l'aveugle.
                     </div>
                   </div>
@@ -1868,32 +1870,32 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               </div>
 
               {/* GUIDE PÉDAGOGIQUE EXPLICATIF DE 0 À 10 POUR NON-AGUERRIS */}
-              <div style={{ background: "linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)", border: "1px solid #cbd5e1", borderRadius: "var(--radius-md)", padding: "16px 18px", marginBottom: "20px" }}>
+              <div style={{ background: "var(--card-legend-bg)", border: "1px solid var(--card-legend-border)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginBottom: "20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
                   <span style={{ fontSize: "1.1rem" }}>💡</span>
-                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 800, color: "#1e293b" }}>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 800, color: "var(--text-main)" }}>
                     Comment fonctionnent les niveaux de priorité (de 0 à 10) ?
                   </h4>
                 </div>
-                <p style={{ margin: "0 0 12px", fontSize: "0.84rem", color: "#475569", lineHeight: 1.45 }}>
+                <p style={{ margin: "0 0 12px", fontSize: "0.84rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                   Les curseurs indiquent à l'algorithme la valeur accordée à chaque règle. Plus la note est élevée, plus le solveur sacrifiera les autres critères secondaires pour satisfaire celui-ci.
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
-                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "#64748b", display: "block" }}>⚪ 0 / 10 — Ignoré</strong>
-                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Le critère est totalement désactivé.</span>
+                  <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--text-light)", display: "block" }}>⚪ 0 / 10 — Ignoré</strong>
+                    <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Le critère est totalement désactivé.</span>
                   </div>
-                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "#0284c7", display: "block" }}>🔵 1 à 3 / 10 — Secondaire</strong>
-                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Pris en compte si possible.</span>
+                  <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-info-text)", display: "block" }}>🔵 1 à 3 / 10 — Secondaire</strong>
+                    <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Pris en compte si possible.</span>
                   </div>
-                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "#15803d", display: "block" }}>🟢 4 à 7 / 10 — Équilibré</strong>
-                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Niveau standard recommandé.</span>
+                  <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-success-text)", display: "block" }}>🟢 4 à 7 / 10 — Équilibré</strong>
+                    <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Niveau standard recommandé.</span>
                   </div>
-                  <div style={{ background: "#ffffff", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "#6b21a8", display: "block" }}>🟣 8 à 10 / 10 — Priorité Haute</strong>
-                    <span style={{ fontSize: "0.74rem", color: "#64748b" }}>Priorité maximale sur les autres.</span>
+                  <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-purple-text)", display: "block" }}>🟣 8 à 10 / 10 — Priorité Haute</strong>
+                    <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Priorité maximale sur les autres.</span>
                   </div>
                 </div>
               </div>
@@ -1909,6 +1911,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       style={{
                         background: getWeightLabel(weights.genderBalance).bg,
                         color: getWeightLabel(weights.genderBalance).color,
+                        border: getWeightLabel(weights.genderBalance).border,
                         padding: "4px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -1938,6 +1941,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       style={{
                         background: getWeightLabel(weights.academicBalance).bg,
                         color: getWeightLabel(weights.academicBalance).color,
+                        border: getWeightLabel(weights.academicBalance).border,
                         padding: "4px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -1967,6 +1971,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       style={{
                         background: getWeightLabel(weights.supportBalance).bg,
                         color: getWeightLabel(weights.supportBalance).color,
+                        border: getWeightLabel(weights.supportBalance).border,
                         padding: "4px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -1996,6 +2001,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       style={{
                         background: getWeightLabel(weights.optionBalance).bg,
                         color: getWeightLabel(weights.optionBalance).color,
+                        border: getWeightLabel(weights.optionBalance).border,
                         padding: "4px 10px",
                         borderRadius: "12px",
                         fontSize: "0.78rem",
@@ -2041,9 +2047,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             fontSize: "0.8rem",
                             fontWeight: 700,
                             borderRadius: "var(--radius-sm)",
-                            border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#3b82f6" : "var(--border-light)"}`,
-                            background: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#eff6ff" : "var(--bg-card)",
-                            color: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "#1d4ed8" : "var(--text-muted)",
+                            border: `1px solid ${weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "var(--card-highlight-border)" : "var(--border-light)"}`,
+                            background: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "var(--card-highlight-bg)" : "var(--bg-card)",
+                            color: weights.optionGroupingMode !== "STRICT_SINGLE_CLASS" ? "var(--card-highlight-text)" : "var(--text-muted)",
                             cursor: "pointer",
                           }}
                         >
@@ -2064,9 +2070,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             fontSize: "0.8rem",
                             fontWeight: 700,
                             borderRadius: "var(--radius-sm)",
-                            border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#8b5cf6" : "var(--border-light)"}`,
-                            background: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#f3e8ff" : "var(--bg-card)",
-                            color: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "#6b21a8" : "var(--text-muted)",
+                            border: `1px solid ${weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "var(--card-purple-border)" : "var(--border-light)"}`,
+                            background: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "var(--card-purple-bg)" : "var(--bg-card)",
+                            color: weights.optionGroupingMode === "STRICT_SINGLE_CLASS" ? "var(--card-purple-text)" : "var(--text-muted)",
                             cursor: "pointer",
                           }}
                         >
@@ -2095,9 +2101,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             fontSize: "0.8rem",
                             fontWeight: 700,
                             borderRadius: "var(--radius-sm)",
-                            border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#10b981" : "var(--border-light)"}`,
-                            background: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#ecfdf5" : "var(--bg-card)",
-                            color: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "#047857" : "var(--text-muted)",
+                            border: `1px solid ${weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "var(--card-success-border)" : "var(--border-light)"}`,
+                            background: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "var(--card-success-bg)" : "var(--bg-card)",
+                            color: weights.supportGroupingMode !== "GROUP_AESH_CLASSES" ? "var(--card-success-text)" : "var(--text-muted)",
                             cursor: "pointer",
                           }}
                         >
@@ -2112,9 +2118,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             fontSize: "0.8rem",
                             fontWeight: 700,
                             borderRadius: "var(--radius-sm)",
-                            border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#f59e0b" : "var(--border-light)"}`,
-                            background: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#fffbe6" : "var(--bg-card)",
-                            color: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "#b45309" : "var(--text-muted)",
+                            border: `1px solid ${weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "var(--card-warning-border)" : "var(--border-light)"}`,
+                            background: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "var(--card-warning-bg)" : "var(--bg-card)",
+                            color: weights.supportGroupingMode === "GROUP_AESH_CLASSES" ? "var(--card-warning-text)" : "var(--text-muted)",
                             cursor: "pointer",
                           }}
                         >
@@ -2140,7 +2146,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
                           Cochez les classes réservées à une option ; laissez vide pour une répartition libre.
                         </span>
-                        <span style={{ fontSize: "0.76rem", color: "#0284c7", marginTop: "6px", display: "inline-block", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontWeight: 700, lineHeight: 1.35 }}>
+                        <span style={{ fontSize: "0.76rem", color: "var(--card-info-text)", marginTop: "6px", display: "inline-block", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontWeight: 700, lineHeight: 1.35 }}>
                           ℹ️ Note pédagogique : Ce tableau concerne uniquement les enseignements disciplinaires (LVA, LVB, Latin, LCE, CHAM). Les besoins d'accompagnement (PAP, PPS, PAI, AESH) ne sont pas des cours et sont gérés par la stratégie AESH ci-dessus.
                         </span>
                       </div>
@@ -2174,7 +2180,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                 {dataset.classrooms.map((c) => {
                                   const isChecked = weights.exclusiveOptionClassrooms?.[c.id] === opt;
                                   return (
-                                    <td key={c.id} style={{ textAlign: "center", padding: "10px 14px", background: isChecked ? "#fef3c7" : "transparent" }}>
+                                    <td key={c.id} style={{ textAlign: "center", padding: "10px 14px", background: isChecked ? "var(--card-warning-bg)" : "transparent" }}>
                                       <input
                                         type="checkbox"
                                         checked={isChecked}
@@ -2198,9 +2204,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   {assignedClasses.length === 0 ? (
                                     <span style={{ color: "var(--text-light)" }}>Non réservée (libre)</span>
                                   ) : totalCap >= optCount ? (
-                                    <span style={{ color: "#15803d", fontWeight: 800 }}>✓ {assignedClasses.length} classe(s) = {totalCap} places / {optCount} élèves</span>
+                                    <span style={{ color: "var(--card-success-text)", fontWeight: 800 }}>✓ {assignedClasses.length} classe(s) = {totalCap} places / {optCount} élèves</span>
                                   ) : (
-                                    <span style={{ color: "#b45309", fontWeight: 800 }}>⚠️ {totalCap} / {optCount} places (Manque {optCount - totalCap})</span>
+                                    <span style={{ color: "var(--card-warning-text)", fontWeight: 800 }}>⚠️ {totalCap} / {optCount} places (Manque {optCount - totalCap})</span>
                                   )}
                                 </td>
                               </tr>
@@ -2212,11 +2218,11 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                     <div style={{ display: "flex", gap: "16px", alignItems: "center", fontSize: "0.76rem", fontWeight: 700, marginTop: "12px", color: "var(--text-muted)" }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }} />
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--emerald-accent)" }} />
                         Capacité suffisante pour l'effectif réservé
                       </span>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94a3b8" }} />
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--text-light)" }} />
                         Répartition libre — aucune classe réservée
                       </span>
                     </div>
@@ -2230,7 +2236,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "1.1rem" }}>⛔</span>
                     <div>
-                      <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#1e293b" }}>
+                      <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
                         Gestionnaire de Règles Individuelles (Incompatibilités & Associations / Binômes)
                       </h4>
                       <span style={{ fontSize: "0.76rem", color: "var(--text-muted)" }}>
@@ -2241,7 +2247,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 </div>
 
                 {/* Formulaire d'ajout rapide de règle */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", alignItems: "end", background: "#f8fafc", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", alignItems: "end", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, marginBottom: "3px", color: "var(--text-muted)" }}>Élève A</label>
                     <select
@@ -2332,9 +2338,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <div
                               key={`conflict-${sA.id}-${sB.id}`}
                               style={{
-                                background: "#fef2f2",
-                                border: "1px solid #fecaca",
-                                color: "#991b1b",
+                                background: "var(--card-warning-bg)",
+                                border: "1px solid var(--card-warning-border)",
+                                color: "var(--card-warning-text)",
                                 padding: "4px 10px",
                                 borderRadius: "12px",
                                 fontSize: "0.76rem",
@@ -2347,7 +2353,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               <span>⛔ Séparation : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
                               <button
                                 type="button"
-                                style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
+                                style={{ border: "none", background: "none", color: "var(--rose-accent)", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
                                 title="Supprimer cette incompatibilité"
                                 onClick={() => {
                                   const updated = dataset.students.map((st) => {
@@ -2374,9 +2380,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <div
                             key={`coloc-${sA.id}-${sB.id}`}
                             style={{
-                              background: "#f0fdf4",
-                              border: "1px solid #bbf7d0",
-                              color: "#166534",
+                              background: "var(--card-success-bg)",
+                              border: "1px solid var(--card-success-border)",
+                              color: "var(--card-success-text)",
                               padding: "4px 10px",
                               borderRadius: "12px",
                               fontSize: "0.76rem",
@@ -2389,7 +2395,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <span>🤝 Association : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
                             <button
                               type="button"
-                              style={{ border: "none", background: "none", color: "#16a34a", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
+                              style={{ border: "none", background: "none", color: "var(--emerald-accent)", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
                               title="Supprimer cette association"
                               onClick={() => {
                                 const updated = dataset.students.map((st) => {
@@ -2455,13 +2461,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           {dispatchSubTab === "kanban" && (
             <>
               {/* BANDEAU PERMANENT D'ACTION ET DE VALIDATION HUMAINE EN HAUT DE PAGE */}
-              <div style={{ background: selected?.state === "APPROVED" ? "#f0fdf4" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "#bbf7d0" : "var(--primary-brand)"}`, padding: "14px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
+              <div style={{ background: selected?.state === "APPROVED" ? "var(--card-success-bg)" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "var(--card-success-border)" : "var(--primary-brand)"}`, padding: "14px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
                 <div>
                   <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     ⚖️ ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
                   </div>
                   <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", marginTop: "2px" }}>
-                    Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "#15803d" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Score d'Équilibrage</span>
+                    Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "var(--card-success-text)" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Score d'Équilibrage</span>
                   </div>
                 </div>
 
@@ -2470,7 +2476,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     className="validate"
                     onClick={validate}
                     disabled={busy || selected?.state === "APPROVED"}
-                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "#166534" : "#15803d", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "0 2px 8px rgba(21, 128, 61, 0.3)", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--primary-brand)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "8px" }}
                   >
                     {selected?.state === "APPROVED" ? "✓ Scénario Officialisé (CNIL Traçable)" : "🔒 Valider Humainement & Officialiser Ce Scénario"}
                   </button>
@@ -2489,16 +2495,16 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                   {/* LÉGENDE INSTITUTIONNELLE DES EFFECTIFS */}
                   <div style={{ display: "flex", gap: "16px", alignItems: "center", fontSize: "0.78rem", fontWeight: 700, background: "var(--bg-subtle)", padding: "6px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#15803d" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }} />
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--emerald-accent)" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--emerald-accent)" }} />
                       Effectif conforme
                     </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#c2410c" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }} />
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--amber-accent)" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--amber-accent)" }} />
                       Sous-effectif — à surveiller
                     </span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#b91c1c" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444" }} />
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--rose-accent)" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--rose-accent)" }} />
                       Sur-effectif — bloquant
                     </span>
                   </div>
@@ -2514,9 +2520,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           borderRadius: "var(--radius-sm)",
                           fontSize: "0.8rem",
                           fontWeight: 800,
-                          background: ruleAuditList.some((a) => a.isViolated) ? "#fef2f2" : "#f0fdf4",
-                          border: `1px solid ${ruleAuditList.some((a) => a.isViolated) ? "#fecaca" : "#bbf7d0"}`,
-                          color: ruleAuditList.some((a) => a.isViolated) ? "#991b1b" : "#166534",
+                          background: ruleAuditList.some((a) => a.isViolated) ? "var(--card-warning-bg)" : "var(--card-success-bg)",
+                          border: `1px solid ${ruleAuditList.some((a) => a.isViolated) ? "var(--card-warning-border)" : "var(--card-success-border)"}`,
+                          color: ruleAuditList.some((a) => a.isViolated) ? "var(--card-warning-text)" : "var(--card-success-text)",
                           cursor: "help",
                           display: "inline-flex",
                           alignItems: "center",
@@ -2602,10 +2608,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       const isBest = scenario.id === bestScenarioId;
                       const meta =
                         index === 0
-                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "🎯 Équilibre Global", color: isBest ? "#10b981" : "#475569" }
+                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "🎯 Équilibre Global", color: isBest ? "var(--button-success-bg)" : "var(--text-muted)" }
                           : index === 1
-                          ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "⚡ Option Hétérogénéité", color: isBest ? "#10b981" : "#4f46e5" }
-                          : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "💡 Option Équilibre PAP", color: isBest ? "#10b981" : "#0284c7" };
+                            ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "⚡ Option Hétérogénéité", color: isBest ? "var(--button-success-bg)" : "var(--primary-brand)" }
+                            : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "💡 Option Équilibre PAP", color: isBest ? "var(--button-success-bg)" : "var(--card-info-border)" };
 
                       return (
                         <button
@@ -2648,28 +2654,28 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Équilibre Parité F/M (Poids ${weights.genderBalance}/10) : ${scenario.metrics.genderBalance}%`}
-                              style={{ background: weights.genderBalance === 0 ? "var(--bg-subtle)" : "#ecfdf5", color: weights.genderBalance === 0 ? "var(--text-muted)" : "#047857", border: `1px solid ${weights.genderBalance === 0 ? "var(--border-light)" : "#a7f3d0"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                              style={{ background: weights.genderBalance === 0 ? "var(--bg-subtle)" : "var(--card-success-bg)", color: weights.genderBalance === 0 ? "var(--text-muted)" : "var(--card-success-text)", border: `1px solid ${weights.genderBalance === 0 ? "var(--border-light)" : "var(--card-success-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
                               ⚖️ Parité {weights.genderBalance === 0 ? "Ignorée" : `${scenario.metrics.genderBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Hétérogénéité des Niveaux (Poids ${weights.academicBalance}/10) : ${scenario.metrics.academicBalance}%`}
-                              style={{ background: weights.academicBalance === 0 ? "var(--bg-subtle)" : "#eff6ff", color: weights.academicBalance === 0 ? "var(--text-muted)" : "#1e40af", border: `1px solid ${weights.academicBalance === 0 ? "var(--border-light)" : "#bfdbfe"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                              style={{ background: weights.academicBalance === 0 ? "var(--bg-subtle)" : "var(--card-highlight-bg)", color: weights.academicBalance === 0 ? "var(--text-muted)" : "var(--card-highlight-text)", border: `1px solid ${weights.academicBalance === 0 ? "var(--border-light)" : "var(--card-highlight-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
                               📊 Niveaux {weights.academicBalance === 0 ? "Ignorés" : `${scenario.metrics.academicBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Accompagnements PAP/PPS (Poids ${weights.supportBalance}/10) : ${scenario.metrics.supportBalance}%`}
-                              style={{ background: weights.supportBalance === 0 ? "var(--bg-subtle)" : "#fef3c7", color: weights.supportBalance === 0 ? "var(--text-muted)" : "#b45309", border: `1px solid ${weights.supportBalance === 0 ? "var(--border-light)" : "#fde68a"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                              style={{ background: weights.supportBalance === 0 ? "var(--bg-subtle)" : "var(--card-warning-bg)", color: weights.supportBalance === 0 ? "var(--text-muted)" : "var(--card-warning-text)", border: `1px solid ${weights.supportBalance === 0 ? "var(--border-light)" : "var(--card-warning-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
                               🤝 PAP {weights.supportBalance === 0 ? "Ignoré" : `${scenario.metrics.supportBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Regroupement d'Options (Poids ${weights.optionBalance}/10) : ${scenario.metrics.optionBalance}%`}
-                              style={{ background: weights.optionBalance === 0 ? "var(--bg-subtle)" : "#f3e8ff", color: weights.optionBalance === 0 ? "var(--text-muted)" : "#6b21a8", border: `1px solid ${weights.optionBalance === 0 ? "var(--border-light)" : "#e9d5ff"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
+                              style={{ background: weights.optionBalance === 0 ? "var(--bg-subtle)" : "var(--card-purple-bg)", color: weights.optionBalance === 0 ? "var(--text-muted)" : "var(--card-purple-text)", border: `1px solid ${weights.optionBalance === 0 ? "var(--border-light)" : "var(--card-purple-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
                               🎓 Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}% respectées`}
                             </span>
@@ -2727,7 +2733,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       </div>
 
                       {/* ÉTAPE PRINCIPALE : VALIDATION HUMAINE & OFFICIALISATION EN HAUT */}
-                      <div style={{ background: selected.state === "APPROVED" ? "#f0fdf4" : "var(--bg-subtle)", border: `1px solid ${selected.state === "APPROVED" ? "#bbf7d0" : "var(--border-light)"}`, padding: "14px", borderRadius: "var(--radius-md)" }}>
+                      <div style={{ background: selected.state === "APPROVED" ? "var(--card-success-bg)" : "var(--bg-subtle)", border: `1px solid ${selected.state === "APPROVED" ? "var(--card-success-border)" : "var(--border-light)"}`, padding: "14px", borderRadius: "var(--radius-md)" }}>
                         <button
                           className="validate"
                           onClick={validate}
@@ -2747,7 +2753,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)", whiteSpace: "nowrap" }}>
                             📊 Diagnostic de Conformité
                           </h4>
-                          <span className="chip" style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "3px 8px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap" }}>
+                          <span className="chip" style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "3px 8px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap" }}>
                             ✓ Contraintes Dures OK
                           </span>
                         </div>
@@ -2761,23 +2767,23 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                       </div>
 
                       {/* ASSISTANT DE RÉÉQUILIBRAGE SOUVERAIN MISTRAL AI */}
-                      <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)", border: "1px solid #c7d2fe", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div style={{ background: "var(--card-highlight-bg)", border: "1px solid var(--card-highlight-border)", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                          <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+                          <span style={{ fontWeight: 800, color: "var(--card-highlight-text)", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
                             🪄 Assistant Rééquilibrage
                           </span>
-                          <span style={{ background: "#059669", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ background: "var(--emerald-accent)", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             🇫🇷 Mistral AI
                           </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: "0.78rem", color: "#3730a3", lineHeight: 1.3, fontWeight: 600 }}>
+                        <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.35, fontWeight: 600 }}>
                           Besoin d'ajuster les écarts de niveau ou les PAP ? L'Assistant Mistral AI analyse le scénario et s'appuie sur le solveur algorithmique pour recommander des permutations explicables pas-à-pas.
                         </p>
                         <button
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "#4338ca", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
+                          style={{ background: "var(--primary-brand)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
                         >
                           ✨ Proposer un rééquilibrage pas-à-pas
                         </button>
@@ -2843,26 +2849,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
                             📥 Exporter CSV
                           </a>
-                          <button
-                            type="button"
-                            className="export-btn primary-export"
-                            onClick={() => setShowPdfModal(true)}
-                            style={{ background: "var(--primary-brand)", color: "#ffffff", border: "none", cursor: "pointer", fontWeight: 800, padding: "8px 12px", borderRadius: "var(--radius-sm)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "0.82rem" }}
-                          >
-                            🖨️ Export PDF / Imprimer
-                          </button>
-                          <a className="export-btn secondary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
+                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
                             📦 Export PRONOTE
                           </a>
                         </div>
-                        {showPdfModal && selected && (
-                          <OfficialPdfModal
-                            scenario={selected}
-                            dataset={dataset}
-                            anonymous={anonymous}
-                            onClose={() => setShowPdfModal(false)}
-                          />
-                        )}
                       </div>
                     </aside>
 
@@ -2942,15 +2932,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               {/* Pastille de Statut Pill (Sous-effectif - X manquants / Effectif conforme / Sur-effectif) */}
                               <div style={{ marginTop: "8px" }}>
                                 {totalCount < classroom.minSize ? (
-                                  <span style={{ background: "#fff7ed", color: "#c2410c", border: "1px solid #fdba74", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ background: "var(--card-warning-bg)", color: "var(--card-warning-text)", border: "1px solid var(--card-warning-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
                                     🟠 Sous-effectif · {classroom.minSize - totalCount} manquant{classroom.minSize - totalCount > 1 ? "s" : ""}
                                   </span>
                                 ) : totalCount > classroom.maxSize ? (
-                                  <span style={{ background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ background: "var(--card-purple-bg)", color: "var(--card-purple-text)", border: "1px solid var(--card-purple-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
                                     🔴 Sur-effectif · {totalCount - classroom.maxSize} en trop
                                   </span>
                                 ) : (
-                                  <span style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                  <span style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
                                     🟢 Effectif conforme
                                   </span>
                                 )}
@@ -2963,7 +2953,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                     style={{
                                       height: "100%",
                                       width: `${Math.min(100, (totalCount / classroom.maxSize) * 100)}%`,
-                                      background: totalCount < classroom.minSize ? "#f59e0b" : totalCount > classroom.maxSize ? "#ef4444" : "#10b981",
+                                      background: totalCount < classroom.minSize ? "var(--amber-accent)" : totalCount > classroom.maxSize ? "var(--rose-accent)" : "var(--emerald-accent)",
                                       borderRadius: "3px",
                                       transition: "width 0.3s ease",
                                     }}
@@ -3038,12 +3028,12 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                           <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nameOf(s, anonymous)}</span>
                                           <div style={{ display: "flex", gap: "3px", flexShrink: 0 }}>
                                             {s.supportFlags.map((f) => (
-                                              <span key={f} title={SUPPORT_FLAG_TITLES[f] || f} style={{ background: "#fef3c7", color: "#b45309", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
+                                              <span key={f} title={SUPPORT_FLAG_TITLES[f] || f} style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
                                                 {f}
                                               </span>
                                             ))}
                                             {s.options.map((o) => (
-                                              <span key={o} title={OPTION_TITLES[o] || o} style={{ background: "#f3e8ff", color: "#6b21a8", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
+                                              <span key={o} title={OPTION_TITLES[o] || o} style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "1px 5px", borderRadius: "8px", fontSize: "0.66rem", fontWeight: 800 }}>
                                                 {o}
                                               </span>
                                             ))}
@@ -3079,7 +3069,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   {/* Ligne 1 : Poignée, Avatar, Nom + Note côte-à-côte & Boutons d'Action */}
                                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", width: "100%" }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0, flex: 1 }}>
-                                      <span className="drag-handle" style={{ color: "#94a3b8", cursor: "grab", fontSize: "0.85rem", flexShrink: 0 }} title="Glisser-déposer">::</span>
+                                      <span className="drag-handle" style={{ color: "var(--text-light)", cursor: "grab", fontSize: "0.85rem", flexShrink: 0 }} title="Glisser-déposer">::</span>
 
                                       <div
                                         style={{
@@ -3102,7 +3092,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", minWidth: 0, flex: 1, overflow: "hidden" }}>
                                         <span
-                                          style={{ fontWeight: 700, fontSize: "0.88rem", color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
+                                          style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
                                           title={nameOf(student, anonymous)}
                                         >
                                           {nameOf(student, anonymous)}
@@ -3111,25 +3101,25 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                           className="ui-tooltip"
                                           data-tooltip={`Moyenne générale de ${nameOf(student, anonymous)} : ${student.levelAverage.toFixed(1)}/20`}
                                           style={{
-                                            background: "#f1f5f9",
-                                            border: "1px solid #cbd5e1",
+                                            background: "var(--bg-subtle)",
+                                            border: "1px solid var(--border-light)",
                                             padding: "2px 7px",
                                             borderRadius: "12px",
                                             fontSize: "0.76rem",
                                             fontWeight: 800,
-                                            color: "#334155",
+                                            color: "var(--text-main)",
                                             fontFamily: "var(--font-mono)",
                                             whiteSpace: "nowrap",
                                             flexShrink: 0,
                                             display: "inline-flex",
                                             alignItems: "center",
                                             gap: "1.5px",
-                                            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                                            boxShadow: "var(--shadow-sm)",
                                             cursor: "help"
                                           }}
                                         >
                                           <span>{student.levelAverage.toFixed(1)}</span>
-                                          <span style={{ color: "#94a3b8", fontSize: "0.68rem", fontWeight: 500 }}>/20</span>
+                                          <span style={{ color: "var(--text-light)", fontSize: "0.68rem", fontWeight: 500 }}>/20</span>
                                         </span>
                                       </div>
                                     </div>
@@ -3177,9 +3167,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                         <span
                                           title="⚠️ Incompatibilité forcée dans cette classe (regroupement d'option strict ou capacité)"
                                           style={{
-                                            background: "#fef2f2",
-                                            color: "#991b1b",
-                                            border: "1px solid #fecaca",
+                                            background: "var(--card-warning-bg)",
+                                            color: "var(--card-warning-text)",
+                                            border: "1px solid var(--card-warning-border)",
                                             padding: "1px 6px",
                                             borderRadius: "10px",
                                             fontSize: "0.68rem",
@@ -3195,9 +3185,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                         <span
                                           title="🤝 Binôme d'amitié ou regroupement d'accompagnement AESH conservé"
                                           style={{
-                                            background: "#f0fdf4",
-                                            color: "#166534",
-                                            border: "1px solid #bbf7d0",
+                                            background: "var(--card-success-bg)",
+                                            color: "var(--card-success-text)",
+                                            border: "1px solid var(--card-success-border)",
                                             padding: "1px 6px",
                                             borderRadius: "10px",
                                             fontSize: "0.68rem",
@@ -3214,8 +3204,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                           key={flag}
                                           title={SUPPORT_FLAG_TITLES[flag] || `Dispositif d'accompagnement : ${flag}`}
                                           style={{
-                                            background: flag === "PAP" ? "#ffedd5" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
-                                            color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
+                                            background: "var(--badge-need-bg)",
+                                            color: "var(--badge-need-text)",
+                                            border: "1px solid var(--badge-need-border)",
                                             padding: "1px 6px",
                                             borderRadius: "10px",
                                             fontSize: "0.68rem",
@@ -3232,8 +3223,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                           key={opt}
                                           title={OPTION_TITLES[opt] || `Option linguistique ou artistique : ${opt}`}
                                           style={{
-                                            background: "#f3e8ff",
-                                            color: "#6b21a8",
+                                            background: "var(--card-purple-bg)",
+                                            color: "var(--card-purple-text)",
                                             padding: "1px 6px",
                                             borderRadius: "10px",
                                             fontSize: "0.68rem",
@@ -3353,7 +3344,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   <strong>Enseignants disponibles et qualifiés pour substitution :</strong>
                 </p>
                 {substitutions.length === 0 ? (
-                  <p style={{ color: "#d9381e" }}>Aucun enseignant disponible sur ce créneau.</p>
+                  <p style={{ color: "var(--card-error-text)" }}>Aucun enseignant disponible sur ce créneau.</p>
                 ) : (
                   substitutions.map((sug) => (
                     <div key={sug.substituteTeacherId} className="suggestion-card">
@@ -3466,12 +3457,12 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     {t.displayName} ({t.subjects.join(", ")})
                   </option>
                 )) ?? (
-                  <>
-                    <option value="t-1">Mme Martin (Mathématiques)</option>
-                    <option value="t-2">M. Bernard (Français)</option>
-                    <option value="t-3">Mme Thomas (Histoire-Géo)</option>
-                  </>
-                )}
+                    <>
+                      <option value="t-1">Mme Martin (Mathématiques)</option>
+                      <option value="t-2">M. Bernard (Français)</option>
+                      <option value="t-3">Mme Thomas (Histoire-Géo)</option>
+                    </>
+                  )}
               </select>
             </div>
           </div>
@@ -3595,10 +3586,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
         <section aria-labelledby="compliance-title">
           <div className="section-heading" style={{ marginBottom: "20px" }}>
             <div>
-              <span className="eyebrow" style={{ color: "#2563eb", fontWeight: 800 }}>
+              <span className="eyebrow" style={{ color: "var(--indigo-accent)", fontWeight: 800 }}>
                 🛡️ CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE
               </span>
-              <h2 id="compliance-title" style={{ margin: "4px 0 0", fontSize: "1.5rem", fontWeight: 800, color: "#0f172a" }}>
+              <h2 id="compliance-title" style={{ margin: "4px 0 0", fontSize: "1.5rem", fontWeight: 800, color: "var(--text-main)" }}>
                 Registre DPO, Homologation RGS (EBIOS RM) & Accessibilité RGAA
               </h2>
             </div>
@@ -3616,10 +3607,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             {/* Carte 1 : Dossier RGPD & Protection des Mineurs */}
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
-                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
                   <span>📜</span> Dossier RGPD & Traitement des Mineurs
                 </h3>
-                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#eff6ff", color: "#1d4ed8", padding: "2px 8px", borderRadius: "10px" }}>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "2px 8px", borderRadius: "10px" }}>
                   Certifié RGPD
                 </span>
               </div>
@@ -3627,63 +3618,63 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Responsable de Traitement</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Responsable de Traitement</span>
                     <a
                       href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre4#Article28"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       Art. 28 RGPD ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Chef d'établissement / DASEN. L'éditeur agit exclusivement en tant que sous-traitant au sens du RGPD.
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Base Légale & Non-Consentement</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Base Légale & Non-Consentement</span>
                     <a
                       href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre2#Article6"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       Art. 6.1.e RGPD ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Mission d'intérêt public. Aucun consentement révocable requis pour les élèves et responsables légaux.
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Minimisation Stricte des Données</span>
-                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", background: "#ecfdf5", border: "1px solid #a7f3d0", padding: "2px 8px", borderRadius: "10px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Minimisation Stricte des Données</span>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-success-text)", background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "2px 8px", borderRadius: "10px" }}>
                       HMAC SHA-256
                     </span>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Identifiants INE hachés (<code>student-*</code>). Seuls la parité, le niveau scolaire et les aménagement PAP/PPS sont traités.
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Protection des Mineurs & Explicabilité</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Protection des Mineurs & Explicabilité</span>
                     <a
                       href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", background: "#f0f9ff", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       Art. 22 RGPD ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Aucune décision 100% automatisée. Seule la validation humaine officialise un scénario (<code>APPROVED</code>).
                   </span>
                 </div>
@@ -3693,10 +3684,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             {/* Carte 2 : Homologation RGS, EBIOS RM & RGAA */}
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
-                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
                   <span>🛡️</span> Homologation RGS & Accessibilité RGAA
                 </h3>
-                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#f0fdf4", color: "#166534", padding: "2px 8px", borderRadius: "10px" }}>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "2px 8px", borderRadius: "10px" }}>
                   ANSSI & DINUM
                 </span>
               </div>
@@ -3704,13 +3695,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Homologation de Sécurité RGS</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Homologation de Sécurité RGS</span>
                     <div style={{ display: "flex", gap: "4px" }}>
                       <a
                         href="https://www.ssi.gouv.fr/entreprise/reglementation/confiance-numerique/le-referentiel-general-de-securite-rgs/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#e0f2fe", border: "1px solid #7dd3fc", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
+                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
                       >
                         RGS v2.0 ↗
                       </a>
@@ -3718,47 +3709,47 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         href="https://www.ssi.gouv.fr/guide/ebios-risk-manager-la-methode/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#e0f2fe", border: "1px solid #7dd3fc", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
+                        style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 6px", borderRadius: "10px", textDecoration: "none" }}
                       >
                         EBIOS RM ↗
                       </a>
                     </div>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Dossier d'analyse de risques certifié ANSSI. Chiffrement des données AES-256 au repos et TLS 1.3 en transit.
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Déclaration d'Accessibilité RGAA</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Déclaration d'Accessibilité RGAA</span>
                     <a
                       href="https://accessibilite.numerique.gouv.fr/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#7c3aed", background: "#f5f3ff", border: "1px solid #ddd6fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-purple-text)", background: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       RGAA AA (DINUM) ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Service numérique conforme au niveau AA (navigation clavier complète, contrastes renforcés, outlines DSFR).
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Règlement Européen sur l'IA</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Règlement Européen sur l'IA</span>
                     <a
                       href="https://digital-strategy.ec.europa.eu/fr/policies/regulatory-framework-ai"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#c026d3", background: "#fdf4ff", border: "1px solid #f5d0fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-purple-text)", background: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       EU AI Act ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Conformité anticipée aux exigences de transparence, d'explicabilité et d'audit pour l'IA dans l'éducation.
                   </span>
                 </div>
@@ -3785,10 +3776,10 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             {/* Carte 3 : Pile Souveraine Mistral AI & OVHcloud */}
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
-                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
                   <span>🇫🇷</span> Souveraineté Numérique & Infrastructure
                 </h3>
-                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "#fff7ed", color: "#c2410c", padding: "2px 8px", borderRadius: "10px" }}>
+                <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "var(--card-warning-bg)", color: "var(--card-warning-text)", border: "1px solid var(--card-warning-border)", padding: "2px 8px", borderRadius: "10px" }}>
                   Anti US Cloud Act
                 </span>
               </div>
@@ -3796,46 +3787,46 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>IA Multimodale & Vision</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>IA Multimodale & Vision</span>
                     <a
                       href="https://mistral.ai/fr/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#ea580c", background: "#fff7ed", border: "1px solid #ffedd5", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--amber-accent)", background: "var(--card-warning-bg)", border: "1px solid var(--card-warning-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       Mistral AI (France) ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Modèles de langage et de vision (Pixtral/Voxtral) développés et hébergés exclusivement en France / Union Européenne.
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Hébergement de Production</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Hébergement de Production</span>
                     <a
                       href="https://www.ovhcloud.com/fr/security/secnumcloud/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0284c7", background: "#f0f9ff", border: "1px solid #e0f2fe", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
+                      style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--card-info-text)", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "10px", textDecoration: "none" }}
                     >
                       OVHcloud SecNumCloud ↗
                     </a>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Hébergeur souverain français certifié ANSSI SecNumCloud & HDS. Aucun recours aux GAFAM (pas de Google Cloud / AWS / Azure en prod).
                   </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a" }}>Environnement Actuel (Staging)</span>
-                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#475569", background: "#f1f5f9", padding: "2px 8px", borderRadius: "10px" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>Environnement Actuel (Staging)</span>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "2px 8px", borderRadius: "10px" }}>
                       Données Synthétiques
                     </span>
                   </div>
-                  <span style={{ fontSize: "0.82rem", color: "#475569", lineHeight: 1.45 }}>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Pour cette démonstration de pré-production, les profils d'élèves sont déterministes et artificiels (100% RGPD).
                   </span>
                 </div>
@@ -3846,8 +3837,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
           <section className="audit-section" aria-labelledby="audit-title" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", marginTop: "24px" }}>
             <div className="section-heading" style={{ marginBottom: "14px" }}>
               <div>
-                <span className="eyebrow" style={{ color: "#0284c7", fontWeight: 800 }}>TRAÇABILITÉ LÉGALE & SÉCURITÉ</span>
-                <h3 id="audit-title" style={{ margin: "4px 0 0", fontSize: "1.15rem", fontWeight: 800, color: "#0f172a" }}>
+                <span className="eyebrow" style={{ color: "var(--indigo-accent)", fontWeight: 800 }}>TRAÇABILITÉ LÉGALE & SÉCURITÉ</span>
+                <h3 id="audit-title" style={{ margin: "4px 0 0", fontSize: "1.15rem", fontWeight: 800, color: "var(--text-main)" }}>
                   Journal d'Audit Immuable (Append-Only)
                 </h3>
               </div>
@@ -3877,14 +3868,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           {new Date(event.occurredAt).toLocaleTimeString("fr-FR")}
                         </td>
                         <td style={{ padding: "10px 12px" }}>
-                          <span style={{ background: "#eff6ff", color: "#1d4ed8", padding: "2px 8px", borderRadius: "10px", fontWeight: 800, fontSize: "0.76rem" }}>
+                          <span style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "2px 8px", borderRadius: "10px", fontWeight: 800, fontSize: "0.76rem" }}>
                             {event.eventType}
                           </span>
                         </td>
-                        <td style={{ padding: "10px 12px", fontWeight: 700, color: "#1e293b" }}>
+                        <td style={{ padding: "10px 12px", fontWeight: 700, color: "var(--text-main)" }}>
                           {event.actorId}
                         </td>
-                        <td style={{ padding: "10px 12px", color: "#475569" }}>
+                        <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>
                           {event.scenarioId ? `Scénario : ${event.scenarioId}` : "Action système"}
                         </td>
                       </tr>
@@ -3968,7 +3959,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <span className="brand-badge" style={{ background: "var(--bg-subtle)", color: "var(--primary-brand)", border: "1px solid var(--border-light)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
                             DOSSIER PÉDAGOGIQUE ÉLÈVE
                           </span>
-                          <span style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
+                          <span style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
                             📍 {assignedClassroom ? assignedClassroom.label : "Non affecté"}
                           </span>
                           <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
@@ -3996,9 +3987,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   </div>
 
                   {/* BARRE DE SÉCURITÉ & HABILITATION RGPD */}
-                  <div style={{ background: userRole === "HEADMASTER_ADMIN" ? "#eff6ff" : "#f8fafc", borderBottom: "1px solid var(--border-light)", padding: "10px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.78rem", flexShrink: 0 }}>
+                  <div style={{ background: userRole === "HEADMASTER_ADMIN" ? "var(--card-highlight-bg)" : "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)", padding: "10px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.78rem", flexShrink: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "#1e40af" : "#475569" }}>
+                      <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "var(--card-highlight-text)" : "var(--text-muted)" }}>
                         {userRole === "HEADMASTER_ADMIN" ? "🛡️ Habilitation : Chef d'Établissement (Droits Écriture)" : "🔒 Mode : Consultation Seule"}
                       </span>
                       <button
@@ -4006,7 +3997,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           setUserRole(userRole === "HEADMASTER_ADMIN" ? "READONLY_TEACHER" : "HEADMASTER_ADMIN");
                           if (userRole === "HEADMASTER_ADMIN") setIsEditingStudent(false);
                         }}
-                        style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", textDecoration: "underline", fontSize: "0.75rem", fontWeight: 700, padding: 0 }}
+                        style={{ background: "none", border: "none", color: "var(--indigo-accent)", cursor: "pointer", textDecoration: "underline", fontSize: "0.75rem", fontWeight: 700, padding: 0 }}
                         title="Permuter le rôle d'utilisateur pour tester les permissions de sécurité"
                       >
                         ({userRole === "HEADMASTER_ADMIN" ? "Tester mode Consultation" : "Activer Droits Chef d'Établissement"})
@@ -4023,14 +4014,14 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           setEditStudentForm({ ...inspectStudent });
                           setIsEditingStudent(true);
                         }}
-                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "#2563eb" : "#94a3b8" }}
+                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "var(--primary-brand)" : "var(--text-light)" }}
                       >
                         ✏️ Modifier la fiche élève
                       </button>
                     ) : (
                       <button
                         onClick={() => setIsEditingStudent(false)}
-                        style={{ background: "#cbd5e1", color: "#1e293b", border: "none", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer" }}
+                        style={{ background: "var(--bg-hover)", color: "var(--text-main)", border: "1px solid var(--border-light)", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer" }}
                       >
                         ✕ Annuler l'édition
                       </button>
@@ -4042,7 +4033,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                     {isEditingStudent && editStudentForm ? (
                       /* FORMULAIRE D'ÉDITION SÉCURISÉ & TRACÉ */
                       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "#166534", fontWeight: 700 }}>
+                        <div style={{ background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "var(--card-success-text)", fontWeight: 700 }}>
                           ⚖️ <strong>Traçabilité CNIL Active</strong> : Toute modification enregistrée produit un événement d'audit horodaté immuable (`STUDENT_UPDATED`).
                         </div>
 
@@ -4114,7 +4105,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                   const avg = newGrades.reduce((sum, g) => sum + g.score, 0) / newGrades.length;
                                   setEditStudentForm({ ...editStudentForm, subjectGrades: newGrades, levelAverage: parseFloat(avg.toFixed(1)) });
                                 }}
-                                style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                                style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
                               >
                                 ➕ Ajouter une matière
                               </button>
@@ -4169,7 +4160,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                                       const avg = updated.length > 0 ? updated.reduce((sum, g) => sum + g.score, 0) / updated.length : editStudentForm.levelAverage;
                                       setEditStudentForm({ ...editStudentForm, subjectGrades: updated, levelAverage: parseFloat(avg.toFixed(1)) });
                                     }}
-                                    style={{ background: "#fef2f2", color: "#ef4444", border: "1px solid #fecaca", borderRadius: "var(--radius-sm)", padding: "4px", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
+                                    style={{ background: "var(--card-error-bg)", color: "var(--card-error-text)", border: "1px solid var(--card-error-border)", borderRadius: "var(--radius-sm)", padding: "4px", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
                                     title="Supprimer cette matière"
                                   >
                                     ✕
@@ -4181,8 +4172,8 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         </div>
 
                         {/* SÉLECTION EXPLICITE LV1 (LVA) & LV2 (LVB) */}
-                        <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "10px" }}>
-                          <div style={{ fontSize: "0.82rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "12px", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                          <div style={{ fontSize: "0.82rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "6px" }}>
                             <span>🌍</span> Langues Vivantes Réglementaires (Programme Officiel MEN) :
                           </div>
 
@@ -4247,7 +4238,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             {(["PAP", "PPS", "PAI", "PPRE", "ULIS"] as const).map((flag) => {
                               const checked = editStudentForm.supportFlags.includes(flag);
                               return (
-                                <label key={flag} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#eff6ff" : "var(--bg-subtle)", border: `1px solid ${checked ? "#93c5fd" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "#1e40af" : "var(--text-main)" }}>
+                                <label key={flag} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "var(--card-highlight-bg)" : "var(--bg-subtle)", border: `1px solid ${checked ? "var(--card-highlight-border)" : "var(--border-light)"}`, padding: "6px 12px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.82rem", fontWeight: 800, color: checked ? "var(--card-highlight-text)" : "var(--text-main)" }}>
                                   <input
                                     type="checkbox"
                                     checked={checked}
@@ -4274,7 +4265,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             {OFFICIAL_OPTIONS_ONLY.map((item) => {
                               const checked = editStudentForm.options.includes(item.code);
                               return (
-                                <label key={item.code} title={item.label} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "#f3e8ff" : "var(--bg-card)", border: `1px solid ${checked ? "#d8b4fe" : "var(--border-light)"}`, padding: "5px 10px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.78rem", fontWeight: 800, color: checked ? "#6b21a8" : "var(--text-main)" }}>
+                                <label key={item.code} title={item.label} style={{ display: "flex", alignItems: "center", gap: "6px", background: checked ? "var(--card-purple-bg)" : "var(--bg-card)", border: `1px solid ${checked ? "var(--card-purple-border)" : "var(--border-light)"}`, padding: "5px 10px", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: "0.78rem", fontWeight: 800, color: checked ? "var(--card-purple-text)" : "var(--text-main)" }}>
                                   <input
                                     type="checkbox"
                                     checked={checked}
@@ -4307,7 +4298,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
                         {/* Motif de la Modification (CNIL) */}
                         <div>
-                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#1e40af", marginBottom: "4px" }}>
+                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--indigo-accent)", marginBottom: "4px" }}>
                             ⚖️ Motif de l'Ajustement (Obligatoire pour l'Audit) :
                           </label>
                           <input
@@ -4315,7 +4306,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             value={editReason}
                             onChange={(e) => setEditReason(e.target.value)}
                             placeholder="Ex: Décision du conseil de classe / Ajustement du profil d'apprentissage"
-                            style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid #bfdbfe", background: "#eff6ff", fontSize: "0.85rem", color: "#1e3a8a", fontWeight: 600 }}
+                            style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontSize: "0.85rem", color: "var(--text-main)", fontWeight: 600 }}
                           />
                         </div>
 
@@ -4351,9 +4342,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                             {inspectStudent.subjectGrades?.map((sg) => {
                               const isHigh = sg.score >= 12;
                               const isMedium = sg.score >= 10;
-                              const bgColor = isHigh ? "#f0fdf4" : isMedium ? "#fffbeb" : "#fef2f2";
-                              const textColor = isHigh ? "#15803d" : isMedium ? "#b45309" : "#dc2626";
-                              const borderColor = isHigh ? "#bbf7d0" : isMedium ? "#fde68a" : "#fecaca";
+                              const bgColor = isHigh ? "var(--card-success-bg)" : isMedium ? "var(--card-warning-bg)" : "var(--card-warning-bg)";
+                              const textColor = isHigh ? "var(--card-success-text)" : isMedium ? "var(--card-warning-text)" : "var(--card-warning-text)";
+                              const borderColor = isHigh ? "var(--card-success-border)" : isMedium ? "var(--card-warning-border)" : "var(--card-warning-border)";
 
                               return (
                                 <div
@@ -4400,7 +4391,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
                             Vie Scolaire & Consultation Individuelle
                           </h4>
-                          <div style={{ background: "#f8fafc", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                          <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "10px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
                             <strong>ℹ️ Protection des mineurs (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-brand)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Ces données de vie scolaire sont réservées à la consultation pédagogique individuelle et sont excluses de l'algorithme automatisé de classement et de répartition des classes.
                           </div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
@@ -4435,9 +4426,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               <div
                                 key={flag}
                                 style={{
-                                  background: flag === "PAP" ? "#fff7ed" : flag === "PPS" ? "#fef3c7" : "#e0e7ff",
-                                  color: flag === "PAP" ? "#c2410c" : flag === "PPS" ? "#b45309" : "#3730a3",
-                                  border: `1px solid ${flag === "PAP" ? "#fdba74" : flag === "PPS" ? "#fde68a" : "#c7d2fe"}`,
+                                  background: "var(--badge-need-bg)",
+                                  color: "var(--badge-need-text)",
+                                  border: "1px solid var(--badge-need-border)",
                                   padding: "6px 12px",
                                   borderRadius: "var(--radius-sm)",
                                   fontSize: "0.82rem",
@@ -4455,9 +4446,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                               <div
                                 key={opt}
                                 style={{
-                                  background: "#f3e8ff",
-                                  color: "#6b21a8",
-                                  border: "1px solid #e9d5ff",
+                                  background: "var(--badge-option-bg)",
+                                  color: "var(--badge-option-text)",
+                                  border: "1px solid var(--badge-option-border)",
                                   padding: "6px 12px",
                                   borderRadius: "var(--radius-sm)",
                                   fontSize: "0.82rem",
@@ -4568,9 +4559,9 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             className="modal-card"
             style={{
               background: "var(--bg-card)",
-              border: "2px solid #ef4444",
+              border: "2px solid var(--rose-accent)",
               borderRadius: "var(--radius-md)",
-              boxShadow: "0 20px 25px -5px rgba(239, 68, 68, 0.2), var(--shadow-lg)",
+              boxShadow: "var(--shadow-lg)",
               maxWidth: "620px",
               width: "100%",
               padding: "26px",
@@ -4580,15 +4571,15 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid #fee2e2", paddingBottom: "16px" }}>
-              <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#fef2f2", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", fontWeight: 800, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
+              <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--card-warning-bg)", color: "var(--rose-accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", fontWeight: 800, flexShrink: 0 }}>
                 🚨
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#991b1b" }}>
+                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "var(--card-warning-text)" }}>
                   Impossibilité Mathématique Détectée
                 </h3>
-                <span style={{ fontSize: "0.82rem", color: "#b91c1c", fontWeight: 600 }}>
+                <span style={{ fontSize: "0.82rem", color: "var(--card-warning-text)", fontWeight: 600 }}>
                   L'algorithme a interrompu le calcul car vos contraintes de structure sont physiquement irréalisables.
                 </span>
               </div>
@@ -4596,20 +4587,20 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {impossibilityErrors.map((err, idx) => (
-                <div key={idx} style={{ background: "#fef2f2", border: "1px solid #fecaca", padding: "14px 16px", borderRadius: "var(--radius-sm)" }}>
-                  <h4 style={{ margin: "0 0 6px", fontSize: "0.92rem", fontWeight: 800, color: "#991b1b" }}>
+                <div key={idx} style={{ background: "var(--card-warning-bg)", border: "1px solid var(--card-warning-border)", padding: "14px 16px", borderRadius: "var(--radius-sm)" }}>
+                  <h4 style={{ margin: "0 0 6px", fontSize: "0.92rem", fontWeight: 800, color: "var(--card-warning-text)" }}>
                     {err.title}
                   </h4>
-                  <p style={{ margin: "0 0 12px", fontSize: "0.86rem", color: "#7f1d1d", lineHeight: 1.45 }}>
+                  <p style={{ margin: "0 0 12px", fontSize: "0.86rem", color: "var(--card-warning-text)", lineHeight: 1.45 }}>
                     {err.message}
                   </p>
                   {err.suggestedFix && (
-                    <div style={{ background: "#ffffff", padding: "12px", borderRadius: "6px", border: "1px solid #fca5a5" }}>
-                      <strong style={{ fontSize: "0.78rem", color: "#b91c1c", display: "block", marginBottom: "6px" }}>
+                    <div style={{ background: "var(--bg-card)", padding: "12px", borderRadius: "6px", border: "1px solid var(--card-warning-border)" }}>
+                      <strong style={{ fontSize: "0.78rem", color: "var(--card-warning-text)", display: "block", marginBottom: "6px" }}>
                         💡 Action corrective recommandée par l'IA :
                       </strong>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1e293b", flex: 1, minWidth: "200px" }}>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", flex: 1, minWidth: "200px" }}>
                           {err.suggestedFix.label}
                         </span>
                         <button
@@ -4661,7 +4652,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
         </div>
       )}
 
-      {/* MODAL TRANSPARENCE IA, RGPD & SOUVERAINETÉ EUROPÉENNE (MISTRAL AI & OVHCLOUD) */}
+      {/* MODALE TRANSPARENCE IA, RGPD & SOUVERAINETÉ EUROPÉENNE (MISTRAL AI & OVHCLOUD) */}
       {showAiTransparencyModal && (
         <div
           className="modal-overlay"
@@ -4702,7 +4693,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "#eff6ff", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>
+                <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "var(--card-highlight-bg)", border: "1px solid var(--card-highlight-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>
                   🇪🇺
                 </div>
                 <div>
@@ -4731,35 +4722,35 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 <span>🤖</span> 1. Comment et où l'IA est-elle utilisée dans EdTemps ?
               </h4>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" }}>
-                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
-                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
                     ⚡ Équilibrage des classes (Solveur Déterministe)
                   </strong>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Un algorithme sous contraintes déterministe (recherche gloutonne + recuit simulé) évalue des milliers de combinaisons pour calculer 3 scénarios d'équilibrage parité/niveaux/options/AESH. Calcul 100% reproductible sans modèle génératif.
                   </p>
                 </div>
-                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
-                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
                     🇫🇷 IA Générative & Explication (Mistral AI)
                   </strong>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Le modèle souverain français Mistral AI intervient exclusivement pour la génération textuelle : explications naturelles du rééquilibrage, dictée vocale de consignes et analyse OCR de documents SIECLE.
                   </p>
                 </div>
-                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
-                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
                     📄 OCR & Procès-Verbaux (Mistral Pixtral)
                   </strong>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Mistral AI analyse les bilans de conseils de classe et extraits SIECLE scannés pour extraire automatiquement les aménagements (PAP/PPS) et avis pédagogiques.
                   </p>
                 </div>
-                <div style={{ background: "#f8fafc", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid #e2e8f0" }}>
-                  <strong style={{ fontSize: "0.85rem", color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                  <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
                     🚨 Remplacements d'enseignants
                   </strong>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#475569", lineHeight: 1.45 }}>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     L'IA croise les compétences disciplinaires et les créneaux libres pour recommander immédiatement des enseignants remplaçants disponibles.
                   </p>
                 </div>
@@ -4771,19 +4762,19 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>🇫🇷</span> 2. Modèles Souverains Mistral AI & Hébergement OVHcloud (100% France / UE)
               </h4>
-              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "14px 16px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "14px 16px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <span style={{ fontSize: "1.2rem" }}>🛡️</span>
                   <div>
-                    <strong style={{ fontSize: "0.88rem", color: "#166534", display: "block" }}>
+                    <strong style={{ fontSize: "0.88rem", color: "var(--card-success-text)", display: "block" }}>
                       Garantie de Souveraineté & Protection Anti US Cloud Act
                     </strong>
-                    <span style={{ fontSize: "0.78rem", color: "#15803d" }}>
+                    <span style={{ fontSize: "0.78rem", color: "var(--card-success-text)" }}>
                       EdTemps refuse tout recours aux géants américains (GAFAM : pas de Google Cloud, AWS ou Azure en production).
                     </span>
                   </div>
                 </div>
-                <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "0.8rem", color: "#166534", lineHeight: 1.5 }}>
+                <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "0.8rem", color: "var(--card-success-text)", lineHeight: 1.5 }}>
                   <li><strong>IA Générative / OCR / Dictée</strong> : Développés et propulsés exclusivement sur l'API souveraine <strong>Mistral AI</strong> (France / UE). Aucun prompt n'est transmis hors de l'Union Européenne.</li>
                   <li><strong>Infrastructure de Production</strong> : En production, l'hébergement est assuré sur <strong>OVHcloud</strong> (Cloud souverain français certifié <em>SecNumCloud</em> par l'ANSSI et <em>HDS</em> pour les données sensibles d'Éducation).</li>
                   <li><strong>Environnement Actuel (Staging / Démo)</strong> : Cet environnement de pré-production utilise **exclusivement des données de test synthétiques et fictives**, strictement isolées de tout fichier élève réel.</li>
@@ -4796,12 +4787,12 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
               <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>⚖️</span> 3. Conduite Éthique, RGPD & EU AI Act (Règlement Européen IA)
               </h4>
-              <div style={{ background: "#faf5ff", border: "1px solid #e9d5ff", padding: "14px 16px", borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "#6b21a8", lineHeight: 1.5 }}>
+              <div style={{ background: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)", padding: "14px 16px", borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "var(--card-purple-text)", lineHeight: 1.5 }}>
                 <div style={{ marginBottom: "6px" }}>
-                  <strong>• Prise de décision humaine obligatoire (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "#6b21a8", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Aucun élève n'est réaffecté automatiquement par la machine. Tous les scénarios sont délivrés à l'état de brouillon (<code>DRAFT</code>). Seule une action explicite de la direction officialise la répartition (<code>APPROVED</code>).
+                  <strong>• Prise de décision humaine obligatoire (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article22" target="_blank" rel="noopener noreferrer" style={{ color: "var(--card-purple-text)", fontWeight: 800, textDecoration: "underline" }}>Art. 22 RGPD ↗</a>) :</strong> Aucun élève n'est réaffecté automatiquement par la machine. Tous les scénarios sont délivrés à l'état de brouillon (<code>DRAFT</code>). Seule une action explicite de la direction officialise la répartition (<code>APPROVED</code>).
                 </div>
                 <div style={{ marginBottom: "6px" }}>
-                  <strong>• Base Légale (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre2#Article6" target="_blank" rel="noopener noreferrer" style={{ color: "#6b21a8", fontWeight: 800, textDecoration: "underline" }}>Art. 6.1.e RGPD ↗</a>) :</strong> Traitement effectué dans le cadre d'une mission d'intérêt public pour le Ministère de l'Éducation Nationale.
+                  <strong>• Base Légale (<a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre2#Article6" target="_blank" rel="noopener noreferrer" style={{ color: "var(--card-purple-text)", fontWeight: 800, textDecoration: "underline" }}>Art. 6.1.e RGPD ↗</a>) :</strong> Traitement effectué dans le cadre d'une mission d'intérêt public pour le Ministère de l'Éducation Nationale.
                 </div>
                 <div>
                   <strong>• Pseudonymisation par design :</strong> Les numéros INE des élèves sont instantanément hachés sous HMAC SHA-256 (<code>student-*</code>). Aucune donnée médicale brute n'est conservée.
@@ -4922,7 +4913,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-light)", paddingBottom: "14px" }}>
                 <div>
-                  <span className="brand-badge" style={{ background: "#e0e7ff", color: "#3730a3", padding: "3px 10px", borderRadius: "12px", fontSize: "0.74rem", fontWeight: 800 }}>
+                  <span className="brand-badge" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", padding: "3px 10px", borderRadius: "12px", fontSize: "0.74rem", fontWeight: 800 }}>
                     🪄 ASSISTANT ALGORITHMIQUE DE RÉÉQUILIBRAGE
                   </span>
                   <h2 style={{ margin: "6px 0 2px", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-main)" }}>
@@ -4943,13 +4934,13 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                   📊 Diagnostic de la Répartition Courante
                 </h4>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
-                  <div style={{ background: violations.length > 0 ? "#fef2f2" : "#f0fdf4", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${violations.length > 0 ? "#fca5a5" : "#bbf7d0"}` }}>
-                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: violations.length > 0 ? "#991b1b" : "#166534" }}>
+                  <div style={{ background: violations.length > 0 ? "var(--card-error-bg)" : "var(--card-success-bg)", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${violations.length > 0 ? "var(--card-error-border)" : "var(--card-success-border)"}` }}>
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: violations.length > 0 ? "var(--card-error-text)" : "var(--card-success-text)" }}>
                       {violations.length > 0 ? `⚠️ ${violations.length} Contrainte(s) dures violées` : "✓ Respect strict des contraintes dures"}
                     </span>
                   </div>
-                  <div style={{ background: rebalanceData.issuesCount > 0 ? "#fff7ed" : "#f0fdf4", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${rebalanceData.issuesCount > 0 ? "#fed7aa" : "#bbf7d0"}` }}>
-                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: rebalanceData.issuesCount > 0 ? "#9a3412" : "#166534" }}>
+                  <div style={{ background: rebalanceData.issuesCount > 0 ? "var(--card-warning-bg)" : "var(--card-success-bg)", padding: "8px 12px", borderRadius: "6px", border: `1px solid ${rebalanceData.issuesCount > 0 ? "var(--card-warning-border)" : "var(--card-success-border)"}` }}>
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: rebalanceData.issuesCount > 0 ? "var(--card-warning-text)" : "var(--card-success-text)" }}>
                       {rebalanceData.issuesCount > 0 ? `⚡ ${rebalanceData.issuesCount} Ajustement(s) d'effectifs requis` : "✓ Effectifs de classes conformes"}
                     </span>
                   </div>
@@ -4968,7 +4959,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                 </div>
 
                 {rebalanceData.steps.length === 0 ? (
-                  <div style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", padding: "16px", borderRadius: "var(--radius-sm)", textAlign: "center", fontWeight: 700, fontSize: "0.9rem" }}>
+                  <div style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "16px", borderRadius: "var(--radius-sm)", textAlign: "center", fontWeight: 700, fontSize: "0.9rem" }}>
                     🎉 Votre répartition manuelle est parfaitement équilibrée ! Aucune action corrective n'est nécessaire.
                   </div>
                 ) : (
@@ -4978,7 +4969,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         key={step.id}
                         style={{
                           background: "var(--bg-card)",
-                          border: `1px solid ${step.priority === "HIGH" ? "#fdba74" : "var(--border-light)"}`,
+                          border: `1px solid ${step.priority === "HIGH" ? "var(--card-warning-border)" : "var(--border-light)"}`,
                           borderRadius: "var(--radius-md)",
                           padding: "14px 16px",
                           boxShadow: "var(--shadow-sm)",
@@ -5054,7 +5045,7 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                         }
                         setShowRebalanceModal(false);
                       }}
-                      style={{ padding: "8px 20px", fontWeight: 800, background: "#10b981" }}
+                      style={{ padding: "8px 20px", fontWeight: 800, background: "var(--button-success-bg)" }}
                     >
                       ✨ Appliquer Tout le Rééquilibrage ({rebalanceData.steps.length} étapes)
                     </button>
@@ -5230,7 +5221,7 @@ function Metric({ name, value, weight }: { name: string; value: number; weight?:
         </dt>
         <dd style={{ margin: "4px 0 0", display: "flex", alignItems: "center", gap: "8px" }}>
           <span className="metric-bar" style={{ flex: 1, minWidth: "60px", background: "var(--bg-subtle)" }} title="Critère désactivé">
-            <i style={{ width: `0%`, background: "#94a3b8" }} />
+            <i style={{ width: `0%`, background: "var(--text-light)" }} />
           </span>
           <strong style={{ fontSize: "0.82rem", color: "var(--text-light)", whiteSpace: "nowrap" }}>Ignoré</strong>
           <span style={{ color: "var(--text-light)", fontWeight: 700, fontSize: "0.74rem", whiteSpace: "nowrap" }}>
@@ -5253,10 +5244,10 @@ function Metric({ name, value, weight }: { name: string; value: number; weight?:
       </dt>
       <dd style={{ margin: "4px 0 0", display: "flex", alignItems: "center", gap: "8px" }}>
         <span className="metric-bar" style={{ flex: 1, minWidth: "60px" }} title={`${value}% de conformité`}>
-          <i style={{ width: `${value}%`, background: value < 60 ? "#ef4444" : value < 75 ? "#f59e0b" : "#10b981" }} />
+          <i style={{ width: `${value}%`, background: value < 60 ? "var(--rose-accent)" : value < 75 ? "var(--amber-accent)" : "var(--button-success-bg)" }} />
         </span>
         <strong style={{ fontSize: "0.85rem", whiteSpace: "nowrap", minWidth: "36px", textAlign: "right" }}>{value}%</strong>
-        <span style={{ color: value < 60 ? "#dc2626" : value < 75 ? "#d97706" : "#059669", fontWeight: 800, fontSize: "0.74rem", whiteSpace: "nowrap" }}>
+        <span style={{ color: value < 60 ? "var(--card-error-text)" : value < 75 ? "var(--card-warning-text)" : "var(--card-success-text)", fontWeight: 800, fontSize: "0.74rem", whiteSpace: "nowrap" }}>
           {value < 60 ? "à surveiller" : value < 75 ? "moyen" : "OK"}
         </span>
       </dd>
@@ -5292,11 +5283,11 @@ function nameOf(student: Student, anonymous: boolean): string {
   return anonymous ? student.initials : student.displayName;
 }
 
-function getWeightLabel(value: number): { label: string; color: string; bg: string } {
-  if (value === 0) return { label: "Ignoré (0/10)", color: "#64748b", bg: "#f1f5f9" };
-  if (value <= 3) return { label: `Secondaire (${value}/10)`, color: "#0369a1", bg: "#e0f2fe" };
-  if (value <= 7) return { label: `Équilibré (${value}/10)`, color: "#15803d", bg: "#dcfce7" };
-  return { label: `Priorité Haute (${value}/10)`, color: "#6b21a8", bg: "#f3e8ff" };
+function getWeightLabel(value: number): { label: string; color: string; bg: string; border: string } {
+  if (value === 0) return { label: "Ignoré (0/10)", color: "var(--text-muted)", bg: "var(--bg-subtle)", border: "1px solid var(--border-light)" };
+  if (value <= 3) return { label: `Secondaire (${value}/10)`, color: "var(--card-highlight-text)", bg: "var(--card-highlight-bg)", border: "1px solid var(--card-highlight-border)" };
+  if (value <= 7) return { label: `Équilibré (${value}/10)`, color: "var(--card-success-text)", bg: "var(--card-success-bg)", border: "1px solid var(--card-success-border)" };
+  return { label: `Priorité Haute (${value}/10)`, color: "var(--card-purple-text)", bg: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)" };
 }
 
 export type RebalanceStep = {
@@ -5342,7 +5333,7 @@ function computeRebalanceSteps(
   try {
     const optScenario = generateScenario(input as any, 42, weights);
     targetAssignments = optScenario.assignments;
-  } catch {}
+  } catch { }
 
   // 1. Priority 1: Resolve Capacity Overcrowding / Undercapacity
   for (const overClass of overcrowded) {
@@ -5405,135 +5396,4 @@ function computeRebalanceSteps(
   }
 
   return { steps, issuesCount: overcrowded.length + undercapacity.length };
-}
-
-function OfficialPdfModal({
-  scenario,
-  dataset,
-  onClose,
-  anonymous,
-}: {
-  scenario: Scenario;
-  dataset: Dataset;
-  onClose: () => void;
-  anonymous: boolean;
-}) {
-  return (
-    <div className="modal-overlay print-modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
-      <div
-        className="modal-card print-modal-card"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: "1080px",
-          width: "92vw",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-light)",
-          borderRadius: "var(--radius-md)",
-          padding: "24px",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid var(--border-light)", paddingBottom: "14px" }} className="no-print">
-          <div>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)" }}>
-              🖨️ Document Officiel de Répartition — {scenario.id}
-            </h3>
-            <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
-              Établissement : Collège Démo (Cohorte {dataset.level}) · Conforme RGPD Art. 6.1.e & Arrêté de Répartition
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => window.print()}
-              style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 800, background: "var(--primary-brand)", color: "#ffffff", borderRadius: "var(--radius-sm)", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
-            >
-              🖨️ Imprimer / Sauvegarder en PDF
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              onClick={onClose}
-              style={{ padding: "8px 14px", fontSize: "0.88rem", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", cursor: "pointer" }}
-            >
-              ✕ Fermer
-            </button>
-          </div>
-        </div>
-
-        {/* CONTENU À IMPRIMER */}
-        <div className="official-pdf-document" style={{ color: "var(--text-main)", fontFamily: "var(--font-body)" }}>
-          <div style={{ textAlign: "center", marginBottom: "24px", borderBottom: "2px solid var(--border-strong)", paddingBottom: "16px" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.02em" }}>
-              MINISTÈRE DE L'ÉDUCATION NATIONALE
-            </h2>
-            <h3 style={{ margin: "4px 0 0", fontSize: "1.1rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-              REPARTITION DES ÉLÈVES PAR CLASSE — RENTRÉE 2026
-            </h3>
-            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "6px", fontWeight: 700 }}>
-              Collège Démo · Niveau {dataset.level} · {dataset.students.length} Élèves · {dataset.classrooms.length} Classes · Scénario {scenario.id} ({scenario.state === "APPROVED" ? "Officialisé" : "Provisoire"})
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
-            {dataset.classrooms.map((c) => {
-              const students = dataset.students.filter((s) => scenario.assignments[s.id] === c.id);
-              const girls = students.filter((s) => s.gender === "F").length;
-              const boys = students.filter((s) => s.gender === "M").length;
-              const avg = students.length > 0 ? students.reduce((acc, st) => acc + st.levelAverage, 0) / students.length : 0;
-              const papCount = students.filter((s) => s.supportFlags.length > 0).length;
-
-              return (
-                <div key={c.id} style={{ border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)", padding: "14px", background: "var(--bg-card)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", borderBottom: "1px solid var(--border-light)", paddingBottom: "8px" }}>
-                    <strong style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--text-main)" }}>
-                      {c.label.toUpperCase()}
-                    </strong>
-                    <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                      {students.length} / {c.maxSize} él.
-                    </span>
-                  </div>
-
-                  <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginBottom: "10px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
-                    <span>Parité : {girls}F / {boys}M</span>
-                    <span>Moyenne : {avg.toFixed(1)}/20</span>
-                    <span>PAP/PPS : {papCount}</span>
-                  </div>
-
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.76rem" }}>
-                    <thead>
-                      <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
-                        <th style={{ textAlign: "left", padding: "4px 6px" }}>#</th>
-                        <th style={{ textAlign: "left", padding: "4px 6px" }}>Nom & Prénom</th>
-                        <th style={{ textAlign: "center", padding: "4px 6px" }}>Moy.</th>
-                        <th style={{ textAlign: "right", padding: "4px 6px" }}>Options / PAP</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {students.map((st, i) => (
-                        <tr key={st.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
-                          <td style={{ padding: "4px 6px", color: "var(--text-muted)" }}>{i + 1}</td>
-                          <td style={{ padding: "4px 6px", fontWeight: 700, color: "var(--text-main)" }}>
-                            {nameOf(st, anonymous)}
-                          </td>
-                          <td style={{ textAlign: "center", padding: "4px 6px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-                            {st.levelAverage.toFixed(1)}
-                          </td>
-                          <td style={{ textAlign: "right", padding: "4px 6px", fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                            {[...st.supportFlags, ...st.options].join(", ")}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }

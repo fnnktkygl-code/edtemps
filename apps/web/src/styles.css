@@ -10,14 +10,15 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Palette Carnet de Bord & Institutionnelle Éducation Nationale */
-  --primary-brand: #1e3a8a; /* Encre bleue institutionnelle */
+  --primary-brand: #1e3a8a;
+  /* Encre bleue institutionnelle */
   --primary-hover: #1e40af;
   --indigo-accent: #2563eb;
   --blue-accent: #1d4ed8;
   --emerald-accent: #059669;
   --amber-accent: #d97706;
   --rose-accent: #dc2626;
-  
+
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
   --bg-subtle: #f1f5f9;
@@ -28,8 +29,42 @@
   --text-light: #64748b;
 
   --border-light: #cbd5e1;
-  --border-strong: #94a3b8;
-  
+  --border-strong: #7c8fac;
+
+  /* Tokens sémantiques (badges, diagnostics, cartes) — formalisation des couleurs
+     déjà utilisées en inline dans App.tsx, désormais pilotables par thème */
+  --card-success-bg: #f0fdf4;
+  --card-success-border: #bbf7d0;
+  --card-success-text: #166534;
+
+  --card-error-bg: #fef2f2;
+  --card-error-border: #fca5a5;
+  --card-error-text: #991b1b;
+
+  --card-warning-bg: #fff7ed;
+  --card-warning-border: #fed7aa;
+  --card-warning-text: #9a3412;
+
+  --card-purple-bg: #f3e8ff;
+  --card-purple-border: #e9d5ff;
+  --card-purple-text: #6b21a8;
+
+  --card-info-bg: #e0f2fe;
+  --card-info-border: #bae6fd;
+  --card-info-text: #0369a1;
+
+  --card-highlight-bg: #eff6ff;
+  --card-highlight-border: #bfdbfe;
+  --card-highlight-text: #1d4ed8;
+
+  --badge-option-bg: #e0e7ff;
+  --badge-option-text: #3730a3;
+  --badge-option-border: #c7d2fe;
+
+  /* Couleur de bouton "succès" plein (texte blanc) — stable entre les deux thèmes,
+     vérifiée ≥ 4.5:1 avec du blanc (contrairement à #10b981/#059669 utilisés avant) */
+  --button-success-bg: #047857;
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -82,22 +117,35 @@
 }
 
 @keyframes scaleUp {
-  0% { transform: scale(0.94); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes shimmerWave {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes spinIcon {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .shimmer-banner {
@@ -140,14 +188,15 @@
 
 /* Mode Sombre Adaptatif */
 [data-theme="dark"] {
-  --primary-brand: #6366f1;
+  --primary-brand: #4f46e5;
+  /* était #6366f1 : texte blanc dessus = 4.47:1 (échec AA de justesse) → 6.29:1 */
   --primary-hover: #818cf8;
   --indigo-accent: #818cf8;
   --blue-accent: #3b82f6;
   --emerald-accent: #34d399;
   --amber-accent: #fbbf24;
   --rose-accent: #fb7185;
-  
+
   --bg-page: #090d16;
   --bg-card: #131b2e;
   --bg-subtle: #1c273e;
@@ -157,13 +206,98 @@
   --text-muted: #cbd5e1;
   --text-light: #94a3b8;
 
-  --border-light: #25334d;
-  --border-strong: #3b4d6e;
-  
+  --border-light: #33456b;
+  /* était #25334d = 1.36:1 sur bg-card, sous le seuil 3:1 (WCAG 1.4.11) */
+  --border-strong: #57709c;
+  /* était #3b4d6e = 2.29:1, désormais 3.4–3.9:1 sur bg-page/bg-card */
+
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.35);
+
+  /* Soft Badge & Card Highlight Tokens (Dark Mode RGAA AA High Contrast) */
+  --badge-female-bg: #831843;
+  --badge-female-text: #fbcfe8;
+  --badge-female-border: #9d174d;
+
+  --badge-male-bg: #075985;
+  --badge-male-text: #bae6fd;
+  --badge-male-border: #0369a1;
+
+  --badge-need-bg: #78350f;
+  --badge-need-text: #fef3c7;
+  --badge-need-border: #92400e;
+
+  --badge-option-bg: #312e81;
+  --badge-option-text: #e0e7ff;
+  --badge-option-border: #3730a3;
+
+  --card-highlight-bg: #1e293b;
+  --card-highlight-border: #3b82f6;
+  --card-highlight-text: #93c5fd;
+
+  --card-success-bg: #064e3b;
+  --card-success-border: #059669;
+  --card-success-text: #6ee7b7;
+
+  --card-warning-bg: #451a03;
+  --card-warning-border: #d97706;
+  --card-warning-text: #fde68a;
+
+  --card-purple-bg: #3b0764;
+  --card-purple-border: #8b5cf6;
+  --card-purple-text: #ddd6fe;
+
+  --card-info-bg: #0c4a6e;
+  --card-info-border: #0284c7;
+  --card-info-text: #7dd3fc;
+
+  --card-error-bg: #7f1d1d;
+  --card-error-border: #dc2626;
+  --card-error-text: #fecdd3;
+  /* 7.1:1 sur #7f1d1d — n'existait pas côté dark, sweep utilisait #fef2f2/#991b1b codés en dur */
+
+  --button-success-bg: #047857;
+  /* identique aux deux thèmes : 5.48:1 avec texte blanc (vs 2.54:1 pour #10b981 utilisé avant) */
+
+  --card-legend-bg: linear-gradient(135deg, #131b2e 0%, #1e293b 100%);
+  --card-legend-border: #25334d;
+}
+
+/* Surcharges globales pour garantir un contraste 100% parfait en mode sombre */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .weight-card,
+[data-theme="dark"] .option-matrix-table,
+[data-theme="dark"] .kanban-column,
+[data-theme="dark"] .scenario-card,
+[data-theme="dark"] .inspector,
+[data-theme="dark"] .modal-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] table th {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] table td {
+  border-color: var(--border-light) !important;
+  color: var(--text-main) !important;
 }
 
 * {
@@ -181,7 +315,11 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-button, input, select, a, [tabindex] {
+button,
+input,
+select,
+a,
+[tabindex] {
   font-family: inherit;
 }
 
@@ -406,9 +544,33 @@ h1 {
 }
 
 .active-filter {
-  background: var(--text-main) !important;
-  color: var(--bg-card) !important;
-  border-color: var(--text-main) !important;
+  background: var(--primary-brand) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-brand) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] {
+  scrollbar-color: #25334d #090d16;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #090d16 !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #25334d !important;
+  border-radius: 4px;
+  border: 2px solid #090d16 !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #3b4d6e !important;
 }
 
 /* Tooltip Custom Styled */
@@ -435,13 +597,17 @@ h1 {
 }
 
 .step-pill.done-step {
-  background: #10b981;
+  background: var(--button-success-bg);
+  /* était #10b981 codé en dur : 2.54:1 avec du blanc, sous tous les seuils */
   color: #ffffff;
-  border-color: #10b981;
+  border-color: var(--button-success-bg);
 }
 
 /* Buttons */
-.primary, .secondary, .validate, .action-btn {
+.primary,
+.secondary,
+.validate,
+.action-btn {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.88rem;
@@ -660,7 +826,8 @@ button:disabled {
   gap: 6px;
 }
 
-.substitutions-form select, .substitutions-form input {
+.substitutions-form select,
+.substitutions-form input {
   padding: 9px 12px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
@@ -672,7 +839,8 @@ button:disabled {
   transition: var(--transition-fast);
 }
 
-.substitutions-form select:focus, .substitutions-form input:focus {
+.substitutions-form select:focus,
+.substitutions-form input:focus {
   border-color: var(--primary-brand);
   background: var(--bg-card);
 }
@@ -801,13 +969,33 @@ button:disabled {
   font-weight: 600;
 }
 
-.course-badge.math { border-left-color: #ef4444; }
-.course-badge.fra { border-left-color: #3b82f6; }
-.course-badge.hg { border-left-color: #f59e0b; }
-.course-badge.pc { border-left-color: #8b5cf6; }
-.course-badge.svt { border-left-color: #10b981; }
-.course-badge.ang { border-left-color: #06b6d4; }
-.course-badge.eps { border-left-color: #f43f5e; }
+.course-badge.math {
+  border-left-color: #ef4444;
+}
+
+.course-badge.fra {
+  border-left-color: #3b82f6;
+}
+
+.course-badge.hg {
+  border-left-color: #f59e0b;
+}
+
+.course-badge.pc {
+  border-left-color: #8b5cf6;
+}
+
+.course-badge.svt {
+  border-left-color: #10b981;
+}
+
+.course-badge.ang {
+  border-left-color: #06b6d4;
+}
+
+.course-badge.eps {
+  border-left-color: #f43f5e;
+}
 
 /* Weights Panel */
 .weights-panel {
@@ -1241,7 +1429,7 @@ button.validate {
   box-sizing: border-box;
 }
 
-.class-column > header {
+.class-column>header {
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -1249,7 +1437,7 @@ button.validate {
   border-bottom: 1px solid var(--border-light);
 }
 
-.class-column > header h3 {
+.class-column>header h3 {
   font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 800;
@@ -1297,7 +1485,7 @@ button.validate {
   background: var(--bg-subtle);
 }
 
-.student-card > span.student-title-main {
+.student-card>span.student-title-main {
   font-weight: 800;
   font-size: 0.95rem;
   color: var(--text-main);
@@ -1724,6 +1912,7 @@ button.validate {
 }
 
 @media (max-width: 768px) {
+
   /* Éléments de table masqués au profit des cartes mobiles */
   .desktop-only-table {
     display: none !important;
@@ -1820,12 +2009,14 @@ button.validate {
   }
 
   .page {
-    padding-bottom: 84px !important; /* Dégager la barre du bas */
+    padding-bottom: 84px !important;
+    /* Dégager la barre du bas */
   }
 }
 
 /* Empêcher tout débordement horizontal global */
-html, body {
+html,
+body {
   overflow-x: hidden !important;
   width: 100% !important;
   max-width: 100vw !important;
@@ -1838,6 +2029,7 @@ html, body {
 }
 
 @media (max-width: 768px) {
+
   /* Reconstitution de l'espace de travail sur mobile : LES CLASSES EN PREMIER */
   .workspace {
     display: flex !important;
@@ -1975,7 +2167,9 @@ html, body {
   }
 
   /* Suppression du zoom automatique agaçant sur iOS Safari (font-size >= 16px) */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 
@@ -1989,6 +2183,7 @@ html, body {
     padding-bottom: 4px;
     scrollbar-width: none;
   }
+
   .nav-tabs::-webkit-scrollbar {
     display: none;
   }
@@ -2002,6 +2197,7 @@ html, body {
     padding-bottom: 4px;
     scrollbar-width: none;
   }
+
   .sub-nav-tabs::-webkit-scrollbar {
     display: none;
   }
@@ -2056,14 +2252,37 @@ html, body {
 
   /* Stepper de workflow en colonne sur smartphone */
   .workflow-stepper {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 12px 14px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
   }
 
-  .workflow-stepper > div[style*="height: 1px"] {
-    display: none;
+  .workflow-stepper button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .workflow-stepper>div[style*="width: 1px"],
+  .workflow-stepper>div[style*="height: 24px"] {
+    display: none !important;
+  }
+
+  /* Grille des poids et curseurs sur 1 seule colonne */
+  .weights-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .weight-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  .weight-title small {
+    display: block !important;
+    margin-top: 2px !important;
   }
 
   /* Grille des scénarios et dossiers sur 1 seule colonne */
@@ -2075,6 +2294,12 @@ html, body {
     grid-template-columns: 1fr !important;
   }
 
+  /* Barre de saut rapide entre les classes épinglée au-dessus du Kanban */
+  .mobile-class-tabs {
+    order: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
   /* Tableau Kanban des Classes : Carrousel Swipable à l'horizontale sur Mobile */
   .class-columns-grid {
     display: flex !important;
@@ -2083,10 +2308,10 @@ html, body {
     scroll-snap-type: x mandatory !important;
     gap: 14px !important;
     padding-bottom: 14px !important;
-    margin-right: -12px;
-    margin-left: -12px;
-    padding-left: 12px;
-    padding-right: 12px;
+    margin-right: -12px !important;
+    margin-left: -12px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
 
   .classroom-column {
@@ -2096,20 +2321,26 @@ html, body {
   }
 
   /* Modales optimisées mobile */
+  .modal-overlay {
+    padding: 8px !important;
+  }
+
   .modal-card {
-    padding: 16px 14px !important;
-    max-height: 92vh !important;
-    width: 95vw !important;
-    border-radius: var(--radius-sm) !important;
+    padding: 14px 12px !important;
+    max-height: 94vh !important;
+    width: 96vw !important;
+    border-radius: var(--radius-md) !important;
+    margin: auto !important;
   }
 
   /* Tableaux scrollables sans casser le layout */
   .audit-section table,
-  .import-preview table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
+  .import-preview table,
+  .table-wrapper {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
   }
 }
 
@@ -2137,46 +2368,4 @@ a:focus-visible {
   outline: 3px solid #2563eb !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
-}
-
-/* ==========================================================================\n   Format d'Impression PDF d'Établissement (@media print)\n   ========================================================================== */
-@media print {
-  header, nav, main, footer,
-  .masthead, .compact-status-bar, .workflow-stepper,
-  .main-content, .sidebar, .inspector, .board, .export-actions-grid, .no-print {
-    display: none !important;
-  }
-
-  html, body, #root, .app-container {
-    background: #ffffff !important;
-    color: #000000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-  }
-
-  .modal-overlay.print-modal-overlay,
-  .modal-card.print-modal-card,
-  .official-pdf-document {
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  .official-pdf-document * {
-    color: #000000 !important;
-  }
-
-  .official-pdf-document table,
-  .official-pdf-document th,
-  .official-pdf-document td {
-    border: 1px solid #000000 !important;
-  }
 }
