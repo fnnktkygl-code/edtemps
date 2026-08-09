@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Classroom, Dataset, Scenario, Student } from "../types";
+import type { Dataset, Scenario, Student } from "../types";
 
 export function OfficialPdfModal({
   scenario,

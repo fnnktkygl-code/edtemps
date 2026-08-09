@@ -1,34 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { validateAssignment, generateScenario, calculateMetrics, type DispatchWeights } from "@edtemps/domain";
-import { api, createSyntheticDemoInputCustom, validateDispatchFeasibility, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
+import { calculateMetrics, type DispatchWeights } from "@edtemps/domain";
+import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type { FeasibilityError } from "@edtemps/domain";
 import type {
   AuditEvent,
   Classroom,
   Dataset,
-  Gender,
   Scenario,
   SIECLEImportPreview,
   Student,
   SubstitutionSuggestion,
-  TimeSlot,
   TimetablingDataset,
   TimetablingSchedule,
 } from "./types";
-import {
-  emptyDataset,
-  SUPPORT_FLAG_TITLES,
-  OFFICIAL_NATIONAL_SUBJECTS,
-  OFFICIAL_LV1_LIST,
-  OFFICIAL_LV2_LIST,
-  OFFICIAL_OPTIONS_ONLY,
-  OPTION_TITLES,
-} from "./constants/referentiels";
-import { subjectColorClass, getAvatarColor, nameOf, getWeightLabel } from "./utils/format";
-import { computeRebalanceSteps } from "./utils/rebalance";
-import { days, periods } from "./constants/schedule";
-import { Metric } from "./components/Metric";
-import { Explanation } from "./components/Explanation";
+import { emptyDataset } from "./constants/referentiels";
+import { nameOf } from "./utils/format";
 import { OfficialPdfModal } from "./components/OfficialPdfModal";
 import { MoveConfirmationModal } from "./components/modals/MoveConfirmationModal";
 import { StudentDetailModal } from "./components/modals/StudentDetailModal";

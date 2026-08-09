@@ -1,14 +1,5 @@
 import type { Student } from "../types";
 
-/**
- * NOTE: metricLabel n'est actuellement appelée nulle part dans App.tsx (code mort
- * détecté lors de l'extraction). Conservée telle quelle pour ne rien casser ;
- * à supprimer ou réutiliser dans un futur nettoyage si elle reste inutilisée.
- */
-export function metricLabel(value: number): string {
-  return value >= 85 ? "bon" : value >= 65 ? "à surveiller" : "à améliorer";
-}
-
 export function nameOf(student: Student, anonymous: boolean): string {
   return anonymous ? student.initials : student.displayName;
 }
