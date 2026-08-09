@@ -5419,73 +5419,213 @@ function OfficialPdfModal({
   scenario,
   dataset,
   onClose,
-  anonymous,
+  anonymous: initialAnonymous,
 }: {
   scenario: Scenario;
   dataset: Dataset;
   onClose: () => void;
   anonymous: boolean;
 }) {
+  const [identityMode, setIdentityMode] = useState<"INITIALS" | "FULL_NAME" | "INE_HASH">("INITIALS");
+  const [schoolName, setSchoolName] = useState<string>("Collège Édouard Herriot — Académie de Paris");
+
+  const getStudentDisplayName = (st: Student) => {
+    if (identityMode === "FULL_NAME") {
+      return st.displayName;
+    }
+    if (identityMode === "INE_HASH") {
+      return st.id;
+    }
+    return st.initials;
+  };
+
+  const currentDateStr = new Date().toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
   return (
     <div className="modal-overlay print-modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
       <div
         className="modal-card print-modal-card"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: "1080px",
-          width: "92vw",
-          maxHeight: "90vh",
+          maxWidth: "1100px",
+          width: "95vw",
+          maxHeight: "92vh",
           overflowY: "auto",
           background: "var(--bg-card)",
           border: "1px solid var(--border-light)",
           borderRadius: "var(--radius-md)",
-          padding: "24px",
+          padding: "28px",
+          boxShadow: "var(--shadow-lg)",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid var(--border-light)", paddingBottom: "14px" }} className="no-print">
-          <div>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)" }}>
-              🖨️ Document Officiel de Répartition — {scenario.id}
-            </h3>
-            <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
-              Établissement : Collège Démo (Cohorte {dataset.level}) · Conforme RGPD Art. 6.1.e & Arrêté de Répartition
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => window.print()}
-              style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 800, background: "var(--button-primary-bg)", color: "#ffffff", borderRadius: "var(--radius-sm)", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
-            >
-              🖨️ Imprimer / Sauvegarder en PDF
-            </button>
+        {/* HEADER CONTROLS (HIDDEN DURING PRINT) */}
+        <div className="no-print" style={{ marginBottom: "24px", borderBottom: "1px solid var(--border-light)", paddingBottom: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
+                📄 Procès-Verbal de Répartition (Format PDF Imprimable)
+              </h3>
+              <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+                Prévisualisez et ajustez les options de document avant l'impression ou l'exportation PDF.
+              </p>
+            </div>
             <button
               type="button"
               className="secondary"
               onClick={onClose}
-              style={{ padding: "8px 14px", fontSize: "0.88rem", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", cursor: "pointer" }}
+              style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 800, background: "var(--bg-subtle)", color: "var(--text-main)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", cursor: "pointer" }}
             >
               ✕ Fermer
             </button>
           </div>
+
+          {/* CONTROL PANEL CARD */}
+          <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "18px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "8px" }}>
+                Mode d'Identité Élèves :
+              </label>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => setIdentityMode("INITIALS")}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "var(--radius-sm)",
+                    fontWeight: 800,
+                    fontSize: "0.84rem",
+                    cursor: "pointer",
+                    border: "1px solid var(--border-light)",
+                    background: identityMode === "INITIALS" ? "var(--button-primary-bg)" : "var(--bg-card)",
+                    color: identityMode === "INITIALS" ? "#ffffff" : "var(--text-main)",
+                  }}
+                >
+                  👥 Initiales / App (`C.L.`)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIdentityMode("FULL_NAME")}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "var(--radius-sm)",
+                    fontWeight: 800,
+                    fontSize: "0.84rem",
+                    cursor: "pointer",
+                    border: "1px solid var(--border-light)",
+                    background: identityMode === "FULL_NAME" ? "var(--button-primary-bg)" : "var(--bg-card)",
+                    color: identityMode === "FULL_NAME" ? "#ffffff" : "var(--text-main)",
+                  }}
+                >
+                  👤 Noms Complêts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIdentityMode("INE_HASH")}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "var(--radius-sm)",
+                    fontWeight: 800,
+                    fontSize: "0.84rem",
+                    cursor: "pointer",
+                    border: "1px solid var(--border-light)",
+                    background: identityMode === "INE_HASH" ? "var(--button-primary-bg)" : "var(--bg-card)",
+                    color: identityMode === "INE_HASH" ? "#ffffff" : "var(--text-main)",
+                  }}
+                >
+                  🔒 INE SHA-256
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "6px" }}>
+                Nom de l'Établissement (Entête PDF) :
+              </label>
+              <input
+                type="text"
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+                style={{
+                  width: "100%",
+                  maxWidth: "500px",
+                  padding: "8px 12px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border-light)",
+                  background: "var(--bg-card)",
+                  color: "var(--text-main)",
+                  fontWeight: 700,
+                  fontSize: "0.88rem",
+                }}
+              />
+            </div>
+
+            <div>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => window.print()}
+                style={{
+                  padding: "12px 24px",
+                  fontSize: "0.95rem",
+                  fontWeight: 800,
+                  background: "#059669",
+                  color: "#ffffff",
+                  borderRadius: "var(--radius-sm)",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                🖨️ Imprimer / Sauvegarder en PDF (Ctrl+P)
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* CONTENU À IMPRIMER */}
-        <div className="official-pdf-document" style={{ color: "var(--text-main)", fontFamily: "var(--font-body)" }}>
-          <div style={{ textAlign: "center", marginBottom: "24px", borderBottom: "2px solid var(--border-strong)", paddingBottom: "16px" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.02em" }}>
-              MINISTÈRE DE L'ÉDUCATION NATIONALE
-            </h2>
-            <h3 style={{ margin: "4px 0 0", fontSize: "1.1rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-              RÉPARTITION DES ÉLÈVES PAR CLASSE — RENTRÉE 2026
-            </h3>
-            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "6px", fontWeight: 700 }}>
-              Collège Démo · Niveau {dataset.level} · {dataset.students.length} Élèves · {dataset.classrooms.length} Classes · Scénario {scenario.id} ({scenario.state === "APPROVED" ? "Officialisé" : "Provisoire"})
+        {/* DOCUMENT PDF À IMPRIMER */}
+        <div className="official-pdf-document" style={{ color: "#0f172a", fontFamily: "var(--font-body)", background: "#ffffff", padding: "24px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+          {/* ENTÊTE DU PV */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", marginBottom: "20px" }}>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: 900, color: "#1e3a8a", fontFamily: "var(--font-serif)" }}>
+                {schoolName}
+              </h2>
+              <p style={{ margin: "4px 0 0", fontSize: "0.85rem", fontStyle: "italic", color: "#475569" }}>
+                Enseignement Secondaire — Registre d'Arbitrage et d'Affectation des Élèves
+              </p>
+            </div>
+
+            <div style={{ textAlign: "right", fontSize: "0.82rem", lineHeight: 1.45, color: "#334155" }}>
+              <strong style={{ display: "block", textTransform: "uppercase", fontSize: "0.88rem", letterSpacing: "0.03em" }}>
+                ANNÉE SCOLAIRE 2026-2027
+              </strong>
+              <div>Niveau : <strong>{dataset.level} (Cohorte Complète)</strong></div>
+              <div style={{ fontSize: "0.78rem", color: "#64748b" }}>EdTemps v0.1 · Synthèse d'Arbitrage</div>
+              <div>Date : <strong>{currentDateStr}</strong></div>
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+          <div style={{ borderBottom: "2px solid #0f172a", marginBottom: "20px" }} />
+
+          {/* TITRE PRINCIPAL DU PV */}
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
+            <h1 style={{ margin: 0, fontSize: "1.45rem", fontWeight: 900, color: "#1e3a8a", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+              PROCÈS-VERBAL DE RÉPARTITION DES ÉLÈVES
+            </h1>
+            <p style={{ margin: "4px 0 0", fontSize: "0.88rem", fontStyle: "italic", color: "#475569" }}>
+              Document de travail et d'arbitrage d'établissement — Scénario {scenario.id} ({scenario.state === "APPROVED" ? "Officialisé (CNIL Traçable)" : "Proposition Provisoire"})
+            </p>
+          </div>
+
+          {/* GRILLE PAR CLASSE */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px", marginBottom: "32px" }}>
             {dataset.classrooms.map((c) => {
               const students = dataset.students.filter((s) => scenario.assignments[s.id] === c.id);
               const girls = students.filter((s) => s.gender === "F").length;
@@ -5494,42 +5634,42 @@ function OfficialPdfModal({
               const papCount = students.filter((s) => s.supportFlags.length > 0).length;
 
               return (
-                <div key={c.id} style={{ border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)", padding: "14px", background: "var(--bg-card)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", borderBottom: "1px solid var(--border-light)", paddingBottom: "8px" }}>
-                    <strong style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--text-main)" }}>
-                      {c.label.toUpperCase()}
+                <div key={c.id} style={{ border: "1px solid #cbd5e1", borderRadius: "6px", padding: "16px", background: "#ffffff" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "2px solid #1e3a8a", paddingBottom: "8px" }}>
+                    <strong style={{ fontSize: "1.1rem", fontWeight: 900, color: "#1e3a8a" }}>
+                      CLASSE DE {c.label.toUpperCase()}
                     </strong>
-                    <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#1e3a8a" }}>
                       {students.length} / {c.maxSize} él.
                     </span>
                   </div>
 
-                  <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginBottom: "10px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
-                    <span>Parité : {girls}F / {boys}M</span>
-                    <span>Moyenne : {avg.toFixed(1)}/20</span>
-                    <span>PAP/PPS : {papCount}</span>
+                  <div style={{ fontSize: "0.78rem", color: "#475569", marginBottom: "12px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", background: "#f8fafc", padding: "6px 8px", borderRadius: "4px" }}>
+                    <span>Parité : <strong>{girls}F / {boys}M</strong></span>
+                    <span>Moyenne : <strong>{avg.toFixed(1)}/20</strong></span>
+                    <span>PAP/PPS : <strong>{papCount}</strong></span>
                   </div>
 
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.76rem" }}>
                     <thead>
-                      <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
-                        <th style={{ textAlign: "left", padding: "4px 6px" }}>#</th>
-                        <th style={{ textAlign: "left", padding: "4px 6px" }}>Nom & Prénom</th>
-                        <th style={{ textAlign: "center", padding: "4px 6px" }}>Moy.</th>
-                        <th style={{ textAlign: "right", padding: "4px 6px" }}>Options / PAP</th>
+                      <tr style={{ background: "#f1f5f9", borderBottom: "1px solid #cbd5e1" }}>
+                        <th style={{ textAlign: "left", padding: "5px 6px", color: "#334155" }}>#</th>
+                        <th style={{ textAlign: "left", padding: "5px 6px", color: "#334155" }}>Nom & Prénom / Identité</th>
+                        <th style={{ textAlign: "center", padding: "5px 6px", color: "#334155" }}>Moy.</th>
+                        <th style={{ textAlign: "right", padding: "5px 6px", color: "#334155" }}>Options / PAP</th>
                       </tr>
                     </thead>
                     <tbody>
                       {students.map((st, i) => (
-                        <tr key={st.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
-                          <td style={{ padding: "4px 6px", color: "var(--text-muted)" }}>{i + 1}</td>
-                          <td style={{ padding: "4px 6px", fontWeight: 700, color: "var(--text-main)" }}>
-                            {nameOf(st, anonymous)}
+                        <tr key={st.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                          <td style={{ padding: "5px 6px", color: "#64748b" }}>{i + 1}</td>
+                          <td style={{ padding: "5px 6px", fontWeight: 700, color: "#0f172a" }}>
+                            {getStudentDisplayName(st)}
                           </td>
-                          <td style={{ textAlign: "center", padding: "4px 6px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                          <td style={{ textAlign: "center", padding: "5px 6px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "#1e3a8a" }}>
                             {st.levelAverage.toFixed(1)}
                           </td>
-                          <td style={{ textAlign: "right", padding: "4px 6px", fontSize: "0.7rem", color: "var(--text-muted)" }}>
+                          <td style={{ textAlign: "right", padding: "5px 6px", fontSize: "0.72rem", color: "#475569" }}>
                             {[...st.supportFlags, ...st.options].join(", ")}
                           </td>
                         </tr>
@@ -5539,6 +5679,32 @@ function OfficialPdfModal({
                 </div>
               );
             })}
+          </div>
+
+          {/* SIGNATURES OFFICIELLES & NOTICE DPO */}
+          <div style={{ marginTop: "40px", borderTop: "2px solid #0f172a", paddingTop: "20px" }}>
+            <h4 style={{ margin: "0 0 16px", fontSize: "0.92rem", fontWeight: 800, textTransform: "uppercase", color: "#1e3a8a" }}>
+              Signatures d'Arbitrage d'Établissement :
+            </h4>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", textAlign: "center", minHeight: "90px" }}>
+              <div style={{ border: "1px dashed #cbd5e1", borderRadius: "6px", padding: "12px" }}>
+                <strong style={{ fontSize: "0.82rem", display: "block" }}>Le Chef d'Établissement</strong>
+                <span style={{ fontSize: "0.74rem", color: "#64748b" }}>(Principal / Proviseur)</span>
+              </div>
+              <div style={{ border: "1px dashed #cbd5e1", borderRadius: "6px", padding: "12px" }}>
+                <strong style={{ fontSize: "0.82rem", display: "block" }}>Le Principal Adjoint</strong>
+                <span style={{ fontSize: "0.74rem", color: "#64748b" }}>(Directeur des Études)</span>
+              </div>
+              <div style={{ border: "1px dashed #cbd5e1", borderRadius: "6px", padding: "12px" }}>
+                <strong style={{ fontSize: "0.82rem", display: "block" }}>Le Conseiller Principal d'Éducation</strong>
+                <span style={{ fontSize: "0.74rem", color: "#64748b" }}>(CPE)</span>
+              </div>
+            </div>
+
+            <p style={{ marginTop: "24px", fontSize: "0.72rem", color: "#64748b", fontStyle: "italic", textAlign: "center", lineHeight: 1.4 }}>
+              Document officiel établi conformément à la mission d'intérêt public (Art. 6.1.e RGPD et Art. 22 RGPD protection des mineurs) et au Code de l'Éducation.<br />
+              Les événements d'arbitrage et de validation sont tracés dans le registre append-only d'audit de l'établissement EdTemps.
+            </p>
           </div>
         </div>
       </div>
