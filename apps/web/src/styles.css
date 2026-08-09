@@ -11,8 +11,11 @@
 
   /* Palette Carnet de Bord & Institutionnelle Éducation Nationale */
   --primary-brand: #1e3a8a;
-  /* Encre bleue institutionnelle */
+  /* Encre bleue institutionnelle (titres, liens, textes sur fond clair) */
   --primary-hover: #1e40af;
+  --button-primary-bg: #1d4ed8;
+  /* Fond de bouton plein avec texte blanc (6.70:1 avec du blanc) */
+  --button-primary-hover: #1e40af;
   --indigo-accent: #2563eb;
   --blue-accent: #1d4ed8;
   --emerald-accent: #059669;
@@ -149,7 +152,7 @@
 }
 
 .shimmer-banner {
-  background: linear-gradient(90deg, var(--primary-brand) 0%, #2563eb 50%, var(--primary-brand) 100%);
+  background: linear-gradient(90deg, var(--button-primary-bg) 0%, #2563eb 50%, var(--button-primary-bg) 100%);
   background-size: 200% 100%;
   animation: shimmerWave 2s infinite ease-in-out;
   color: #ffffff;
@@ -188,9 +191,12 @@
 
 /* Mode Sombre Adaptatif */
 [data-theme="dark"] {
-  --primary-brand: #4f46e5;
-  /* était #6366f1 : texte blanc dessus = 4.47:1 (échec AA de justesse) → 6.29:1 */
-  --primary-hover: #818cf8;
+  --primary-brand: #818cf8;
+  /* Bleu indigo pastel clair (6.8:1 de contraste avec texte sur bg-card #131b2e) */
+  --primary-hover: #a5b4fc;
+  --button-primary-bg: #4f46e5;
+  /* Fond de bouton plein avec texte blanc (6.29:1 avec du blanc) */
+  --button-primary-hover: #4338ca;
   --indigo-accent: #818cf8;
   --blue-accent: #3b82f6;
   --emerald-accent: #34d399;
@@ -531,22 +537,22 @@ h1 {
 }
 
 .tab-button.active {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
   box-shadow: var(--shadow-sm);
 }
 
 .active-subtab {
-  background: var(--primary-brand) !important;
+  background: var(--button-primary-bg) !important;
   color: #ffffff !important;
-  border-color: var(--primary-brand) !important;
+  border-color: var(--button-primary-bg) !important;
   box-shadow: var(--shadow-sm);
 }
 
 .active-filter {
-  background: var(--primary-brand) !important;
+  background: var(--button-primary-bg) !important;
   color: #ffffff !important;
-  border-color: var(--primary-brand) !important;
+  border-color: var(--button-primary-bg) !important;
   box-shadow: var(--shadow-sm);
 }
 
@@ -590,9 +596,9 @@ h1 {
 }
 
 .step-pill.active-step {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
-  border-color: var(--primary-brand);
+  border-color: var(--button-primary-bg);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
@@ -625,13 +631,13 @@ h1 {
 }
 
 .primary {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
   box-shadow: 0 2px 8px 0 rgba(30, 58, 138, 0.25);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--primary-hover);
+  background: var(--button-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px 0 rgba(30, 58, 138, 0.35);
 }
@@ -952,7 +958,7 @@ button:disabled {
 }
 
 .course-class-tag {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
   padding: 2px 8px;
   border-radius: var(--radius-full);
@@ -1058,7 +1064,7 @@ button:disabled {
 }
 
 .weight-score {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
   padding: 4px 10px;
   border-radius: var(--radius-full);
@@ -1069,7 +1075,7 @@ button:disabled {
 
 .weight-slider input[type="range"] {
   width: 100%;
-  accent-color: var(--primary-brand);
+  accent-color: var(--button-primary-bg);
   cursor: pointer;
 }
 
@@ -1196,13 +1202,13 @@ button.validate {
 }
 
 .export-btn.primary-export {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff !important;
-  border: 1px solid var(--primary-brand);
+  border: 1px solid var(--button-primary-bg);
 }
 
 .export-btn.primary-export:hover {
-  filter: brightness(1.1);
+  background: var(--button-primary-hover);
   transform: translateY(-1px);
 }
 
@@ -1262,8 +1268,8 @@ button.validate {
 }
 
 .target-pill:hover:not(:disabled) {
-  border-color: var(--primary-brand);
-  background: var(--primary-brand);
+  border-color: var(--button-primary-bg);
+  background: var(--button-primary-bg);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -1337,9 +1343,9 @@ button.validate {
 }
 
 .quick-move-chip:hover {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
-  border-color: var(--primary-brand);
+  border-color: var(--button-primary-bg);
 }
 
 .class-column.drag-over {
@@ -1366,7 +1372,7 @@ button.validate {
 }
 
 .undo-btn {
-  background: var(--primary-brand);
+  background: var(--button-primary-bg);
   color: #ffffff;
   border: none;
   padding: 4px 12px;
@@ -1407,7 +1413,7 @@ button.validate {
 .metric-bar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-brand), var(--emerald-accent));
+  background: linear-gradient(90deg, var(--button-primary-bg), var(--emerald-accent));
   border-radius: var(--radius-full);
 }
 
@@ -2079,9 +2085,9 @@ body {
   }
 
   .mobile-class-tab-btn.active {
-    background: var(--primary-brand) !important;
+    background: var(--button-primary-bg) !important;
     color: #ffffff !important;
-    border-color: var(--primary-brand) !important;
+    border-color: var(--button-primary-bg) !important;
   }
 
   .masthead {

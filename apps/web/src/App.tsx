@@ -2476,7 +2476,7 @@ export default function App() {
                     className="validate"
                     onClick={validate}
                     disabled={busy || selected?.state === "APPROVED"}
-                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--primary-brand)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                    style={{ padding: "12px 24px", fontSize: "0.95rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--button-primary-bg)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "8px" }}
                   >
                     {selected?.state === "APPROVED" ? "✓ Scénario Officialisé (CNIL Traçable)" : "🔒 Valider Humainement & Officialiser Ce Scénario"}
                   </button>
@@ -2783,7 +2783,7 @@ export default function App() {
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "var(--primary-brand)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
+                          style={{ background: "var(--button-primary-bg)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
                         >
                           ✨ Proposer un rééquilibrage pas-à-pas
                         </button>
@@ -3503,7 +3503,7 @@ export default function App() {
                             const classroom = dataset.classrooms.find((c) => c.id === course?.classroomId);
                             const room = timetablingData?.rooms.find((r) => r.id === placement.roomId);
                             return (
-                              <div key={placement.courseId} style={{ background: "var(--primary-brand)", color: "#ffffff", padding: "8px", borderRadius: "var(--radius-sm)", fontSize: "0.82rem" }}>
+                              <div key={placement.courseId} style={{ background: "var(--button-primary-bg)", color: "#ffffff", padding: "8px", borderRadius: "var(--radius-sm)", fontSize: "0.82rem" }}>
                                 <strong style={{ display: "block" }}>{course?.subject}</strong>
                                 <span>Classe : {classroom?.label ?? course?.classroomId}</span>
                                 <small style={{ display: "block", marginTop: "2px", opacity: 0.9 }}>Salle {room?.label ?? placement.roomId}</small>
@@ -4014,7 +4014,7 @@ export default function App() {
                           setEditStudentForm({ ...inspectStudent });
                           setIsEditingStudent(true);
                         }}
-                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "var(--primary-brand)" : "var(--text-light)" }}
+                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "var(--button-primary-bg)" : "var(--text-light)" }}
                       >
                         ✏️ Modifier la fiche élève
                       </button>
@@ -4980,7 +4980,7 @@ export default function App() {
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <span style={{ background: "var(--primary-brand)", color: "#fff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.75rem" }}>
+                            <span style={{ background: "var(--button-primary-bg)", color: "#fff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.75rem" }}>
                               {index + 1}
                             </span>
                             <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: step.avatarColor, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.72rem" }}>
