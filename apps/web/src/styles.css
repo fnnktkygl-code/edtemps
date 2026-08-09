@@ -2397,6 +2397,8 @@ a:focus-visible {
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .modal-overlay.print-modal-overlay {
@@ -2411,6 +2413,8 @@ a:focus-visible {
     box-shadow: none !important;
     border: none !important;
     overflow: visible !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .modal-card.print-modal-card {
@@ -2426,6 +2430,8 @@ a:focus-visible {
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .official-pdf-document {
@@ -2434,20 +2440,19 @@ a:focus-visible {
     width: 100% !important;
     max-width: 100% !important;
     background: #ffffff !important;
-    color: #000000 !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
-  }
-
-  .official-pdf-document * {
-    color: #000000 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .official-pdf-document table,
   .official-pdf-document th,
   .official-pdf-document td {
     border: 1px solid #cbd5e1 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .pdf-page-class {
@@ -2457,5 +2462,14 @@ a:focus-visible {
     page-break-inside: avoid !important;
     margin: 0 !important;
     padding-top: 15px !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .pdf-signatures-block {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 }
