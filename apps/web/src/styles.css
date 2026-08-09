@@ -2138,3 +2138,45 @@ a:focus-visible {
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
 }
+
+/* ==========================================================================\n   Format d'Impression PDF d'Établissement (@media print)\n   ========================================================================== */
+@media print {
+  header, nav, main, footer,
+  .masthead, .compact-status-bar, .workflow-stepper,
+  .main-content, .sidebar, .inspector, .board, .export-actions-grid, .no-print {
+    display: none !important;
+  }
+
+  html, body, #root, .app-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .modal-overlay.print-modal-overlay,
+  .modal-card.print-modal-card,
+  .official-pdf-document {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .official-pdf-document * {
+    color: #000000 !important;
+  }
+
+  .official-pdf-document table,
+  .official-pdf-document th,
+  .official-pdf-document td {
+    border: 1px solid #000000 !important;
+  }
+}

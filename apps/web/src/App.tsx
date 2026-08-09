@@ -195,6 +195,7 @@ export default function App() {
   };
 
   const [showBenchmark, setShowBenchmark] = useState<boolean>(true);
+  const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
 
   // Module 1 State (Dispatch) avec persistance LocalStorage
   const [dataset, setDatasetState] = useState<Dataset>(emptyDataset);
@@ -2842,10 +2843,26 @@ function getBestScenarioId(scens: Scenario[]): string | undefined {
                           <a className="export-btn secondary-export" href={api.exportCsvUrl(selected.id)} download={`repartition-${selected.id}.csv`}>
                             📥 Exporter CSV
                           </a>
-                          <a className="export-btn primary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
+                          <button
+                            type="button"
+                            className="export-btn primary-export"
+                            onClick={() => setShowPdfModal(true)}
+                            style={{ background: "var(--primary-brand)", color: "#ffffff", border: "none", cursor: "pointer", fontWeight: 800, padding: "8px 12px", borderRadius: "var(--radius-sm)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "0.82rem" }}
+                          >
+                            🖨️ Export PDF / Imprimer
+                          </button>
+                          <a className="export-btn secondary-export" href={api.exportPronoteUrl(selected.id)} download={`repartition-${selected.id}-pronote.json`}>
                             📦 Export PRONOTE
                           </a>
                         </div>
+                        {showPdfModal && selected && (
+                          <OfficialPdfModal
+                            scenario={selected}
+                            dataset={dataset}
+                            anonymous={anonymous}
+                            onClose={() => setShowPdfModal(false)}
+                          />
+                        )}
                       </div>
                     </aside>
 
@@ -5388,4 +5405,135 @@ function computeRebalanceSteps(
   }
 
   return { steps, issuesCount: overcrowded.length + undercapacity.length };
+}
+
+function OfficialPdfModal({
+  scenario,
+  dataset,
+  onClose,
+  anonymous,
+}: {
+  scenario: Scenario;
+  dataset: Dataset;
+  onClose: () => void;
+  anonymous: boolean;
+}) {
+  return (
+    <div className="modal-overlay print-modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
+      <div
+        className="modal-card print-modal-card"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: "1080px",
+          width: "92vw",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          background: "var(--bg-card)",
+          border: "1px solid var(--border-light)",
+          borderRadius: "var(--radius-md)",
+          padding: "24px",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid var(--border-light)", paddingBottom: "14px" }} className="no-print">
+          <div>
+            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)" }}>
+              🖨️ Document Officiel de Répartition — {scenario.id}
+            </h3>
+            <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
+              Établissement : Collège Démo (Cohorte {dataset.level}) · Conforme RGPD Art. 6.1.e & Arrêté de Répartition
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => window.print()}
+              style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 800, background: "var(--primary-brand)", color: "#ffffff", borderRadius: "var(--radius-sm)", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              🖨️ Imprimer / Sauvegarder en PDF
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={onClose}
+              style={{ padding: "8px 14px", fontSize: "0.88rem", fontWeight: 700, background: "var(--bg-subtle)", color: "var(--text-main)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", cursor: "pointer" }}
+            >
+              ✕ Fermer
+            </button>
+          </div>
+        </div>
+
+        {/* CONTENU À IMPRIMER */}
+        <div className="official-pdf-document" style={{ color: "var(--text-main)", fontFamily: "var(--font-body)" }}>
+          <div style={{ textAlign: "center", marginBottom: "24px", borderBottom: "2px solid var(--border-strong)", paddingBottom: "16px" }}>
+            <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.02em" }}>
+              MINISTÈRE DE L'ÉDUCATION NATIONALE
+            </h2>
+            <h3 style={{ margin: "4px 0 0", fontSize: "1.1rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+              REPARTITION DES ÉLÈVES PAR CLASSE — RENTRÉE 2026
+            </h3>
+            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "6px", fontWeight: 700 }}>
+              Collège Démo · Niveau {dataset.level} · {dataset.students.length} Élèves · {dataset.classrooms.length} Classes · Scénario {scenario.id} ({scenario.state === "APPROVED" ? "Officialisé" : "Provisoire"})
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+            {dataset.classrooms.map((c) => {
+              const students = dataset.students.filter((s) => scenario.assignments[s.id] === c.id);
+              const girls = students.filter((s) => s.gender === "F").length;
+              const boys = students.filter((s) => s.gender === "M").length;
+              const avg = students.length > 0 ? students.reduce((acc, st) => acc + st.levelAverage, 0) / students.length : 0;
+              const papCount = students.filter((s) => s.supportFlags.length > 0).length;
+
+              return (
+                <div key={c.id} style={{ border: "1px solid var(--border-light)", borderRadius: "var(--radius-sm)", padding: "14px", background: "var(--bg-card)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", borderBottom: "1px solid var(--border-light)", paddingBottom: "8px" }}>
+                    <strong style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--text-main)" }}>
+                      {c.label.toUpperCase()}
+                    </strong>
+                    <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--primary-brand)" }}>
+                      {students.length} / {c.maxSize} él.
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginBottom: "10px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
+                    <span>Parité : {girls}F / {boys}M</span>
+                    <span>Moyenne : {avg.toFixed(1)}/20</span>
+                    <span>PAP/PPS : {papCount}</span>
+                  </div>
+
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.76rem" }}>
+                    <thead>
+                      <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
+                        <th style={{ textAlign: "left", padding: "4px 6px" }}>#</th>
+                        <th style={{ textAlign: "left", padding: "4px 6px" }}>Nom & Prénom</th>
+                        <th style={{ textAlign: "center", padding: "4px 6px" }}>Moy.</th>
+                        <th style={{ textAlign: "right", padding: "4px 6px" }}>Options / PAP</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((st, i) => (
+                        <tr key={st.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
+                          <td style={{ padding: "4px 6px", color: "var(--text-muted)" }}>{i + 1}</td>
+                          <td style={{ padding: "4px 6px", fontWeight: 700, color: "var(--text-main)" }}>
+                            {nameOf(st, anonymous)}
+                          </td>
+                          <td style={{ textAlign: "center", padding: "4px 6px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                            {st.levelAverage.toFixed(1)}
+                          </td>
+                          <td style={{ textAlign: "right", padding: "4px 6px", fontSize: "0.7rem", color: "var(--text-muted)" }}>
+                            {[...st.supportFlags, ...st.options].join(", ")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
