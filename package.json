@@ -16,6 +16,8 @@
     "dev:web": "npm run dev --workspace=@edtemps/web",
     "db:migrate": "tsx apps/api/src/migrate.ts",
     "check": "tsc --noEmit && npm run check --workspace=@edtemps/web",
+    "lint": "eslint . --max-warnings=9999",
+    "lint:css": "stylelint \"apps/web/src/**/*.css\"",
     "test": "tsx --test packages/domain/test/dispatch.test.ts packages/domain/test/load.test.ts packages/domain/test/timetabling.test.ts packages/domain/test/substitutions.test.ts packages/domain/test/pronote_dpo.test.ts apps/api/test/siecle-import.test.ts",
     "build:api": "tsc --noEmit",
     "build": "npm run check && npm run build --workspace=@edtemps/web"
@@ -31,11 +33,19 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
     "concurrently": "^9.1.0",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.9.0",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.66.0"
   }
 }

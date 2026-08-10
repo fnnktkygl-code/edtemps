@@ -10,7 +10,6 @@ import {
   exportDispatchPRONOTE,
   generateCNILRegisterJSON,
   generateDPIAMarkdown,
-  generateScenario,
   generateScenarios,
   generateSchedule,
   moveCourseSlot,
@@ -32,7 +31,7 @@ const stateStore = await createStateStore();
 let input = await stateStore.loadInput(establishmentId) ?? createSyntheticDemoInput();
 const scenarios = new Map<string, DispatchScenario>((await stateStore.listScenarios(establishmentId)).map((scenario) => [scenario.id, scenario]));
 
-let timetablingInput = await stateStore.loadTimetablingInput(establishmentId) ?? createSyntheticTimetablingDemoInput();
+const timetablingInput = await stateStore.loadTimetablingInput(establishmentId) ?? createSyntheticTimetablingDemoInput();
 const timetablingSchedules = new Map<string, TimetablingSchedule>((await stateStore.listTimetablingSchedules(establishmentId)).map((s) => [s.id, s]));
 
 const pendingImports = new Map<string, { preview: SIECLEImportPreview; expiresAt: number }>();

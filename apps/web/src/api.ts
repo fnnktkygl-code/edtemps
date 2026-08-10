@@ -123,7 +123,7 @@ function setCached<T>(key: string, data: T): void {
 const fallbackDataset = createSyntheticDemoInput();
 const fallbackTimetablingDataset = createSyntheticTimetablingDemoInput();
 let fallbackScenarios = generateDomainScenarios(fallbackDataset, 3);
-let fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
+const fallbackSchedule = generateDomainSchedule(fallbackTimetablingDataset);
 
 let activeDataset: Dataset = fallbackDataset;
 
