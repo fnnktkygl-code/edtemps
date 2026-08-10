@@ -1,11 +1,28 @@
-/* Accessibility Focus Rings (RGAA AA / DSFR) */
+/* Anneaux de focus hautement contrastés (Conformité RGAA AA / DSFR - Critère 10.7)
+ *
+ * Fusion de deux règles quasi-identiques trouvées à deux endroits distincts
+ * du fichier original monolithique (reset.css avait la version historique,
+ * accessibility.css une version ajoutée plus tard avec un box-shadow en
+ * plus). Par ordre de cascade, la seconde gagnait déjà sur les éléments
+ * communs (button/input/select/a) - mais elle utilisait une couleur bleue
+ * codée en dur (#2563eb) au lieu du token --primary-brand, qui vaut #1e3a8a
+ * en thème clair et #818cf8 en thème sombre. Résultat concret : l'anneau de
+ * focus ne s'adaptait PAS au thème sombre, avec un risque de contraste
+ * insuffisant sur fond sombre - ironique pour une règle d'accessibilité.
+ *
+ * Fusion : union des deux listes de sélecteurs (ajout de [tabindex] et
+ * textarea), couleur theme-aware pour l'outline ET le box-shadow via
+ * color-mix() (support natif Chrome 111+/Firefox 113+/Safari 16.4+, sans
+ * navigateur cible plus ancien identifié dans ce projet). */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
-a:focus-visible {
-  outline: 3px solid #2563eb !important;
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--primary-brand) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-brand) 25%, transparent) !important;
 }
+
 

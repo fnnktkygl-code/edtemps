@@ -21,15 +21,8 @@ a,
   font-family: inherit;
 }
 
-/* Anneaux de focus hautement contrastés (Conformité RGAA AA - Critère 10.7) */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-a:focus-visible,
-[tabindex]:focus-visible {
-  outline: 3px solid var(--primary-brand) !important;
-  outline-offset: 2px !important;
-}
+/* Anneaux de focus : voir accessibility.css (règle unifiée, fusionnée avec
+   la version qui vivait plus loin dans le fichier original) */
 
 /* Page Container */
 .page {
