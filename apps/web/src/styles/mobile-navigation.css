@@ -157,11 +157,13 @@
 
   .mobile-nav-item.active {
     color: var(--primary-brand) !important;
-    background: rgba(37, 99, 235, 0.08) !important;
+    background: rgba(26, 47, 92, 0.08) !important;
+    /* recalé sur --primary-brand (encre), était rgba(37, 99, 235, ...) = l'ancien bleu générique */
   }
 
-  .mobile-nav-item span.nav-icon {
-    font-size: 1.15rem !important;
+  .mobile-nav-item .nav-icon {
+    width: 19px !important;
+    height: 19px !important;
   }
 
   .page {

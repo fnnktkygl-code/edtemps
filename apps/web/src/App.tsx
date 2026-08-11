@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { School, CalendarDays, GraduationCap, ShieldCheck, Moon, Sun } from "lucide-react";
 import { calculateMetrics, type DispatchWeights } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type { FeasibilityError } from "@edtemps/domain";
@@ -845,21 +846,21 @@ export default function App() {
             onClick={() => setActiveTab("dispatch")}
             data-tooltip="Module 1 : Répartition équilibrée des élèves"
           >
-            🏫 Répartition des Élèves
+            <School size={17} aria-hidden="true" /> Répartition des Élèves
           </button>
           <button
             className={`tab-button ${activeTab === "timetabling" ? "active" : ""}`}
             onClick={() => setActiveTab("timetabling")}
             data-tooltip="Module 2 : Emplois du temps & Remplacements"
           >
-            📅 Emplois du Temps
+            <CalendarDays size={17} aria-hidden="true" /> Emplois du Temps
           </button>
           <button
             className={`tab-button ${activeTab === "teacher" ? "active" : ""}`}
             onClick={() => setActiveTab("teacher")}
             data-tooltip="Espace Enseignant personnel"
           >
-            👩‍🏫 Espace Enseignant
+            <GraduationCap size={17} aria-hidden="true" /> Espace Enseignant
           </button>
           <button
             className={`tab-button ${activeTab === "compliance" ? "active" : ""}`}
@@ -869,7 +870,7 @@ export default function App() {
             }}
             data-tooltip="Module 3 : Conformité CNIL/RGPD & RGS"
           >
-            📋 Conformité DPO
+            <ShieldCheck size={17} aria-hidden="true" /> Conformité DPO
           </button>
         </nav>
 
@@ -1027,7 +1028,7 @@ export default function App() {
             onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
             data-tooltip="Basculez entre le mode clair et le mode sombre"
           >
-            {theme === "light" ? "🌙" : "☀️"}
+            {theme === "light" ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}
           </button>
         </div>
       </header>
@@ -1536,9 +1537,10 @@ export default function App() {
           <button
             className="secondary"
             onClick={() => { setTheme((t) => (t === "light" ? "dark" : "light")); }}
-            style={{ padding: "10px", fontWeight: 700 }}
+            style={{ padding: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
           >
-            {theme === "light" ? "🌙 Passer au Mode Sombre" : "☀️ Passer au Mode Clair"}
+            {theme === "light" ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+            {theme === "light" ? "Passer au Mode Sombre" : "Passer au Mode Clair"}
           </button>
         </div>
       </aside>
@@ -1549,21 +1551,21 @@ export default function App() {
           className={`mobile-nav-item ${activeTab === "dispatch" ? "active" : ""}`}
           onClick={() => setActiveTab("dispatch")}
         >
-          <span className="nav-icon">🏫</span>
+          <School className="nav-icon" size={19} aria-hidden="true" />
           <span>Répartition</span>
         </button>
         <button
           className={`mobile-nav-item ${activeTab === "timetabling" ? "active" : ""}`}
           onClick={() => setActiveTab("timetabling")}
         >
-          <span className="nav-icon">📅</span>
+          <CalendarDays className="nav-icon" size={19} aria-hidden="true" />
           <span>Emplois</span>
         </button>
         <button
           className={`mobile-nav-item ${activeTab === "teacher" ? "active" : ""}`}
           onClick={() => setActiveTab("teacher")}
         >
-          <span className="nav-icon">👩‍🏫</span>
+          <GraduationCap className="nav-icon" size={19} aria-hidden="true" />
           <span>Enseignant</span>
         </button>
         <button
@@ -1573,7 +1575,7 @@ export default function App() {
             void refreshAudit();
           }}
         >
-          <span className="nav-icon">📋</span>
+          <ShieldCheck className="nav-icon" size={19} aria-hidden="true" />
           <span>DPO</span>
         </button>
       </nav>

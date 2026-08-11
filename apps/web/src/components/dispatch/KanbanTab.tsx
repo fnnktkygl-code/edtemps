@@ -1,4 +1,5 @@
 import type { DispatchWeights } from "@edtemps/domain";
+import { Scale, Lock, CheckCircle2, FileText, Sparkles, Undo2, Redo2 } from "lucide-react";
 import { api } from "../../api";
 import type { Classroom, Dataset, Scenario, Student } from "../../types";
 import { getAvatarColor, nameOf } from "../../utils/format";
@@ -82,8 +83,8 @@ export function KanbanTab({
               {/* BANDEAU PERMANENT D'ACTION ET DE VALIDATION HUMAINE EN HAUT DE PAGE */}
               <div style={{ background: selected?.state === "APPROVED" ? "var(--card-success-bg)" : "var(--bg-card)", border: `2px solid ${selected?.state === "APPROVED" ? "var(--card-success-border)" : "var(--primary-brand)"}`, padding: "16px 20px", borderRadius: "var(--radius-md)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap", boxShadow: "var(--shadow-md)" }}>
                 <div>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    ⚖️ ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
+                  <div style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Scale size={14} aria-hidden="true" /> ÉTAPE 3 : DÉCISION HUMAINE OBLIGATOIRE (ART. 6.1.E RGPD)
                   </div>
                   <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", marginTop: "2px" }}>
                     Scénario examiné : <strong>{selected?.id === scenarios[0]?.id ? "Scénario A (🎯 Équilibre)" : selected?.id === scenarios[1]?.id ? "Scénario B (📊 Mixité)" : "Scénario C (🤝 Accompagnement)"}</strong> — <span style={{ color: "var(--card-success-text)" }}>{Math.round((selected?.metrics.score ?? 850) / 10)}% Score d'Équilibrage</span>
@@ -97,7 +98,8 @@ export function KanbanTab({
                     disabled={busy || selected?.state === "APPROVED"}
                     style={{ padding: "10px 18px", fontSize: "0.9rem", fontWeight: 800, background: selected?.state === "APPROVED" ? "var(--emerald-accent)" : "var(--button-primary-bg)", color: "#ffffff", borderRadius: "var(--radius-sm)", cursor: "pointer", border: "none", boxShadow: "var(--shadow-sm)", display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    {selected?.state === "APPROVED" ? "✓ Officialisé (CNIL)" : "🔒 Officialiser Ce Scénario"}
+                    {selected?.state === "APPROVED" ? <CheckCircle2 size={16} aria-hidden="true" /> : <Lock size={16} aria-hidden="true" />}
+                    {selected?.state === "APPROVED" ? "Officialisé (CNIL)" : "Officialiser Ce Scénario"}
                   </button>
 
                   <button
@@ -118,7 +120,7 @@ export function KanbanTab({
                       gap: "6px",
                     }}
                   >
-                    📄 Exporter PDF (Procès-Verbal)
+                    <FileText size={16} aria-hidden="true" /> Exporter PDF (Procès-Verbal)
                   </button>
 
                   <a
@@ -227,13 +229,13 @@ export function KanbanTab({
                         alignItems: "center",
                         gap: "6px",
                         borderRadius: "var(--radius-sm)",
-                        border: "1px solid var(--border-light)",
+                        border: "1px solid var(--border-interactive)",
                         background: historyPast.length > 0 ? "var(--bg-card)" : "var(--bg-subtle)",
                         color: historyPast.length > 0 ? "var(--text-main)" : "var(--text-muted)",
                         cursor: historyPast.length > 0 ? "pointer" : "not-allowed",
                       }}
                     >
-                      ↩️ Annuler ({historyPast.length})
+                      <Undo2 size={15} aria-hidden="true" /> Annuler ({historyPast.length})
                     </button>
                     <button
                       className={`icon-btn-subtle ui-tooltip ${historyFuture.length > 0 ? "" : "disabled"}`}
@@ -248,13 +250,13 @@ export function KanbanTab({
                         alignItems: "center",
                         gap: "6px",
                         borderRadius: "var(--radius-sm)",
-                        border: "1px solid var(--border-light)",
+                        border: "1px solid var(--border-interactive)",
                         background: historyFuture.length > 0 ? "var(--bg-card)" : "var(--bg-subtle)",
                         color: historyFuture.length > 0 ? "var(--text-main)" : "var(--text-muted)",
                         cursor: historyFuture.length > 0 ? "pointer" : "not-allowed",
                       }}
                     >
-                      ↪️ Rétablir ({historyFuture.length})
+                      <Redo2 size={15} aria-hidden="true" /> Rétablir ({historyFuture.length})
                     </button>
                   </div>
                 </div>
@@ -463,9 +465,9 @@ export function KanbanTab({
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "var(--accent-warm)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
+                          style={{ background: "var(--accent-warm)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                         >
-                          ✨ Proposer un rééquilibrage pas-à-pas
+                          <Sparkles size={15} aria-hidden="true" /> Proposer un rééquilibrage pas-à-pas
                         </button>
                       </div>
 
