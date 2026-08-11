@@ -24,6 +24,15 @@ export function subjectColorClass(subject: string): string {
 }
 
 export function getAvatarColor(id: string): string {
+  // Palette VOLONTAIREMENT séparée des tokens de marque (--primary-brand,
+  // --accent-warm) : elle doit distinguer visuellement beaucoup d'élèves
+  // différents dans une même classe, ce qui demande plus de teintes que la
+  // palette de marque n'en fournit. Vérifié le 09/08/2026 (recalibrage
+  // encre/bordeaux) : aucune de ces 8 couleurs ne coïncide plus avec les
+  // nouveaux tokens de marque, donc plus de risque de confusion visuelle
+  // "est-ce un bouton ou un avatar ?" qu'avec l'ancienne palette (où le bleu
+  // avatar #1d4ed8 était identique à l'ancien --button-primary-bg).
+  //
   // Palette corrigée : les valeurs Tailwind "500" d'origine échouaient au contraste
   // AA (4.5:1) avec des initiales blanches (ex. #f59e0b = 2.15:1, #10b981 = 2.54:1).
   // Ces teintes plus saturées passent toutes ≥ 5:1 en conservant des teintes proches.
