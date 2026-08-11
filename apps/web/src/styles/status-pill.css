@@ -37,7 +37,7 @@
 
 .icon-btn-subtle {
   background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-interactive);
   color: var(--text-main);
   padding: 3px 8px;
   border-radius: var(--radius-sm);
@@ -61,7 +61,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-interactive);
   color: var(--text-main);
   padding: 0;
   width: 26px;

@@ -9,13 +9,22 @@
   --font-serif: Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Palette Carnet de Bord & Institutionnelle Éducation Nationale */
-  --primary-brand: #1e3a8a;
-  /* Encre bleue institutionnelle (titres, liens, textes sur fond clair) */
-  --primary-hover: #1e40af;
-  --button-primary-bg: #1d4ed8;
-  /* Fond de bouton plein avec texte blanc (6.70:1 avec du blanc) */
-  --button-primary-hover: #1e40af;
+  /* Palette Carnet de Bord & Institutionnelle Éducation Nationale
+     Recalibrée le 09/08/2026 : l'ancien bleu (#1e3a8a) était un indigo SaaS
+     générique sans lien avec le sujet. "Encre" + "bordeaux" évoquent le
+     carnet de bord scolaire sans reprendre le Bleu France/Marianne du DSFR,
+     dont l'identité visuelle est réservée aux sites .gouv.fr (RGAA reste
+     suivi comme référentiel d'accessibilité public, pas comme charte
+     graphique à copier). Contrastes vérifiés : voir docs/frontend-architecture.md */
+  --primary-brand: #1a2f5c;
+  /* Encre bleue institutionnelle (titres, liens, textes sur fond clair) — 13.1:1 sur blanc */
+  --primary-hover: #24406f;
+  --button-primary-bg: #2c4a86;
+  /* Fond de bouton plein avec texte blanc — 8.6:1 avec du blanc */
+  --button-primary-hover: #24406f;
+  --accent-warm: #8a2846;
+  /* Bordeaux — accent chaud pour actions secondaires (rééquilibrage, mise en avant) — 8.5:1 avec du blanc */
+  --accent-warm-hover: #6f1f38;
   --indigo-accent: #2563eb;
   --blue-accent: #1d4ed8;
   --emerald-accent: #059669;
@@ -31,8 +40,13 @@
   --text-muted: #334155;
   --text-light: #64748b;
 
+  /* --border-light : décoratif uniquement (séparateurs, cartes) - PAS assez
+     contrasté (1.48:1) pour délimiter un élément interactif (WCAG 1.4.11
+     exige 3:1). Pour un input/select/zone cliquable, utiliser --border-interactive. */
   --border-light: #cbd5e1;
   --border-strong: #7c8fac;
+  --border-interactive: #7c8fac;
+  /* Alias de --border-strong avec un nom qui dit ce qu'il faut en faire — 3.3:1 sur blanc, conforme WCAG 1.4.11 */
 
   /* Tokens sémantiques (badges, diagnostics, cartes) — formalisation des couleurs
      déjà utilisées en inline dans App.tsx, désormais pilotables par thème */
@@ -64,6 +78,22 @@
   --badge-option-text: #3730a3;
   --badge-option-border: #c7d2fe;
 
+  /* Badges sexe/accompagnement élève - AJOUTÉS le 09/08/2026 : ces tokens
+     n'existaient qu'en thème sombre (dark-mode.css), pas ici. Résultat en
+     thème clair (celui par défaut) : fond transparent, bordure invisible,
+     badge quasi cassé visuellement. Valeurs vérifiées ≥ 6.5:1. */
+  --badge-female-bg: #fce7f3;
+  --badge-female-text: #9d174d;
+  --badge-female-border: #f9a8d4;
+
+  --badge-male-bg: #e0f2fe;
+  --badge-male-text: #075985;
+  --badge-male-border: #7dd3fc;
+
+  --badge-need-bg: #fef3c7;
+  --badge-need-text: #78350f;
+  --badge-need-border: #fcd34d;
+
   /* Couleur de bouton "succès" plein (texte blanc) — stable entre les deux thèmes,
      vérifiée ≥ 4.5:1 avec du blanc (contrairement à #10b981/#059669 utilisés avant) */
   --button-success-bg: #047857;
@@ -76,7 +106,8 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.12);
-  --shadow-glow: 0 0 20px rgba(30, 58, 138, 0.2);
+  --shadow-glow: 0 0 20px rgba(26, 47, 92, 0.2);
+  /* Recalcule sur --primary-brand (etait rgba(30, 58, 138, ...), l'ancienne valeur) */
 
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);

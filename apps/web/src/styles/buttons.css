@@ -22,19 +22,20 @@
 .primary {
   background: var(--button-primary-bg);
   color: #ffffff;
-  box-shadow: 0 2px 8px 0 rgba(30, 58, 138, 0.25);
+  box-shadow: 0 2px 8px 0 rgba(26, 47, 92, 0.25);
 }
 
 .primary:hover:not(:disabled) {
   background: var(--button-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px 0 rgba(30, 58, 138, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(26, 47, 92, 0.35);
 }
 
 .secondary {
   background: var(--bg-card);
   color: var(--text-main);
-  border-color: var(--border-light);
+  border-color: var(--border-interactive);
+  /* était --border-light (1.5:1) : un bouton est un composant interactif, WCAG 1.4.11 exige 3:1 */
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -46,20 +47,21 @@
 }
 
 .validate {
-  background: #059669;
+  background: var(--button-success-bg);
+  /* était #059669 codé en dur, dupliquant --button-success-bg avec une valeur différente (2.54:1 vs 5.48:1 avec du blanc) */
   color: #ffffff;
   padding: 10px 20px;
   font-size: 0.9rem;
   font-weight: 800;
-  box-shadow: 0 2px 8px 0 rgba(5, 150, 105, 0.25);
+  box-shadow: 0 2px 8px 0 rgba(4, 120, 87, 0.25);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .validate:hover:not(:disabled) {
-  background: #047857;
+  filter: brightness(0.88);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(4, 120, 87, 0.35);
 }
 
 button:disabled {

@@ -107,7 +107,7 @@ export function KanbanTab({
                       padding: "10px 18px",
                       fontSize: "0.9rem",
                       fontWeight: 800,
-                      background: "#059669",
+                      background: "var(--emerald-accent)",
                       color: "#ffffff",
                       borderRadius: "var(--radius-sm)",
                       cursor: "pointer",
@@ -463,7 +463,7 @@ export function KanbanTab({
                           className="primary"
                           onClick={() => setShowRebalanceModal(true)}
                           disabled={selected.state === "APPROVED"}
-                          style={{ background: "var(--button-primary-bg)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
+                          style={{ background: "var(--accent-warm)", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: "0.82rem", borderRadius: "var(--radius-sm)", width: "100%", cursor: "pointer", border: "none", whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25 }}
                         >
                           ✨ Proposer un rééquilibrage pas-à-pas
                         </button>

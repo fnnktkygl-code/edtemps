@@ -246,7 +246,7 @@ export function StudentDetailModal({
                                   const avg = default9.reduce((sum, g) => sum + g.score, 0) / default9.length;
                                   setEditStudentForm({ ...editStudentForm, subjectGrades: default9, levelAverage: parseFloat(avg.toFixed(1)) });
                                 }}
-                                style={{ background: "#2563eb", color: "#ffffff", border: "none", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                                style={{ background: "var(--button-primary-bg)", color: "#ffffff", border: "none", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
                               >
                                 📋 9 Matières Officieuses
                               </button>
@@ -618,7 +618,10 @@ export function StudentDetailModal({
                           </div>
                         </div>
 
-                        {/* CARTE SOUVERAINE IA D'EXPLICATION DES CONTRAINTES */}
+                        {/* CARTE SOUVERAINE IA D'EXPLICATION DES CONTRAINTES
+                            Couleurs volontairement fixes (pas de token clair/sombre) : cet encart
+                            est pensé comme un "spotlight" toujours contrasté pour mettre en avant
+                            l'explication algorithmique, quel que soit le thème de la page. */}
                         {selected && selected.explanations && selected.explanations[inspectStudent.id] && (
                           <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)", padding: "16px", borderRadius: "var(--radius-md)", color: "#ffffff", boxShadow: "0 4px 16px rgba(49, 46, 129, 0.22)" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>

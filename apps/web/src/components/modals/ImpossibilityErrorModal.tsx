@@ -123,7 +123,7 @@ export function ImpossibilityErrorModal({
                         onClose();
                         setNotice("Structure d'effectifs réajustée automatiquement selon la recommandation de l'IA.");
                       }}
-                      style={{ padding: "8px 16px", fontSize: "0.82rem", fontWeight: 800, background: "#dc2626", borderColor: "#dc2626" }}
+                      style={{ padding: "8px 16px", fontSize: "0.82rem", fontWeight: 800, background: "var(--rose-accent)", borderColor: "var(--rose-accent)" }}
                     >
                       🛠️ Appliquer la correction IA
                     </button>

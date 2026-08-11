@@ -1,11 +1,14 @@
 /* Mode Sombre Adaptatif */
 [data-theme="dark"] {
-  --primary-brand: #818cf8;
-  /* Bleu indigo pastel clair (6.8:1 de contraste avec texte sur bg-card #131b2e) */
-  --primary-hover: #a5b4fc;
-  --button-primary-bg: #4f46e5;
-  /* Fond de bouton plein avec texte blanc (6.29:1 avec du blanc) */
-  --button-primary-hover: #4338ca;
+  --primary-brand: #8fa8dd;
+  /* Encre pastel (recalibrée 09/08/2026, était #818cf8 indigo générique) - 7.2:1 sur bg-card #131b2e */
+  --primary-hover: #a9bde6;
+  --button-primary-bg: #3d5b96;
+  /* Fond de bouton plein avec texte blanc - 6.7:1 avec du blanc */
+  --button-primary-hover: #4a6cae;
+  --accent-warm: #e8a4b8;
+  /* Bordeaux pastel - accent chaud pour actions secondaires - 8.3:1 sur bg-card */
+  --accent-warm-hover: #f0bdcc;
   --indigo-accent: #818cf8;
   --blue-accent: #3b82f6;
   --emerald-accent: #34d399;
@@ -22,14 +25,17 @@
   --text-light: #94a3b8;
 
   --border-light: #33456b;
-  /* était #25334d = 1.36:1 sur bg-card, sous le seuil 3:1 (WCAG 1.4.11) */
+  /* était #25334d = 1.36:1 sur bg-card, sous le seuil 3:1 (WCAG 1.4.11) - décoratif uniquement, voir --border-interactive */
   --border-strong: #57709c;
   /* était #3b4d6e = 2.29:1, désormais 3.4–3.9:1 sur bg-page/bg-card */
+  --border-interactive: #57709c;
+  /* Alias de --border-strong - à utiliser sur tout élément interactif ou toute limite de composant devant être identifiable (WCAG 1.4.11) */
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.35);
+  --shadow-glow: 0 0 24px rgba(143, 168, 221, 0.35);
+  /* Recalculé sur le nouveau --primary-brand (était rgba(99, 102, 241, ...)) */
 
   /* Soft Badge & Card Highlight Tokens (Dark Mode RGAA AA High Contrast) */
   --badge-female-bg: #831843;
@@ -80,13 +86,16 @@
   --card-legend-border: #25334d;
 }
 
-/* Surcharges globales pour garantir un contraste 100% parfait en mode sombre */
+/* Surcharges globales pour garantir un contraste 100% parfait en mode sombre.
+   09/08/2026 : ces règles utilisaient --border-light (1.36-1.80:1, sous le
+   seuil WCAG 1.4.11) alors que leur but affiché est justement le contraste -
+   corrigé en --border-interactive (3.4-3.9:1). */
 [data-theme="dark"] input,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
   background-color: var(--bg-subtle) !important;
   color: var(--text-main) !important;
-  border-color: var(--border-light) !important;
+  border-color: var(--border-interactive) !important;
 }
 
 [data-theme="dark"] option {
@@ -102,7 +111,7 @@
 [data-theme="dark"] .modal-card {
   background-color: var(--bg-card) !important;
   color: var(--text-main) !important;
-  border-color: var(--border-light) !important;
+  border-color: var(--border-interactive) !important;
 }
 
 [data-theme="dark"] table th {
@@ -111,7 +120,7 @@
 }
 
 [data-theme="dark"] table td {
-  border-color: var(--border-light) !important;
+  border-color: var(--border-interactive) !important;
   color: var(--text-main) !important;
 }
 
