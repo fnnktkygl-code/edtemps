@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FileText, X, Users, User, Lock, Printer, BarChart3 } from "lucide-react";
 import type { Dataset, Scenario, Student } from "../types";
 
 export function OfficialPdfModal({
@@ -59,7 +60,7 @@ export function OfficialPdfModal({
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
             <div>
               <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                📄 Procès-Verbal de Répartition (Format PDF Imprimable)
+                <FileText size={18} aria-hidden="true" /> Procès-Verbal de Répartition (Format PDF Imprimable)
               </h3>
               <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-muted)" }}>
                 Prévisualisez et ajustez les options de document avant l'impression ou l'exportation PDF.
@@ -71,7 +72,7 @@ export function OfficialPdfModal({
               onClick={onClose}
               style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 800, background: "var(--bg-subtle)", color: "var(--text-main)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", cursor: "pointer" }}
             >
-              ✕ Fermer
+              <X size={14} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Fermer
             </button>
           </div>
 
@@ -96,7 +97,7 @@ export function OfficialPdfModal({
                     color: identityMode === "INITIALS" ? "#ffffff" : "var(--text-main)",
                   }}
                 >
-                  👥 Initiales / App (`C.L.`)
+                  <Users size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Initiales / App (`C.L.`)
                 </button>
                 <button
                   type="button"
@@ -112,7 +113,7 @@ export function OfficialPdfModal({
                     color: identityMode === "FULL_NAME" ? "#ffffff" : "var(--text-main)",
                   }}
                 >
-                  👤 Noms Complêts
+                  <User size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Noms Complêts
                 </button>
                 <button
                   type="button"
@@ -128,7 +129,7 @@ export function OfficialPdfModal({
                     color: identityMode === "INE_HASH" ? "#ffffff" : "var(--text-main)",
                   }}
                 >
-                  🔒 INE SHA-256
+                  <Lock size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />INE SHA-256
                 </button>
               </div>
             </div>
@@ -175,7 +176,7 @@ export function OfficialPdfModal({
                   boxShadow: "var(--shadow-sm)",
                 }}
               >
-                🖨️ Imprimer / Sauvegarder en PDF (Ctrl+P)
+                <Printer size={16} aria-hidden="true" /> Imprimer / Sauvegarder en PDF (Ctrl+P)
               </button>
             </div>
           </div>
@@ -189,7 +190,7 @@ export function OfficialPdfModal({
             {/* ENTÊTE DU PV */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", marginBottom: "20px" }}>
               <div style={{ flex: 1 }}>
-                <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: 900, color: "#1e3a8a", fontFamily: "var(--font-serif)" }}>
+                <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: 900, color: "#1a2f5c", fontFamily: "var(--font-serif)" }}>
                   {schoolName}
                 </h2>
                 <p style={{ margin: "4px 0 0", fontSize: "0.85rem", fontStyle: "italic", color: "#475569" }}>
@@ -211,7 +212,7 @@ export function OfficialPdfModal({
 
             {/* TITRE PRINCIPAL DU PV */}
             <div style={{ textAlign: "center", marginBottom: "32px" }}>
-              <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 900, color: "#1e3a8a", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+              <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 900, color: "#1a2f5c", letterSpacing: "0.02em", textTransform: "uppercase" }}>
                 PROCÈS-VERBAL DE RÉPARTITION DES ÉLÈVES
               </h1>
               <p style={{ margin: "6px 0 0", fontSize: "0.9rem", fontStyle: "italic", color: "#475569" }}>
@@ -221,12 +222,12 @@ export function OfficialPdfModal({
 
             {/* TABLEAU DE SYNTHÈSE DE LA COHORTE */}
             <div>
-              <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 900, color: "#1e3a8a", textTransform: "uppercase" }}>
-                📊 Synthèse Globale du Niveau {dataset.level} ({dataset.classrooms.length} Classes · {totalStudents} Élèves)
+              <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 900, color: "#1a2f5c", textTransform: "uppercase" }}>
+                <BarChart3 size={16} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-3px" }} />Synthèse Globale du Niveau {dataset.level} ({dataset.classrooms.length} Classes · {totalStudents} Élèves)
               </h3>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
                 <thead>
-                  <tr style={{ background: "#1e3a8a", color: "#ffffff" }}>
+                  <tr style={{ background: "#1a2f5c", color: "#ffffff" }}>
                     <th style={{ textAlign: "left", padding: "10px 12px", fontWeight: 800 }}>Structure de Classe</th>
                     <th style={{ textAlign: "center", padding: "10px 12px", fontWeight: 800 }}>Effectif</th>
                     <th style={{ textAlign: "center", padding: "10px 12px", fontWeight: 800 }}>Parité (F / M)</th>
@@ -250,10 +251,10 @@ export function OfficialPdfModal({
 
                     return (
                       <tr key={c.id} style={{ borderBottom: "1px solid #cbd5e1", background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }}>
-                        <td style={{ padding: "10px 12px", fontWeight: 800, color: "#1e3a8a" }}>{classLabelDisplay}</td>
+                        <td style={{ padding: "10px 12px", fontWeight: 800, color: "#1a2f5c" }}>{classLabelDisplay}</td>
                         <td style={{ textAlign: "center", padding: "10px 12px", fontWeight: 700 }}>{students.length} / {c.maxSize}</td>
                         <td style={{ textAlign: "center", padding: "10px 12px", fontWeight: 600 }}>{girls} F / {boys} M ({students.length > 0 ? Math.round((girls / students.length) * 100) : 0}% F)</td>
-                        <td style={{ textAlign: "center", padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 800, color: "#1e3a8a" }}>{avg.toFixed(1)} / 20</td>
+                        <td style={{ textAlign: "center", padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 800, color: "#1a2f5c" }}>{avg.toFixed(1)} / 20</td>
                         <td style={{ textAlign: "center", padding: "10px 12px", fontWeight: 700, color: papCount > 0 ? "#9a3412" : "#64748b" }}>{papCount} él.</td>
                         <td style={{ padding: "10px 12px", fontSize: "0.8rem", color: "#475569" }}>{optList || "Formations Générales"}</td>
                       </tr>
@@ -263,7 +264,7 @@ export function OfficialPdfModal({
                     <td style={{ padding: "12px", color: "#0f172a" }}>TOTAL COHORTE {dataset.level}</td>
                     <td style={{ textAlign: "center", padding: "12px", color: "#0f172a" }}>{totalStudents} Élèves</td>
                     <td style={{ textAlign: "center", padding: "12px" }}>{totalGirls} F / {totalBoys} M ({totalStudents > 0 ? Math.round((totalGirls / totalStudents) * 100) : 0}% F)</td>
-                    <td style={{ textAlign: "center", padding: "12px", fontFamily: "var(--font-mono)", color: "#1e3a8a" }}>{globalAvg.toFixed(1)} / 20</td>
+                    <td style={{ textAlign: "center", padding: "12px", fontFamily: "var(--font-mono)", color: "#1a2f5c" }}>{globalAvg.toFixed(1)} / 20</td>
                     <td style={{ textAlign: "center", padding: "12px", color: "#9a3412" }}>{totalPap} Total PAP/PPS</td>
                     <td style={{ padding: "12px", fontSize: "0.8rem", color: "#475569" }}>Cohorte Complète 6ème</td>
                   </tr>
@@ -292,19 +293,19 @@ export function OfficialPdfModal({
                   <span>Scénario {scenario.id} · Date : {currentDateStr}</span>
                 </div>
 
-                <div style={{ border: "2px solid #1e3a8a", borderRadius: "8px", padding: "16px 20px", background: "#ffffff" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "2px solid #1e3a8a", paddingBottom: "8px" }}>
-                    <strong style={{ fontSize: "1.25rem", fontWeight: 900, color: "#1e3a8a", letterSpacing: "0.02em" }}>
+                <div style={{ border: "2px solid #1a2f5c", borderRadius: "8px", padding: "16px 20px", background: "#ffffff" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "2px solid #1a2f5c", paddingBottom: "8px" }}>
+                    <strong style={{ fontSize: "1.25rem", fontWeight: 900, color: "#1a2f5c", letterSpacing: "0.02em" }}>
                       {classLabelDisplay}
                     </strong>
-                    <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1e3a8a" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#1a2f5c" }}>
                       Effectif : {students.length} / {c.maxSize} élèves affectés
                     </span>
                   </div>
 
                   <div style={{ fontSize: "0.82rem", color: "#334155", marginBottom: "14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", background: "#f8fafc", padding: "8px 14px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
                     <span>Parité : <strong style={{ color: "#0f172a" }}>{girls} F / {boys} M</strong> ({students.length > 0 ? Math.round((girls / students.length) * 100) : 0}% F)</span>
-                    <span>Moyenne générale de classe : <strong style={{ color: "#1e3a8a", fontFamily: "var(--font-mono)" }}>{avg.toFixed(1)} / 20</strong></span>
+                    <span>Moyenne générale de classe : <strong style={{ color: "#1a2f5c", fontFamily: "var(--font-mono)" }}>{avg.toFixed(1)} / 20</strong></span>
                     <span>Accompagnements (PAP / PPS / PAI) : <strong style={{ color: "#9a3412" }}>{papCount} él.</strong></span>
                   </div>
 
@@ -329,7 +330,7 @@ export function OfficialPdfModal({
                           <td style={{ textAlign: "center", padding: "5px 8px", fontWeight: 700, color: st.gender === "F" ? "#831843" : "#075985" }}>
                             {st.gender}
                           </td>
-                          <td style={{ textAlign: "center", padding: "5px 8px", fontFamily: "var(--font-mono)", fontWeight: 800, color: "#1e3a8a", fontSize: "0.85rem" }}>
+                          <td style={{ textAlign: "center", padding: "5px 8px", fontFamily: "var(--font-mono)", fontWeight: 800, color: "#1a2f5c", fontSize: "0.85rem" }}>
                             {st.levelAverage.toFixed(1)}
                           </td>
                           <td style={{ padding: "5px 8px", fontSize: "0.78rem", color: "#334155", fontWeight: 600 }}>
@@ -349,7 +350,7 @@ export function OfficialPdfModal({
 
           {/* ==================== BLOC DE SIGNATURES OFFICIELLES (À LA TOUTE FIN DU PV) ==================== */}
           <div className="pdf-signatures-block" style={{ marginTop: "40px", borderTop: "2px solid #0f172a", paddingTop: "24px", pageBreakInside: "avoid", breakInside: "avoid" }}>
-            <h4 style={{ margin: "0 0 16px", fontSize: "0.95rem", fontWeight: 800, textTransform: "uppercase", color: "#1e3a8a" }}>
+            <h4 style={{ margin: "0 0 16px", fontSize: "0.95rem", fontWeight: 800, textTransform: "uppercase", color: "#1a2f5c" }}>
               Signatures d'Arbitrage et d'Habilitation d'Établissement :
             </h4>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", textAlign: "center", minHeight: "110px" }}>
