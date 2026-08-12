@@ -1,3 +1,4 @@
+import { Users, Scale, HeartHandshake, GraduationCap, Search, Dices, Timer, FolderOpen } from "lucide-react";
 import type { Dataset, Scenario, Student } from "../../types";
 import { nameOf } from "../../utils/format";
 
@@ -44,33 +45,36 @@ export function RosterTab({
                 </div>
 
                 <div className="roster-metrics-pills" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
-                    👥 {dataset.students.length} Élèves
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <Users size={13} aria-hidden="true" /> {dataset.students.length} Élèves
                   </span>
-                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
-                    ⚖️ {dataset.students.filter(s => s.gender === 'F').length} F / {dataset.students.filter(s => s.gender === 'M').length} M
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <Scale size={13} aria-hidden="true" /> {dataset.students.filter(s => s.gender === 'F').length} F / {dataset.students.filter(s => s.gender === 'M').length} M
                   </span>
-                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
-                    🤝 {dataset.students.filter(s => s.supportFlags.length > 0).length} PAP/PPS
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <HeartHandshake size={13} aria-hidden="true" /> {dataset.students.filter(s => s.supportFlags.length > 0).length} PAP/PPS
                   </span>
-                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700 }}>
-                    🎓 {dataset.students.filter(s => s.options.length > 0).length} Options
+                  <span className="chip" style={{ background: "var(--bg-subtle)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <GraduationCap size={13} aria-hidden="true" /> {dataset.students.filter(s => s.options.length > 0).length} Options
                   </span>
                 </div>
               </div>
 
               {/* Roster Controls */}
               <div className="roster-controls" style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
-                <input
-                  type="text"
-                  placeholder="🔍 Rechercher un élève par nom, identifiant ou option..."
-                  value={rosterSearch}
-                  onChange={(e) => {
-                    setRosterSearch(e.target.value);
-                    setRosterPage(1);
-                  }}
-                  style={{ flex: "1 1 240px", padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem", minWidth: "200px" }}
-                />
+                <div style={{ position: "relative", flex: "1 1 240px", minWidth: "200px" }}>
+                  <Search size={15} aria-hidden="true" style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-light)", pointerEvents: "none" }} />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un élève par nom, identifiant ou option..."
+                    value={rosterSearch}
+                    onChange={(e) => {
+                      setRosterSearch(e.target.value);
+                      setRosterPage(1);
+                    }}
+                    style={{ width: "100%", padding: "8px 14px 8px 36px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", fontSize: "0.88rem", boxSizing: "border-box" }}
+                  />
+                </div>
                 <div className="roster-filter-btns" style={{ display: "flex", gap: "8px", flexWrap: "wrap", flexShrink: 0 }}>
                   <button
                     className={`secondary ${rosterFilter === "ALL" ? "active-filter" : ""}`}
@@ -87,16 +91,17 @@ export function RosterTab({
                   <button
                     className={`secondary ${rosterFilter === "OPTIONS" ? "active-filter" : ""}`}
                     onClick={() => { setRosterFilter("OPTIONS"); setRosterPage(1); }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}
                   >
-                    🎓 Options Spécifiques ({dataset.students.filter(s => s.options.some(opt => !["LVA_ANG", "LVB_ESP"].includes(opt))).length})
+                    <GraduationCap size={14} aria-hidden="true" /> Options Spécifiques ({dataset.students.filter(s => s.options.some(opt => !["LVA_ANG", "LVB_ESP"].includes(opt))).length})
                   </button>
                   <button
                     className="secondary"
                     onClick={() => void handleRegenerateCohort()}
-                    style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", fontWeight: 800 }}
+                    style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "5px" }}
                     title="Générer une nouvelle cohorte aléatoire de 70 élèves complètement remplis (LV1, LV2, options, 9 notes)"
                   >
-                    🎲 Régénérer 70 Élèves
+                    <Dices size={14} aria-hidden="true" /> Régénérer 70 Élèves
                   </button>
                 </div>
               </div>
@@ -200,16 +205,16 @@ export function RosterTab({
                                     <span className="ui-tooltip" data-tooltip={`Autonomie comportementale : ${student.behavior?.conductScore ?? 4}/5 étoiles`} style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--amber-accent)", cursor: "help" }}>
                                       {"★".repeat(student.behavior?.conductScore ?? 4)}{"☆".repeat(5 - (student.behavior?.conductScore ?? 4))}
                                     </span>
-                                    <span className="ui-tooltip" data-tooltip={`Cumul d'absences signalées : ${student.behavior?.absencesHours ?? 0}h`} style={{ fontSize: "0.76rem", fontWeight: 700, color: (student.behavior?.absencesHours ?? 0) > 5 ? "var(--rose-accent)" : "var(--text-muted)", cursor: "help" }}>
-                                      ⏱️ {student.behavior?.absencesHours ?? 0}h abs.
+                                    <span className="ui-tooltip" data-tooltip={`Cumul d'absences signalées : ${student.behavior?.absencesHours ?? 0}h`} style={{ fontSize: "0.76rem", fontWeight: 700, color: (student.behavior?.absencesHours ?? 0) > 5 ? "var(--rose-accent)" : "var(--text-muted)", cursor: "help", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                      <Timer size={11} aria-hidden="true" /> {student.behavior?.absencesHours ?? 0}h abs.
                                     </span>
                                   </div>
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
                                   {student.supportFlags.length > 0 ? (
                                     student.supportFlags.map((need) => (
-                                      <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
-                                        🤝 {need}
+                                      <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                        <HeartHandshake size={11} aria-hidden="true" /> {need}
                                       </span>
                                     ))
                                   ) : (
@@ -219,8 +224,8 @@ export function RosterTab({
                                 <td style={{ padding: "10px 14px" }}>
                                   {student.options.length > 0 ? (
                                     student.options.map((opt) => (
-                                      <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px" }}>
-                                        🎓 {opt}
+                                      <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.78rem", fontWeight: 800, marginRight: "4px", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                        <GraduationCap size={11} aria-hidden="true" /> {opt}
                                       </span>
                                     ))
                                   ) : (
@@ -234,7 +239,7 @@ export function RosterTab({
                                     onChange={(e) => {
                                       void move(student.id, e.target.value);
                                     }}
-                                    style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700 }}
+                                    style={{ padding: "4px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-interactive)", background: "var(--bg-subtle)", fontWeight: 700 }}
                                   >
                                     {dataset.classrooms.map((c) => (
                                       <option key={c.id} value={c.id}>
@@ -247,9 +252,9 @@ export function RosterTab({
                                   <button
                                     className="secondary"
                                     onClick={() => setInspectStudent(student)}
-                                    style={{ padding: "3px 8px", fontSize: "0.78rem", fontWeight: 700 }}
+                                    style={{ padding: "3px 8px", fontSize: "0.78rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}
                                   >
-                                    📋 Dossier
+                                    <FolderOpen size={13} aria-hidden="true" /> Dossier
                                   </button>
                                 </td>
                               </tr>
@@ -284,13 +289,13 @@ export function RosterTab({
                             {(student.supportFlags.length > 0 || student.options.length > 0) && (
                               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                 {student.supportFlags.map((need) => (
-                                  <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
-                                    🤝 {need}
+                                  <span key={need} className="chip" style={{ background: "var(--badge-need-bg)", color: "var(--badge-need-text)", border: "1px solid var(--badge-need-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                    <HeartHandshake size={10} aria-hidden="true" /> {need}
                                   </span>
                                 ))}
                                 {student.options.map((opt) => (
-                                  <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800 }}>
-                                    🎓 {opt}
+                                  <span key={opt} className="chip" style={{ background: "var(--badge-option-bg)", color: "var(--badge-option-text)", border: "1px solid var(--badge-option-border)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                    <GraduationCap size={10} aria-hidden="true" /> {opt}
                                   </span>
                                 ))}
                               </div>
@@ -303,7 +308,7 @@ export function RosterTab({
                                 onChange={(e) => {
                                   void move(student.id, e.target.value);
                                 }}
-                                style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.82rem" }}
+                                style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-interactive)", background: "var(--bg-subtle)", fontWeight: 700, fontSize: "0.82rem" }}
                               >
                                 {dataset.classrooms.map((c) => (
                                   <option key={c.id} value={c.id}>
@@ -314,9 +319,9 @@ export function RosterTab({
                               <button
                                 className="secondary"
                                 onClick={() => setInspectStudent(student)}
-                                style={{ padding: "6px 10px", fontSize: "0.82rem", fontWeight: 700 }}
+                                style={{ padding: "6px 10px", fontSize: "0.82rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}
                               >
-                                📋 Dossier
+                                <FolderOpen size={13} aria-hidden="true" /> Dossier
                               </button>
                             </div>
                           </div>
