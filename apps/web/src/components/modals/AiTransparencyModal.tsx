@@ -1,3 +1,5 @@
+import { X, Bot, Zap, FileText, AlertOctagon, ShieldCheck, Scale, Lock } from "lucide-react";
+
 export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
   return (
         <div
@@ -55,22 +57,22 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 className="icon-btn-subtle"
                 onClick={() => onClose()}
-                style={{ padding: "6px 12px", fontSize: "1rem", borderRadius: "50%", cursor: "pointer" }}
+                style={{ padding: "6px 12px", fontSize: "1rem", borderRadius: "50%", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
                 title="Fermer la notice"
               >
-                ✕
+                <X size={15} aria-hidden="true" />
               </button>
             </div>
 
             {/* Section 1 : Explications pour le grand public */}
             <div>
               <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <span>🤖</span> 1. Comment et où l'IA est-elle utilisée dans EdTemps ?
+                <Bot size={16} aria-hidden="true" /> 1. Comment et où l'IA est-elle utilisée dans EdTemps ?
               </h4>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" }}>
                 <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                   <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
-                    ⚡ Équilibrage des classes (Solveur Déterministe)
+                    <Zap size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Équilibrage des classes (Solveur Déterministe)
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Un algorithme sous contraintes déterministe (recherche gloutonne + recuit simulé) évalue des milliers de combinaisons pour calculer 3 scénarios d'équilibrage parité/niveaux/options/AESH. Calcul 100% reproductible sans modèle génératif.
@@ -86,7 +88,7 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
                 </div>
                 <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                   <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
-                    📄 OCR & Procès-Verbaux (Mistral Pixtral)
+                    <FileText size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />OCR & Procès-Verbaux (Mistral Pixtral)
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     Mistral AI analyse les bilans de conseils de classe et extraits SIECLE scannés pour extraire automatiquement les aménagements (PAP/PPS) et avis pédagogiques.
@@ -94,7 +96,7 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
                 </div>
                 <div style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                   <strong style={{ fontSize: "0.85rem", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>
-                    🚨 Remplacements d'enseignants
+                    <AlertOctagon size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Remplacements d'enseignants
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
                     L'IA croise les compétences disciplinaires et les créneaux libres pour recommander immédiatement des enseignants remplaçants disponibles.
@@ -110,7 +112,7 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
               </h4>
               <div style={{ background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "14px 16px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ fontSize: "1.2rem" }}>🛡️</span>
+                  <ShieldCheck size={20} aria-hidden="true" style={{ color: "var(--card-success-text)" }} />
                   <div>
                     <strong style={{ fontSize: "0.88rem", color: "var(--card-success-text)", display: "block" }}>
                       Garantie de Souveraineté & Protection Anti US Cloud Act
@@ -131,7 +133,7 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
             {/* Section 3 : Garanties Éthiques & RGPD */}
             <div>
               <h4 style={{ margin: "0 0 10px", fontSize: "0.98rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <span>⚖️</span> 3. Conduite Éthique, RGPD & EU AI Act (Règlement Européen IA)
+                <Scale size={16} aria-hidden="true" /> 3. Conduite Éthique, RGPD & EU AI Act (Règlement Européen IA)
               </h4>
               <div style={{ background: "var(--card-purple-bg)", border: "1px solid var(--card-purple-border)", padding: "14px 16px", borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "var(--card-purple-text)", lineHeight: 1.5 }}>
                 <div style={{ marginBottom: "6px" }}>
@@ -149,7 +151,7 @@ export function AiTransparencyModal({ onClose }: { onClose: () => void }) {
             {/* Footer */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-light)", paddingTop: "14px", marginTop: "4px" }}>
               <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                🔒 Traitement certifié RGPD & SecNumCloud — République Française
+                <Lock size={12} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-1px" }} />Traitement certifié RGPD & SecNumCloud — République Française
               </span>
               <button
                 type="button"

@@ -1,3 +1,4 @@
+import { TriangleAlert, Lightbulb, Wrench } from "lucide-react";
 import type { DispatchWeights } from "@edtemps/domain";
 import type { FeasibilityError } from "@edtemps/domain";
 import { createSyntheticDemoInputCustom, setActiveDataset } from "../../api";
@@ -68,8 +69,8 @@ export function ImpossibilityErrorModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
-          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--card-warning-bg)", color: "var(--rose-accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", fontWeight: 800, flexShrink: 0 }}>
-            🚨
+          <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--card-warning-bg)", color: "var(--rose-accent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <TriangleAlert size={24} aria-hidden="true" />
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "var(--card-warning-text)" }}>
@@ -93,7 +94,7 @@ export function ImpossibilityErrorModal({
               {err.suggestedFix && (
                 <div style={{ background: "var(--bg-card)", padding: "12px", borderRadius: "6px", border: "1px solid var(--card-warning-border)" }}>
                   <strong style={{ fontSize: "0.78rem", color: "var(--card-warning-text)", display: "block", marginBottom: "6px" }}>
-                    💡 Action corrective recommandée par l'IA :
+                    <Lightbulb size={12} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-1px" }} />Action corrective recommandée par l'IA :
                   </strong>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                     <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", flex: 1, minWidth: "200px" }}>
@@ -125,7 +126,7 @@ export function ImpossibilityErrorModal({
                       }}
                       style={{ padding: "8px 16px", fontSize: "0.82rem", fontWeight: 800, background: "var(--rose-accent)", borderColor: "var(--rose-accent)" }}
                     >
-                      🛠️ Appliquer la correction IA
+                      <Wrench size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Appliquer la correction IA
                     </button>
                   </div>
                 </div>
