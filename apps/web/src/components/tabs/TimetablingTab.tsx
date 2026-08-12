@@ -1,3 +1,4 @@
+import { Zap, CheckCircle2, AlertOctagon, AlertTriangle, User, MapPin } from "lucide-react";
 import type { SubstitutionSuggestion, TimetablingDataset, TimetablingSchedule } from "../../types";
 import { days, periods } from "../../constants/schedule";
 import { subjectColorClass } from "../../utils/format";
@@ -69,7 +70,7 @@ export function TimetablingTab({
               </div>
 
               <button className="primary" onClick={generateTimetable} disabled={busy} style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
-                {busy ? "Calcul en cours…" : "⚡ Calculer l'EDT"}
+                {busy ? "Calcul en cours…" : <><Zap size={15} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Calculer l'EDT</>}
               </button>
 
               <button
@@ -78,7 +79,8 @@ export function TimetablingTab({
                 disabled={!selectedSchedule || selectedSchedule.state === "APPROVED"}
                 style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: 800, borderRadius: "var(--radius-sm)", whiteSpace: "nowrap", flexShrink: 0, height: "40px", display: "inline-flex", alignItems: "center", gap: "8px" }}
               >
-                {selectedSchedule?.state === "APPROVED" ? "✓ EDT Scellé" : "✓ Valider & Sceller l'EDT"}
+                <CheckCircle2 size={15} aria-hidden="true" />
+                {selectedSchedule?.state === "APPROVED" ? "EDT Scellé" : "Valider & Sceller l'EDT"}
               </button>
             </div>
           </div>
@@ -88,7 +90,7 @@ export function TimetablingTab({
             <div style={{ marginBottom: "16px" }}>
               <span className="eyebrow">URGENCES & CONTINUITÉ PÉDAGOGIQUE</span>
               <h3 style={{ margin: "2px 0 0", fontSize: "1.2rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                🚨 Gestion des Absences & Remplacements d'Enseignants
+                <AlertOctagon size={17} aria-hidden="true" /> Gestion des Absences & Remplacements d'Enseignants
               </h3>
             </div>
             <div className="substitutions-form">
@@ -119,7 +121,7 @@ export function TimetablingTab({
                 <input value={absenceReason} onChange={(e) => setAbsenceReason(e.target.value)} placeholder="Stage, maladie..." />
               </label>
               <button className="primary" onClick={fetchSubstitutions} disabled={busy || !absenceTeacherId || !absenceTimeSlotId}>
-                ⚡ Trouver un remplaçant
+                <Zap size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Trouver un remplaçant
               </button>
             </div>
 
@@ -155,7 +157,7 @@ export function TimetablingTab({
                   <h3>Diagnostic d'infaisabilité et conflits ({selectedSchedule.conflicts.length})</h3>
                   <ul className="conflict-list">
                     {selectedSchedule.conflicts.map((conflict, idx) => (
-                      <li key={idx}>⚠️ {conflict.message}</li>
+                      <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "5px" }}><AlertTriangle size={13} aria-hidden="true" style={{ marginTop: "2px", flexShrink: 0 }} /> {conflict.message}</li>
                     ))}
                   </ul>
                 </div>
@@ -201,8 +203,8 @@ export function TimetablingTab({
                                     <span className="course-class-tag">{course.classroomId}</span>
                                   </div>
                                   <div className="course-details-row">
-                                    <span>👤 {teacher?.displayName}</span>
-                                    <span>📍 {room?.label}</span>
+                                    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><User size={11} aria-hidden="true" /> {teacher?.displayName}</span>
+                                    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}><MapPin size={11} aria-hidden="true" /> {room?.label}</span>
                                   </div>
                                 </div>
                               );

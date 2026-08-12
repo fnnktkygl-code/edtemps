@@ -1,3 +1,4 @@
+import { ShieldCheck, RefreshCw, ScrollText, FileText } from "lucide-react";
 import type { AuditEvent } from "../../types";
 import { api } from "../../api";
 
@@ -12,8 +13,8 @@ export function ComplianceTab({
         <section aria-labelledby="compliance-title">
           <div className="section-heading" style={{ marginBottom: "20px" }}>
             <div>
-              <span className="eyebrow" style={{ color: "var(--indigo-accent)", fontWeight: 800 }}>
-                🛡️ CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE
+              <span className="eyebrow" style={{ color: "var(--indigo-accent)", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                <ShieldCheck size={13} aria-hidden="true" /> CADRE RÉGLEMENTAIRE & HOMOLOGATION ÉDUCATION NATIONALE
               </span>
               <h2 id="compliance-title" style={{ margin: "4px 0 0", fontSize: "1.5rem", fontWeight: 800, color: "var(--text-main)" }}>
                 Registre DPO, Homologation RGS (EBIOS RM) & Accessibilité RGAA
@@ -25,7 +26,7 @@ export function ComplianceTab({
               onClick={() => void refreshAudit()}
               style={{ padding: "8px 16px", fontWeight: 700 }}
             >
-              🔄 Actualiser le registre d'audit
+              <RefreshCw size={14} aria-hidden="true" style={{ marginRight: "5px" }} />Actualiser le registre d'audit
             </button>
           </div>
 
@@ -34,7 +35,7 @@ export function ComplianceTab({
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
                 <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span>📜</span> Dossier RGPD & Traitement des Mineurs
+                  <ScrollText size={16} aria-hidden="true" /> Dossier RGPD & Traitement des Mineurs
                 </h3>
                 <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "2px 8px", borderRadius: "10px" }}>
                   Certifié RGPD
@@ -111,7 +112,7 @@ export function ComplianceTab({
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "20px 22px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
                 <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span>🛡️</span> Homologation RGS & Accessibilité RGAA
+                  <ShieldCheck size={16} aria-hidden="true" /> Homologation RGS & Accessibilité RGAA
                 </h3>
                 <span style={{ fontSize: "0.72rem", fontWeight: 800, background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "2px 8px", borderRadius: "10px" }}>
                   ANSSI & DINUM
@@ -187,14 +188,14 @@ export function ComplianceTab({
                   download="registre-cnil-demo-college.json"
                   style={{ flex: 1, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 800, borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", textAlign: "center", textDecoration: "none" }}
                 >
-                  📜 Exporter Registre CNIL (JSON)
+                  <ScrollText size={13} aria-hidden="true" style={{ marginRight: "5px" }} />Exporter Registre CNIL (JSON)
                 </a>
                 <a
                   href={api.dpiaDocumentUrl()}
                   download="aipd-dpia-demo-college.md"
                   style={{ flex: 1, padding: "8px 14px", fontSize: "0.8rem", fontWeight: 800, borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", color: "var(--text-main)", textAlign: "center", textDecoration: "none" }}
                 >
-                  📄 Exporter Modèle AIPD (Markdown)
+                  <FileText size={13} aria-hidden="true" style={{ marginRight: "5px" }} />Exporter Modèle AIPD (Markdown)
                 </a>
               </div>
             </div>

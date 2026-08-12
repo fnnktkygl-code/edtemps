@@ -1,3 +1,4 @@
+import { GraduationCap, CalendarDays, CheckCircle2, Pencil, Save, AlertOctagon, Zap } from "lucide-react";
 import type { Dataset, TimetablingDataset, TimetablingSchedule } from "../../types";
 import { days, periods } from "../../constants/schedule";
 
@@ -31,7 +32,7 @@ export function TeacherTab({
           <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-card)", padding: "20px 24px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)", marginBottom: "24px" }}>
             <div>
               <span className="eyebrow">SERVICE NUMÉRIQUE ENSEIGNANT</span>
-              <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800 }}>👩‍🏫 Espace Personnel Enseignant</h2>
+              <h2 id="teacher-space-title" style={{ margin: 0, fontSize: "1.3rem", fontWeight: 800, display: "flex", alignItems: "center", gap: "8px" }}><GraduationCap size={19} aria-hidden="true" /> Espace Personnel Enseignant</h2>
               <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
                 Consultez votre emploi du temps en temps réel, saisissez vos vœux d'aménagement horaire et organisez vos remplacements d'urgence.
               </p>
@@ -61,8 +62,8 @@ export function TeacherTab({
           {/* Grille d'Emploi du Temps Personnel Enseignant */}
           <div className="compliance-card" style={{ marginBottom: "28px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem" }}>📅 Mon Emploi du Temps de la Semaine</h3>
-              <span className="chip approved">✓ Planning Synchronisé</span>
+              <h3 style={{ margin: 0, fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "7px" }}><CalendarDays size={17} aria-hidden="true" /> Mon Emploi du Temps de la Semaine</h3>
+              <span className="chip approved" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><CheckCircle2 size={12} aria-hidden="true" /> Planning Synchronisé</span>
             </div>
 
             <div className="timetabling-grid">
@@ -115,7 +116,7 @@ export function TeacherTab({
           {/* Vœux Horaires & Remplacements */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
             <div className="compliance-card">
-              <h3>✏️ Mes Vœux & Décharges Horaires</h3>
+              <h3 style={{ display: "flex", alignItems: "center", gap: "7px" }}><Pencil size={16} aria-hidden="true" /> Mes Vœux & Décharges Horaires</h3>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "14px" }}>
                 Signalez vos contraintes personnelles de décharge académique ou de réunion pédagogique pour le prochain semestre.
               </p>
@@ -131,12 +132,12 @@ export function TeacherTab({
                 </label>
               </div>
               <button className="primary" style={{ marginTop: "16px" }} onClick={() => setNotice("Vos vœux horaires ont été enregistrés et transmis au proviseur adjoint.")}>
-                💾 Enregistrer mes vœux
+                <Save size={14} aria-hidden="true" style={{ marginRight: "5px" }} />Enregistrer mes vœux
               </button>
             </div>
 
             <div className="compliance-card">
-              <h3>🚨 Déclarer une Absence & Trouver un Remplaçant</h3>
+              <h3 style={{ display: "flex", alignItems: "center", gap: "7px" }}><AlertOctagon size={16} aria-hidden="true" /> Déclarer une Absence & Trouver un Remplaçant</h3>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "14px" }}>
                 Déclenchez immédiatement la recherche automatisée d'un enseignant disponible de la même discipline.
               </p>
@@ -164,7 +165,7 @@ export function TeacherTab({
                     void fetchSubstitutions();
                   }}
                 >
-                  ⚡ Obtenir les propositions de remplacement
+                  <Zap size={14} aria-hidden="true" style={{ marginRight: "5px" }} />Obtenir les propositions de remplacement
                 </button>
               </div>
             </div>
