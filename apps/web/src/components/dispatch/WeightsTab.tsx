@@ -1,3 +1,4 @@
+import { Sliders, Target, BarChart3, Zap, Info, Lightbulb, Circle, Scale, HeartHandshake, GraduationCap, Globe2, ArrowLeftRight, Pin, Sparkle, CheckCircle2, AlertTriangle, Ban, X, Plus } from "lucide-react";
 import type { DispatchWeights, FeasibilityError } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, setActiveDataset, validateDispatchFeasibility } from "../../api";
 import type { Dataset, Scenario } from "../../types";
@@ -73,7 +74,7 @@ export function WeightsTab({
               <div className="section-heading" style={{ marginBottom: "18px" }}>
                 <div>
                   <span className="eyebrow">MODULE 1 · INTENTIONS PÉDAGOGIQUES</span>
-                  <h3>💡 Réglage des critères d'équilibrage des classes</h3>
+                  <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sliders size={18} aria-hidden="true" /> Réglage des critères d'équilibrage des classes</h3>
                   <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: "0.88rem" }}>
                     Configurez vos cibles d'établissement puis ajustez l'importance relative des critères ci-dessous.
                   </p>
@@ -84,14 +85,15 @@ export function WeightsTab({
               <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "18px 20px", marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
                   <h4 style={{ margin: 0, fontSize: "0.98rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "8px" }}>
-                    🎯 Effectifs & Capacité des Classes (Simulateur Cohorte)
+                    <Target size={16} aria-hidden="true" /> Effectifs & Capacité des Classes (Simulateur Cohorte)
                   </h4>
                   <button
                     className="secondary"
                     onClick={() => setShowBenchmark(!showBenchmark)}
-                    style={{ fontSize: "0.8rem", padding: "4px 10px", fontWeight: 700 }}
+                    style={{ fontSize: "0.8rem", padding: "4px 10px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}
                   >
-                    {showBenchmark ? "Masquer le Comparatif Benchmark" : "📊 Comparatif de Performance (Naïf vs Recuit Simulé)"}
+                    {showBenchmark ? null : <BarChart3 size={13} aria-hidden="true" />}
+                    {showBenchmark ? "Masquer le Comparatif Benchmark" : "Comparatif de Performance (Naïf vs Recuit Simulé)"}
                   </button>
                 </div>
 
@@ -184,11 +186,11 @@ export function WeightsTab({
                   <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-light)" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", marginBottom: "10px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <h5 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)" }}>
-                          📊 Performance Mesurée en Temps Réel sur la Cohorte ({dataset.students.length} Élèves)
+                        <h5 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <BarChart3 size={14} aria-hidden="true" /> Performance Mesurée en Temps Réel sur la Cohorte ({dataset.students.length} Élèves)
                         </h5>
-                        <span style={{ fontSize: "0.7rem", background: "var(--card-info-bg)", color: "var(--card-info-text)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
-                          ⚡ CALCUL DIRECT
+                        <span style={{ fontSize: "0.7rem", background: "var(--card-info-bg)", color: "var(--card-info-text)", border: "1px solid var(--card-info-border)", padding: "2px 8px", borderRadius: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                          <Zap size={11} aria-hidden="true" /> CALCUL DIRECT
                         </span>
                       </div>
                       <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
@@ -220,8 +222,8 @@ export function WeightsTab({
                       </div>
                     </div>
 
-                    <div style={{ marginTop: "10px", fontSize: "0.75rem", color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-                      ℹ️ <strong>Origine des métriques :</strong> Ces indicateurs mesurent l'efficacité de l'algorithme sur le scénario actuellement sélectionné (<strong>{scenarios.findIndex((s) => s.id === selected?.id) === 0 ? "Scénario A — Équilibre Global" : scenarios.findIndex((s) => s.id === selected?.id) === 1 ? "Scénario B — Focus Mixité" : "Scénario C — Focus Accompagnements"}</strong>). Ils sont calculés en temps réel sur vos {dataset.students.length} élèves et comparés à la déviation statistique moyenne d'une répartition naïve à l'aveugle.
+                    <div style={{ marginTop: "10px", fontSize: "0.75rem", color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)", display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                      <Info size={13} aria-hidden="true" style={{ marginTop: "2px", flexShrink: 0 }} /> <span><strong>Origine des métriques :</strong> Ces indicateurs mesurent l'efficacité de l'algorithme sur le scénario actuellement sélectionné (<strong>{scenarios.findIndex((s) => s.id === selected?.id) === 0 ? "Scénario A — Équilibre Global" : scenarios.findIndex((s) => s.id === selected?.id) === 1 ? "Scénario B — Focus Mixité" : "Scénario C — Focus Accompagnements"}</strong>). Ils sont calculés en temps réel sur vos {dataset.students.length} élèves et comparés à la déviation statistique moyenne d'une répartition naïve à l'aveugle.</span>
                     </div>
                   </div>
                 )}
@@ -230,7 +232,7 @@ export function WeightsTab({
               {/* GUIDE PÉDAGOGIQUE EXPLICATIF DE 0 À 10 POUR NON-AGUERRIS */}
               <div style={{ background: "var(--card-legend-bg)", border: "1px solid var(--card-legend-border)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginBottom: "20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "1.1rem" }}>💡</span>
+                  <Lightbulb size={17} aria-hidden="true" style={{ color: "var(--amber-accent)" }} />
                   <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 800, color: "var(--text-main)" }}>
                     Comment fonctionnent les niveaux de priorité (de 0 à 10) ?
                   </h4>
@@ -240,19 +242,19 @@ export function WeightsTab({
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
                   <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "var(--text-light)", display: "block" }}>⚪ 0 / 10 — Ignoré</strong>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--text-light)", display: "flex", alignItems: "center", gap: "5px" }}><Circle size={9} aria-hidden="true" fill="currentColor" /> 0 / 10 — Ignoré</strong>
                     <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Le critère est totalement désactivé.</span>
                   </div>
                   <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "var(--card-info-text)", display: "block" }}>🔵 1 à 3 / 10 — Secondaire</strong>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-info-text)", display: "flex", alignItems: "center", gap: "5px" }}><Circle size={9} aria-hidden="true" fill="currentColor" /> 1 à 3 / 10 — Secondaire</strong>
                     <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Pris en compte si possible.</span>
                   </div>
                   <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "var(--card-success-text)", display: "block" }}>🟢 4 à 7 / 10 — Équilibré</strong>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-success-text)", display: "flex", alignItems: "center", gap: "5px" }}><Circle size={9} aria-hidden="true" fill="currentColor" /> 4 à 7 / 10 — Équilibré</strong>
                     <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Niveau standard recommandé.</span>
                   </div>
                   <div style={{ background: "var(--bg-card)", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-                    <strong style={{ fontSize: "0.78rem", color: "var(--card-purple-text)", display: "block" }}>🟣 8 à 10 / 10 — Priorité Haute</strong>
+                    <strong style={{ fontSize: "0.78rem", color: "var(--card-purple-text)", display: "flex", alignItems: "center", gap: "5px" }}><Circle size={9} aria-hidden="true" fill="currentColor" /> 8 à 10 / 10 — Priorité Haute</strong>
                     <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>Priorité maximale sur les autres.</span>
                   </div>
                 </div>
@@ -262,7 +264,7 @@ export function WeightsTab({
                 <div className="weight-card">
                   <div className="weight-header">
                     <div className="weight-title">
-                      <span>⚖️ Parité Filles / Garçons</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Scale size={14} aria-hidden="true" /> Parité Filles / Garçons</span>
                       <small>Équilibre 50%/50% du ratio de genre dans chaque classe</small>
                     </div>
                     <span
@@ -292,7 +294,7 @@ export function WeightsTab({
                 <div className="weight-card">
                   <div className="weight-header">
                     <div className="weight-title">
-                      <span>📊 Mixité des Niveaux Scolaires</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><BarChart3 size={14} aria-hidden="true" /> Mixité des Niveaux Scolaires</span>
                       <small>Répartition hétérogène des compétences (forts, moyens, à besoins)</small>
                     </div>
                     <span
@@ -322,7 +324,7 @@ export function WeightsTab({
                 <div className="weight-card">
                   <div className="weight-header">
                     <div className="weight-title">
-                      <span>🤝 Besoins Particuliers (PAP / PPS / PAI)</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><HeartHandshake size={14} aria-hidden="true" /> Besoins Particuliers (PAP / PPS / PAI)</span>
                       <small>Évite la concentration d'élèves à accompagnement dans la même classe</small>
                     </div>
                     <span
@@ -352,7 +354,7 @@ export function WeightsTab({
                 <div className="weight-card">
                   <div className="weight-header">
                     <div className="weight-title">
-                      <span>🎓 Répartition des Options & Langues</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><GraduationCap size={14} aria-hidden="true" /> Répartition des Options & Langues</span>
                       <small>Harmonisation des groupes LCE, Bilangue, Latin et EIP</small>
                     </div>
                     <span
@@ -389,7 +391,7 @@ export function WeightsTab({
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span>🌐</span> Stratégie de Regroupement des Options
+                          <Globe2 size={15} aria-hidden="true" /> Stratégie de Regroupement des Options
                         </div>
                         <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
                           Choisissez si vous souhaitez équilibrer les élèves optionnaires dans chaque classe ou les regrouper dans une classe dédiée.
@@ -411,7 +413,7 @@ export function WeightsTab({
                             cursor: "pointer",
                           }}
                         >
-                          ↕ Diluer / Équilibrer
+                          <ArrowLeftRight size={13} aria-hidden="true" style={{ marginRight: "4px" }} />Diluer / Équilibrer
                         </button>
                         <button
                           type="button"
@@ -434,7 +436,7 @@ export function WeightsTab({
                             cursor: "pointer",
                           }}
                         >
-                          📌 Regrouper sur 1 Classe
+                          <Pin size={13} aria-hidden="true" style={{ marginRight: "4px" }} />Regrouper sur 1 Classe
                         </button>
                       </div>
                     </div>
@@ -443,7 +445,7 @@ export function WeightsTab({
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span>🤝</span> Stratégie Accompagnements AESH
+                          <HeartHandshake size={15} aria-hidden="true" /> Stratégie Accompagnements AESH
                         </div>
                         <p style={{ margin: "0 0 14px", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
                           Regroupez les accompagnements AESH sur {targetAeshClasses} classe{targetAeshClasses > 1 ? "s cibles" : " cible"} pour mutualiser les heures AESH, ou dispersez-les.
@@ -465,7 +467,7 @@ export function WeightsTab({
                             cursor: "pointer",
                           }}
                         >
-                          ↕ Dispersion Homogène
+                          <ArrowLeftRight size={13} aria-hidden="true" style={{ marginRight: "4px" }} />Dispersion Homogène
                         </button>
                         <button
                           type="button"
@@ -482,7 +484,7 @@ export function WeightsTab({
                             cursor: "pointer",
                           }}
                         >
-                          🤝 Mutualiser AESH ({targetAeshClasses} classe{targetAeshClasses > 1 ? "s" : ""})
+                          <HeartHandshake size={13} aria-hidden="true" style={{ marginRight: "4px" }} />Mutualiser AESH ({targetAeshClasses} classe{targetAeshClasses > 1 ? "s" : ""})
                         </button>
                       </div>
                     </div>
@@ -499,13 +501,13 @@ export function WeightsTab({
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
                       <div>
                         <h4 style={{ margin: 0, fontSize: "0.96rem", fontWeight: 800, color: "var(--text-main)" }}>
-                          ✦ Affectation par langue & options — exclusivité multi-classes
+                          <Sparkle size={14} aria-hidden="true" style={{ marginRight: "4px", display: "inline" }} />Affectation par langue & options — exclusivité multi-classes
                         </h4>
                         <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px", display: "block" }}>
                           Cochez les classes réservées à une option ; laissez vide pour une répartition libre.
                         </span>
                         <span style={{ fontSize: "0.76rem", color: "var(--card-info-text)", marginTop: "6px", display: "inline-block", background: "var(--card-info-bg)", border: "1px solid var(--card-info-border)", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontWeight: 700, lineHeight: 1.35 }}>
-                          ℹ️ Note pédagogique : Ce tableau concerne uniquement les enseignements disciplinaires (LVA, LVB, Latin, LCE, CHAM). Les besoins d'accompagnement (PAP, PPS, PAI, AESH) ne sont pas des cours et sont gérés par la stratégie AESH ci-dessus.
+                          <Info size={12} aria-hidden="true" style={{ marginRight: "3px", display: "inline", verticalAlign: "-1px" }} />Note pédagogique : Ce tableau concerne uniquement les enseignements disciplinaires (LVA, LVB, Latin, LCE, CHAM). Les besoins d'accompagnement (PAP, PPS, PAI, AESH) ne sont pas des cours et sont gérés par la stratégie AESH ci-dessus.
                         </span>
                       </div>
                     </div>
@@ -562,9 +564,9 @@ export function WeightsTab({
                                   {assignedClasses.length === 0 ? (
                                     <span style={{ color: "var(--text-light)" }}>Non réservée (libre)</span>
                                   ) : totalCap >= optCount ? (
-                                    <span style={{ color: "var(--card-success-text)", fontWeight: 800 }}>✓ {assignedClasses.length} classe(s) = {totalCap} places / {optCount} élèves</span>
+                                    <span style={{ color: "var(--card-success-text)", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}><CheckCircle2 size={12} aria-hidden="true" /> {assignedClasses.length} classe(s) = {totalCap} places / {optCount} élèves</span>
                                   ) : (
-                                    <span style={{ color: "var(--card-warning-text)", fontWeight: 800 }}>⚠️ {totalCap} / {optCount} places (Manque {optCount - totalCap})</span>
+                                    <span style={{ color: "var(--card-warning-text)", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}><AlertTriangle size={12} aria-hidden="true" /> {totalCap} / {optCount} places (Manque {optCount - totalCap})</span>
                                   )}
                                 </td>
                               </tr>
@@ -592,7 +594,7 @@ export function WeightsTab({
               <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "16px 18px", marginTop: "16px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "1.1rem" }}>⛔</span>
+                    <Ban size={17} aria-hidden="true" style={{ color: "var(--rose-accent)" }} />
                     <div>
                       <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "var(--text-main)" }}>
                         Gestionnaire de Règles Individuelles (Incompatibilités & Associations / Binômes)
@@ -674,9 +676,9 @@ export function WeightsTab({
                       setRuleStudentBId("");
                       setNotice(`Règle d'affectation enregistrée entre ${nameOf(sA, anonymous)} et ${nameOf(sB, anonymous)}.`);
                     }}
-                    style={{ padding: "6px 14px", fontSize: "0.82rem", fontWeight: 800 }}
+                    style={{ padding: "6px 14px", fontSize: "0.82rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "5px" }}
                   >
-                    ➕ Ajouter la Règle
+                    <Plus size={14} aria-hidden="true" /> Ajouter la Règle
                   </button>
                 </div>
 
@@ -708,7 +710,7 @@ export function WeightsTab({
                                 gap: "6px",
                               }}
                             >
-                              <span>⛔ Séparation : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}><Ban size={12} aria-hidden="true" /> Séparation : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
                               <button
                                 type="button"
                                 style={{ border: "none", background: "none", color: "var(--rose-accent)", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
@@ -724,7 +726,7 @@ export function WeightsTab({
                                   setActiveDataset(nextDs);
                                 }}
                               >
-                                ✕
+                                <X size={13} aria-hidden="true" />
                               </button>
                             </div>
                           );
@@ -750,7 +752,7 @@ export function WeightsTab({
                               gap: "6px",
                             }}
                           >
-                            <span>🤝 Association : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}><HeartHandshake size={12} aria-hidden="true" /> Association : <strong>{nameOf(sA, anonymous)}</strong> ⬄ <strong>{nameOf(sB, anonymous)}</strong></span>
                             <button
                               type="button"
                               style={{ border: "none", background: "none", color: "var(--emerald-accent)", cursor: "pointer", fontSize: "0.85rem", padding: 0 }}
@@ -765,7 +767,7 @@ export function WeightsTab({
                                 setActiveDataset(nextDs);
                               }}
                             >
-                              ✕
+                              <X size={13} aria-hidden="true" />
                             </button>
                           </div>
                         ];
@@ -804,9 +806,9 @@ export function WeightsTab({
                       })
                       .finally(() => setBusy(false));
                   }}
-                  style={{ padding: "14px 28px", fontSize: "1.05rem", fontWeight: 800, minWidth: "320px", boxShadow: "var(--shadow-md)" }}
+                  style={{ padding: "14px 28px", fontSize: "1.05rem", fontWeight: 800, minWidth: "320px", boxShadow: "var(--shadow-md)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
                 >
-                  ⚡ Calculer & Générer les 3 Scénarios d'Équilibrage
+                  <Zap size={18} aria-hidden="true" /> Calculer & Générer les 3 Scénarios d'Équilibrage
                 </button>
                 <p style={{ margin: "8px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
                   Le solveur algorithmique sous contraintes (Recherche gloutonne & Recuit simulé déterministe) calcule 3 alternatives d'optimisation.
