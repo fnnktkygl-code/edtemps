@@ -1,3 +1,4 @@
+import { X, ShieldCheck, Lock, Pencil, Ruler, Globe, Save, BarChart3, NotebookPen, User, Clock, FileText, MapPin, ClipboardList, Plus, HeartHandshake, GraduationCap, Scale, School, Sparkles, CheckCircle2 } from "lucide-react";
 import type { AuditEvent, Dataset, Gender, Scenario, Student } from "../../types";
 import { getAvatarColor, nameOf } from "../../utils/format";
 import {
@@ -112,8 +113,8 @@ export function StudentDetailModal({
                           <span className="brand-badge" style={{ background: "var(--bg-subtle)", color: "var(--primary-brand)", border: "1px solid var(--border-light)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
                             DOSSIER PÉDAGOGIQUE ÉLÈVE
                           </span>
-                          <span style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800 }}>
-                            📍 {assignedClassroom ? assignedClassroom.label : "Non affecté"}
+                          <span style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", fontSize: "0.72rem", padding: "2px 8px", borderRadius: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                            <MapPin size={11} aria-hidden="true" /> {assignedClassroom ? assignedClassroom.label : "Non affecté"}
                           </span>
                           <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontWeight: 700 }}>
                             Sexe : {inspectStudent.gender === "F" ? "Fille ♀" : inspectStudent.gender === "M" ? "Garçon ♂" : "Non spécifié"}
@@ -122,8 +123,8 @@ export function StudentDetailModal({
                         <h2 style={{ margin: "3px 0 2px", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-main)" }}>
                           {nameOf(inspectStudent, anonymous)}
                         </h2>
-                        <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", fontWeight: 600 }}>
-                          🔒 Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.76rem" }}>{ineDisplay}</code>
+                        <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", fontWeight: 600, display: "flex", alignItems: "center", gap: "5px", flexWrap: "wrap" }}>
+                          <Lock size={12} aria-hidden="true" /> Identifiant RGPD : <code style={{ fontFamily: "var(--font-mono)", background: "var(--bg-subtle)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.76rem" }}>{ineDisplay}</code>
                           &nbsp;·&nbsp;
                           Niveau : <strong>{dataset.level}</strong> (Né(e) en 2015 · 11 ans)
                         </p>
@@ -132,18 +133,19 @@ export function StudentDetailModal({
                     <button
                       className="icon-btn-subtle"
                       onClick={() => setInspectStudent(null)}
-                      style={{ padding: "6px 12px", fontSize: "1.1rem", borderRadius: "50%", cursor: "pointer", flexShrink: 0 }}
+                      style={{ padding: "6px", fontSize: "1.1rem", borderRadius: "50%", cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
                       title="Fermer la fenêtre"
                     >
-                      ✕
+                      <X size={16} aria-hidden="true" />
                     </button>
                   </div>
 
                   {/* BARRE DE SÉCURITÉ & HABILITATION RGPD */}
                   <div style={{ background: userRole === "HEADMASTER_ADMIN" ? "var(--card-highlight-bg)" : "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)", padding: "10px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.78rem", flexShrink: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "var(--card-highlight-text)" : "var(--text-muted)" }}>
-                        {userRole === "HEADMASTER_ADMIN" ? "🛡️ Habilitation : Chef d'Établissement (Droits Écriture)" : "🔒 Mode : Consultation Seule"}
+                      <span style={{ fontWeight: 800, color: userRole === "HEADMASTER_ADMIN" ? "var(--card-highlight-text)" : "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        {userRole === "HEADMASTER_ADMIN" ? <ShieldCheck size={14} aria-hidden="true" /> : <Lock size={14} aria-hidden="true" />}
+                        {userRole === "HEADMASTER_ADMIN" ? "Habilitation : Chef d'Établissement (Droits Écriture)" : "Mode : Consultation Seule"}
                       </span>
                       <button
                         onClick={() => {
@@ -167,16 +169,16 @@ export function StudentDetailModal({
                           setEditStudentForm({ ...inspectStudent });
                           setIsEditingStudent(true);
                         }}
-                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "var(--button-primary-bg)" : "var(--text-light)" }}
+                        style={{ padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, background: userRole === "HEADMASTER_ADMIN" ? "var(--button-primary-bg)" : "var(--text-light)", display: "inline-flex", alignItems: "center", gap: "6px" }}
                       >
-                        ✏️ Modifier la fiche élève
+                        <Pencil size={13} aria-hidden="true" /> Modifier la fiche élève
                       </button>
                     ) : (
                       <button
                         onClick={() => setIsEditingStudent(false)}
-                        style={{ background: "var(--bg-hover)", color: "var(--text-main)", border: "1px solid var(--border-light)", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer" }}
+                        style={{ background: "var(--bg-hover)", color: "var(--text-main)", border: "1px solid var(--border-light)", padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, borderRadius: "var(--radius-sm)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
                       >
-                        ✕ Annuler l'édition
+                        <X size={13} aria-hidden="true" /> Annuler l'édition
                       </button>
                     )}
                   </div>
@@ -186,8 +188,8 @@ export function StudentDetailModal({
                     {isEditingStudent && editStudentForm ? (
                       /* FORMULAIRE D'ÉDITION SÉCURISÉ & TRACÉ */
                       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        <div style={{ background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "var(--card-success-text)", fontWeight: 700 }}>
-                          ⚖️ <strong>Traçabilité CNIL Active</strong> : Toute modification enregistrée produit un événement d'audit horodaté immuable (`STUDENT_UPDATED`).
+                        <div style={{ background: "var(--card-success-bg)", border: "1px solid var(--card-success-border)", padding: "10px 14px", borderRadius: "var(--radius-sm)", fontSize: "0.8rem", color: "var(--card-success-text)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                          <Scale size={15} aria-hidden="true" style={{ flexShrink: 0 }} /> <span><strong>Traçabilité CNIL Active</strong> : Toute modification enregistrée produit un événement d'audit horodaté immuable (`STUDENT_UPDATED`).</span>
                         </div>
 
                         {/* Sexe & Moyenne */}
@@ -225,8 +227,8 @@ export function StudentDetailModal({
                         {/* ÉDITION DES NOTES PAR MATIÈRE */}
                         <div>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                            <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary-brand)", margin: 0 }}>
-                              📐 Édition des Notes par Matière (/20) :
+                            <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary-brand)", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                              <Ruler size={14} aria-hidden="true" /> Édition des Notes par Matière (/20) :
                             </label>
                             <div style={{ display: "flex", gap: "6px" }}>
                               <button
@@ -246,9 +248,9 @@ export function StudentDetailModal({
                                   const avg = default9.reduce((sum, g) => sum + g.score, 0) / default9.length;
                                   setEditStudentForm({ ...editStudentForm, subjectGrades: default9, levelAverage: parseFloat(avg.toFixed(1)) });
                                 }}
-                                style={{ background: "var(--button-primary-bg)", color: "#ffffff", border: "none", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                                style={{ background: "var(--button-primary-bg)", color: "#ffffff", border: "none", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                               >
-                                📋 9 Matières Officieuses
+                                <ClipboardList size={12} aria-hidden="true" /> 9 Matières Officieuses
                               </button>
                               <button
                                 type="button"
@@ -258,9 +260,9 @@ export function StudentDetailModal({
                                   const avg = newGrades.reduce((sum, g) => sum + g.score, 0) / newGrades.length;
                                   setEditStudentForm({ ...editStudentForm, subjectGrades: newGrades, levelAverage: parseFloat(avg.toFixed(1)) });
                                 }}
-                                style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer" }}
+                                style={{ background: "var(--card-highlight-bg)", color: "var(--card-highlight-text)", border: "1px solid var(--card-highlight-border)", padding: "4px 8px", borderRadius: "var(--radius-sm)", fontSize: "0.72rem", fontWeight: 800, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
                               >
-                                ➕ Ajouter une matière
+                                <Plus size={12} aria-hidden="true" /> Ajouter une matière
                               </button>
                             </div>
                           </div>
@@ -316,7 +318,7 @@ export function StudentDetailModal({
                                     style={{ background: "var(--card-error-bg)", color: "var(--card-error-text)", border: "1px solid var(--card-error-border)", borderRadius: "var(--radius-sm)", padding: "4px", cursor: "pointer", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
                                     title="Supprimer cette matière"
                                   >
-                                    ✕
+                                    <X size={13} aria-hidden="true" />
                                   </button>
                                 </div>
                               ))
@@ -327,14 +329,14 @@ export function StudentDetailModal({
                         {/* SÉLECTION EXPLICITE LV1 (LVA) & LV2 (LVB) */}
                         <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "12px", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "10px" }}>
                           <div style={{ fontSize: "0.82rem", fontWeight: 800, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <span>🌍</span> Langues Vivantes Réglementaires (Programme Officiel MEN) :
+                            <Globe size={14} aria-hidden="true" /> Langues Vivantes Réglementaires (Programme Officiel MEN) :
                           </div>
 
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
                             {/* Langue Vivante 1 (LVA) */}
                             <div>
                               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                                🔵 Langue Vivante 1 (LVA) :
+                                Langue Vivante 1 (LVA) :
                               </label>
                               <select
                                 value={editStudentForm.lv1 || editStudentForm.options.find((o) => o.startsWith("LVA_")) || "LVA_ANG"}
@@ -358,7 +360,7 @@ export function StudentDetailModal({
                             {/* Langue Vivante 2 (LVB) */}
                             <div>
                               <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                                🟢 Langue Vivante 2 (LVB) :
+                                Langue Vivante 2 (LVB) :
                               </label>
                               <select
                                 value={editStudentForm.lv2 || editStudentForm.options.find((o) => o.startsWith("LVB_")) || "LVB_ESP"}
@@ -384,8 +386,8 @@ export function StudentDetailModal({
 
                         {/* Dispositifs d'Accompagnement */}
                         <div>
-                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                            🤝 Dispositifs & Aménagements Pédagogiques (PAP, PPS, PAI, PPRE, ULIS) :
+                          <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <HeartHandshake size={14} aria-hidden="true" /> Dispositifs & Aménagements Pédagogiques (PAP, PPS, PAI, PPRE, ULIS) :
                           </label>
                           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                             {(["PAP", "PPS", "PAI", "PPRE", "ULIS"] as const).map((flag) => {
@@ -411,8 +413,8 @@ export function StudentDetailModal({
 
                         {/* Options Scolaires, LCA & Sections */}
                         <div>
-                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>
-                            🎓 Options Facultatives, LCA & Sections Particulières :
+                          <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <GraduationCap size={14} aria-hidden="true" /> Options Facultatives, LCA & Sections Particulières :
                           </label>
                           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", padding: "10px", background: "var(--bg-subtle)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                             {OFFICIAL_OPTIONS_ONLY.map((item) => {
@@ -437,8 +439,8 @@ export function StudentDetailModal({
 
                         {/* Observations / Appréciation */}
                         <div>
-                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px" }}>
-                            📝 Appréciation du Conseil de Classe :
+                          <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <NotebookPen size={13} aria-hidden="true" /> Appréciation du Conseil de Classe :
                           </label>
                           <textarea
                             rows={2}
@@ -451,8 +453,8 @@ export function StudentDetailModal({
 
                         {/* Motif de la Modification (CNIL) */}
                         <div>
-                          <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "var(--indigo-accent)", marginBottom: "4px" }}>
-                            ⚖️ Motif de l'Ajustement (Obligatoire pour l'Audit) :
+                          <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--indigo-accent)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Scale size={13} aria-hidden="true" /> Motif de l'Ajustement (Obligatoire pour l'Audit) :
                           </label>
                           <input
                             type="text"
@@ -466,9 +468,9 @@ export function StudentDetailModal({
                         <button
                           className="primary"
                           onClick={() => handleSaveStudentEdit()}
-                          style={{ padding: "12px", fontWeight: 800, fontSize: "0.95rem", marginTop: "6px" }}
+                          style={{ padding: "12px", fontWeight: 800, fontSize: "0.95rem", marginTop: "6px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
                         >
-                          💾 Enregistrer & Sceller la Modification (CNIL Audit)
+                          <Save size={16} aria-hidden="true" /> Enregistrer & Sceller la Modification (CNIL Audit)
                         </button>
                       </div>
                     ) : (
@@ -477,19 +479,19 @@ export function StudentDetailModal({
                         {/* INFOS COMPLÉMENTAIRES ÉTABLISSEMENT & ORIGINE */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
                           <div style={{ background: "var(--bg-subtle)", padding: "10px 12px", borderRadius: "var(--radius-sm)" }}>
-                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", fontWeight: 700 }}>🏫 École d'Origine :</span>
+                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px", fontWeight: 700 }}><School size={12} aria-hidden="true" /> École d'Origine :</span>
                             <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>École Élémentaire Jules Ferry</span>
                           </div>
                           <div style={{ background: "var(--bg-subtle)", padding: "10px 12px", borderRadius: "var(--radius-sm)" }}>
-                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", fontWeight: 700 }}>📊 IPS Théorique (Social) :</span>
+                            <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px", fontWeight: 700 }}><BarChart3 size={12} aria-hidden="true" /> IPS Théorique (Social) :</span>
                             <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-main)" }}>108.5 (Catégorie Moyenne)</span>
                           </div>
                         </div>
 
                         {/* Synthese Notes par Matiere */}
                         <div>
-                          <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                            📐 Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
+                          <h4 style={{ margin: "0 0 10px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <BarChart3 size={15} aria-hidden="true" /> Résultats par Matière & Moyenne Générale ({inspectStudent.levelAverage.toFixed(1)}/20)
                           </h4>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "10px" }}>
                             {inspectStudent.subjectGrades?.map((sg) => {
@@ -565,8 +567,8 @@ export function StudentDetailModal({
 
                         {/* Remarques & Accompagnements */}
                         <div>
-                          <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)" }}>
-                            📝 Appréciation & Dispositifs Pédagogiques
+                          <h4 style={{ margin: "0 0 8px", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary-brand)", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <NotebookPen size={15} aria-hidden="true" /> Appréciation & Dispositifs Pédagogiques
                           </h4>
                           <p style={{ background: "var(--bg-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)", margin: "0 0 10px", fontSize: "0.88rem", fontStyle: "italic", color: "var(--text-main)" }}>
                             "{inspectStudent.teacherComments ?? "Aucune observation particulière enregistrée par le conseil de classe."}"
@@ -591,7 +593,7 @@ export function StudentDetailModal({
                                   gap: "6px",
                                 }}
                               >
-                                <span>🤝</span>
+                                <HeartHandshake size={13} aria-hidden="true" />
                                 <div>{SUPPORT_FLAG_TITLES[flag] || `Dispositif ${flag}`}</div>
                               </div>
                             ))}
@@ -611,7 +613,7 @@ export function StudentDetailModal({
                                   gap: "6px",
                                 }}
                               >
-                                <span>🎓</span>
+                                <GraduationCap size={13} aria-hidden="true" />
                                 <div>{OPTION_TITLES[opt] || `Option ${opt}`}</div>
                               </div>
                             ))}
@@ -626,7 +628,7 @@ export function StudentDetailModal({
                           <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)", padding: "16px", borderRadius: "var(--radius-md)", color: "#ffffff", boxShadow: "0 4px 16px rgba(49, 46, 129, 0.22)" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                               <h4 style={{ margin: 0, fontSize: "0.92rem", fontWeight: 800, color: "#ffffff", display: "flex", alignItems: "center", gap: "6px" }}>
-                                ✨ Justification Algorithmique & Motif d'Affectation
+                                <Sparkles size={15} aria-hidden="true" /> Justification Algorithmique & Motif d'Affectation
                               </h4>
                               <span style={{ background: "rgba(255, 255, 255, 0.15)", color: "#e0e7ff", padding: "2px 8px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 800, border: "1px solid rgba(255, 255, 255, 0.25)" }}>
                                 🇫🇷 Mistral AI
@@ -635,7 +637,7 @@ export function StudentDetailModal({
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                               {selected.explanations[inspectStudent.id].hardConstraints.map((hc, idx) => (
                                 <div key={idx} style={{ background: "rgba(255, 255, 255, 0.12)", border: "1px solid rgba(255, 255, 255, 0.2)", padding: "8px 12px", borderRadius: "6px", fontSize: "0.82rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <span style={{ color: "#a7f3d0", fontWeight: 800 }}>✓</span>
+                                  <CheckCircle2 size={14} aria-hidden="true" style={{ color: "#a7f3d0", flexShrink: 0 }} />
                                   <span>{hc}</span>
                                 </div>
                               ))}
@@ -665,11 +667,11 @@ export function StudentDetailModal({
                                 .map((evt) => (
                                   <div key={evt.id} style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-light)", padding: "8px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.76rem" }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", color: "var(--primary-brand)", fontWeight: 800 }}>
-                                      <span>👤 {evt.actorId}</span>
-                                      <span>🕒 {new Date(evt.occurredAt).toLocaleString("fr-FR")}</span>
+                                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><User size={12} aria-hidden="true" /> {evt.actorId}</span>
+                                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Clock size={12} aria-hidden="true" /> {new Date(evt.occurredAt).toLocaleString("fr-FR")}</span>
                                     </div>
-                                    <div style={{ color: "var(--text-main)", fontWeight: 700, marginTop: "2px" }}>
-                                      📝 {String(evt.details?.summary || evt.eventType)}
+                                    <div style={{ color: "var(--text-main)", fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "flex-start", gap: "4px" }}>
+                                      <FileText size={12} aria-hidden="true" style={{ marginTop: "2px", flexShrink: 0 }} /> {String(evt.details?.summary || evt.eventType)}
                                     </div>
                                     {evt.details?.reason && (
                                       <div style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "0.72rem", marginTop: "2px" }}>
