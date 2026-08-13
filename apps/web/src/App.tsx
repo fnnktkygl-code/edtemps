@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { School, CalendarDays, GraduationCap, ShieldCheck, Moon, Sun } from "lucide-react";
+import { School, CalendarDays, GraduationCap, ShieldCheck, Moon, Sun, Landmark, Menu, Download, Package, Camera, Mic, Dices, User, Zap, Loader2, X, Lock } from "lucide-react";
 import { calculateMetrics, type DispatchWeights } from "@edtemps/domain";
 import { api, createSyntheticDemoInputCustom, getActiveActor, isOfflineFallback, setActorRole, setActiveDataset } from "./api";
 import type { FeasibilityError } from "@edtemps/domain";
@@ -828,7 +828,7 @@ export default function App() {
       <header className="masthead">
         <div className="brand-section" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <h1>EdTemps</h1>
-          <span className="brand-badge" data-tooltip="Conforme aux référentiels du Ministère de l'Éducation Nationale et de la Jeunesse (MENJ)">🏛️ MENJ</span>
+          <span className="brand-badge" data-tooltip="Conforme aux référentiels du Ministère de l'Éducation Nationale et de la Jeunesse (MENJ)" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}><Landmark size={13} aria-hidden="true" /> MENJ</span>
         </div>
 
         <button
@@ -836,7 +836,7 @@ export default function App() {
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Ouvrir le menu mobile"
         >
-          ☰
+          <Menu size={22} aria-hidden="true" />
         </button>
 
         {/* NAVIGATION PAR ONGLETS INTÉGRÉE */}
@@ -947,7 +947,7 @@ export default function App() {
               data-tooltip="Menu d'importation des fichiers SIECLE, STS-Web et outils IA Mistral"
               style={{ padding: "6px 12px", fontSize: "0.84rem" }}
             >
-              📥 Importer ▾
+              <Download size={13} aria-hidden="true" style={{ marginRight: "4px", verticalAlign: "-2px" }} />Importer ▾
             </button>
             {importMenuOpen && (
               <div
@@ -976,7 +976,7 @@ export default function App() {
                     fileInput.current?.click();
                   }}
                 >
-                  📦 SIECLE (Élèves)
+                  <Package size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />SIECLE (Élèves)
                 </button>
                 <button
                   className="secondary"
@@ -986,7 +986,7 @@ export default function App() {
                     stsFileInput.current?.click();
                   }}
                 >
-                  🏛️ STS-Web (Profs & Services)
+                  <Landmark size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />STS-Web (Profs & Services)
                 </button>
                 <button
                   className="secondary"
@@ -996,7 +996,7 @@ export default function App() {
                     ocrFileInput.current?.click();
                   }}
                 >
-                  📷 Mistral OCR (Pixtral)
+                  <Camera size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Mistral OCR (Pixtral)
                 </button>
                 <button
                   className="secondary"
@@ -1006,7 +1006,7 @@ export default function App() {
                     void triggerVoiceCommand();
                   }}
                 >
-                  🎙️ Dictée Vocale (Voxtral)
+                  <Mic size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Dictée Vocale (Voxtral)
                 </button>
                 <button
                   className="secondary"
@@ -1017,7 +1017,7 @@ export default function App() {
                   }}
                   title="Générer une nouvelle cohorte aléatoire de 70 élèves complètement remplis"
                 >
-                  🎲 Régénérer 70 Élèves (Aléatoire MEN)
+                  <Dices size={13} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Régénérer 70 Élèves (Aléatoire MEN)
                 </button>
               </div>
             )}
@@ -1035,15 +1035,15 @@ export default function App() {
 
       {/* BANDEAU DE STATUT COMPACT ET UNIFIÉ */}
       <div className="compact-status-bar">
-        <span className="status-tag">
-          👤 {actorRole === "SCHOOL_ADMIN" ? "Chef d'Établissement" : actorRole === "TEACHER" ? "Enseignant" : actorRole === "CPE" ? "CPE / Vie Scolaire" : actorRole === "DPO" ? "DPO / RSSI" : "Adjoint"}
+        <span className="status-tag" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+          <User size={12} aria-hidden="true" /> {actorRole === "SCHOOL_ADMIN" ? "Chef d'Établissement" : actorRole === "TEACHER" ? "Enseignant" : actorRole === "CPE" ? "CPE / Vie Scolaire" : actorRole === "DPO" ? "DPO / RSSI" : "Adjoint"}
         </span>
-        <span className="status-text">
-          🛡️ <strong>Décision humaine obligatoire :</strong> Les propositions IA sont explicables et à titre d'aide au pilotage. Seule la direction valide les décisions finales.
+        <span className="status-text" style={{ display: "inline-flex", alignItems: "flex-start", gap: "5px" }}>
+          <ShieldCheck size={13} aria-hidden="true" style={{ marginTop: "1px", flexShrink: 0 }} /> <span><strong>Décision humaine obligatoire :</strong> Les propositions IA sont explicables et à titre d'aide au pilotage. Seule la direction valide les décisions finales.</span>
         </span>
         {isOfflineFallback && (
-          <span className="offline-tag">
-            ⚡ Mode Staging & Simulation (Données RGPD Fictives)
+          <span className="offline-tag" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+            <Zap size={12} aria-hidden="true" /> Mode Staging & Simulation (Données RGPD Fictives)
           </span>
         )}
         <button
@@ -1072,20 +1072,20 @@ export default function App() {
       {/* SHIMMER BANNER PENDANT LA GÉNÉRATION OU LE CALCUL */}
       {busy && (
         <div className="shimmer-banner">
-          <span className="shimmer-spinner">⚡</span>
+          <span className="shimmer-spinner"><Loader2 size={17} aria-hidden="true" /></span>
           <span>Calcul et optimisation algorithmique sous contraintes par l'IA en cours... Veuillez patienter quelques instants.</span>
         </div>
       )}
 
       {ocrSummary && (
         <div className="safety-banner" style={{ background: "var(--card-success-bg)", borderColor: "var(--card-success-border)", color: "var(--card-success-text)" }}>
-          <strong>📷 Analyse OCR Mistral Pixtral :</strong> {ocrSummary}
+          <strong style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Camera size={13} aria-hidden="true" /> Analyse OCR Mistral Pixtral :</strong> {ocrSummary}
         </div>
       )}
 
       {voiceSummary && (
         <div className="safety-banner" style={{ background: "var(--card-info-bg)", borderColor: "var(--card-info-border)", color: "var(--card-info-text)" }}>
-          <strong>🎙️ Dictée Vocale Mistral Voxtral :</strong> {voiceSummary}
+          <strong style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Mic size={12} aria-hidden="true" /> Dictée Vocale Mistral Voxtral :</strong> {voiceSummary}
         </div>
       )}
 
@@ -1463,13 +1463,14 @@ export default function App() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ fontWeight: 800, fontSize: "1.1rem" }}>EdTemps</span>
-            <span className="brand-badge">🏛️ MENJ</span>
+            <span className="brand-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Landmark size={12} aria-hidden="true" /> MENJ</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            style={{ background: "transparent", border: "none", fontSize: "1.4rem", cursor: "pointer", color: "var(--text-muted)" }}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+            aria-label="Fermer le menu"
           >
-            ✕
+            <X size={22} aria-hidden="true" />
           </button>
         </div>
 
@@ -1499,7 +1500,7 @@ export default function App() {
 
         {/* Section Protection RGPD */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)" }}>
-          <span style={{ fontWeight: 700, fontSize: "0.88rem" }}>🔒 Mode Pseudonyme RGPD</span>
+          <span style={{ fontWeight: 700, fontSize: "0.88rem", display: "inline-flex", alignItems: "center", gap: "5px" }}><Lock size={13} aria-hidden="true" /> Mode Pseudonyme RGPD</span>
           <input
             type="checkbox"
             checked={anonymous}
@@ -1512,16 +1513,16 @@ export default function App() {
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--text-muted)", textTransform: "uppercase" }}>Importations & IA</label>
           <button className="secondary" onClick={() => { setMobileMenuOpen(false); fileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
-            📦 Fichier SIECLE (ZIP)
+            <Package size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Fichier SIECLE (ZIP)
           </button>
           <button className="secondary" onClick={() => { setMobileMenuOpen(false); stsFileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
-            🏛️ Fichier STS-Web (XML)
+            <Landmark size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Fichier STS-Web (XML)
           </button>
           <button className="secondary" onClick={() => { setMobileMenuOpen(false); ocrFileInput.current?.click(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
-            📷 Mistral OCR (Pixtral)
+            <Camera size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Mistral OCR (Pixtral)
           </button>
           <button className="secondary" onClick={() => { setMobileMenuOpen(false); void triggerVoiceCommand(); }} style={{ textAlign: "left", padding: "10px 12px" }}>
-            🎙️ Dictée Vocale (Voxtral)
+            <Mic size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Dictée Vocale (Voxtral)
           </button>
         </div>
 
