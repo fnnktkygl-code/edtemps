@@ -770,7 +770,7 @@ export function KanbanTab({
                                           {nameOf(student, anonymous)}
                                         </span>
                                         <span
-                                          className="ui-tooltip"
+                                          className="ui-tooltip ui-tooltip-align-right"
                                           data-tooltip={`Moyenne générale de ${nameOf(student, anonymous)} : ${student.levelAverage.toFixed(1)}/20`}
                                           style={{
                                             background: "var(--bg-subtle)",
