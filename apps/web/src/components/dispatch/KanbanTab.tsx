@@ -403,11 +403,12 @@ export function KanbanTab({
                           <select
                             value={selected.id}
                             onChange={(e) => setSelectedId(e.target.value)}
-                            style={{ width: "100%", padding: "8px 24px 8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.84rem", color: "var(--text-main)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", boxSizing: "border-box" }}
+                            style={{ width: "100%", padding: "8px 20px 8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-subtle)", fontWeight: 800, fontSize: "0.84rem", color: "var(--text-main)", boxSizing: "border-box" }}
+                            title={`Scénario sélectionné : ${selected.id}`}
                           >
                             {scenarios.map((sc, idx) => (
                               <option key={sc.id} value={sc.id}>
-                                {idx === 0 ? "Scénario A · 🎯 Équilibre" : idx === 1 ? "Scénario B · 📊 Mixité" : `Scénario ${String.fromCharCode(65 + idx)} · 🤝 PAP`} ({Math.round(sc.metrics.score / 10)}% Score){sc.state === "APPROVED" ? " ✓" : ""}
+                                {idx === 0 ? "Scénario A · 🎯 Équilibre" : idx === 1 ? "Scénario B · 📊 Mixité" : `Scénario ${String.fromCharCode(65 + idx)} · 🤝 PAP`} ({Math.round(sc.metrics.score / 10)}%){sc.state === "APPROVED" ? " ✓" : ""}
                               </option>
                             ))}
                           </select>
@@ -644,7 +645,7 @@ export function KanbanTab({
                                   ∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong>
                                 </span>
                                 <button
-                                  className={`ui-tooltip ${openSupportModalClassId === classroom.id ? "active" : ""}`}
+                                  className={`ui-tooltip ui-tooltip-align-right ${openSupportModalClassId === classroom.id ? "active" : ""}`}
                                   data-tooltip="Cliquez pour afficher le détail des accompagnements (PAP, PPS, PAI...) de la classe"
                                   style={{
                                     background: openSupportModalClassId === classroom.id ? "var(--primary-brand)" : "transparent",
@@ -741,6 +742,8 @@ export function KanbanTab({
                                       <span className="drag-handle" style={{ color: "var(--text-light)", cursor: "grab", fontSize: "0.85rem", flexShrink: 0 }} title="Glisser-déposer">::</span>
 
                                       <div
+                                        className="ui-tooltip"
+                                        data-tooltip="Identifiant visuel unique attribué à l'élève pour le repérage"
                                         style={{
                                           width: "28px",
                                           height: "28px",
@@ -753,8 +756,9 @@ export function KanbanTab({
                                           fontWeight: 800,
                                           fontSize: "0.74rem",
                                           flexShrink: 0,
+                                          cursor: "help",
                                         }}
-                                        title={anonymous ? `Élève ${student.initials}` : student.displayName}
+                                        title={anonymous ? `Identifiant visuel unique (${student.initials})` : `Identifiant visuel unique (${student.displayName})`}
                                       >
                                         {anonymous ? <Lock size={12} aria-hidden="true" /> : <User size={13} aria-hidden="true" />}
                                       </div>
@@ -796,7 +800,7 @@ export function KanbanTab({
                                     {/* Actions : Fiche & Déplacer */}
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
                                       <button
-                                        className="icon-btn-subtle ui-tooltip"
+                                        className="icon-btn-subtle ui-tooltip ui-tooltip-align-right"
                                         data-tooltip="Consulter le dossier pédagogique"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -809,7 +813,7 @@ export function KanbanTab({
 
                                       {selected.state !== "APPROVED" && (
                                         <select
-                                          className="compact-move-select ui-tooltip"
+                                          className="compact-move-select ui-tooltip ui-tooltip-align-right"
                                           data-tooltip="Transférer vers une autre classe"
                                           value=""
                                           onClick={(e) => e.stopPropagation()}

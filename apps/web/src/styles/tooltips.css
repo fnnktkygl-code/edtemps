@@ -94,6 +94,65 @@
   .inspector .ui-tooltip:hover::before {
     transform: translateY(0) !important;
   }
+
+  /* Alignement à droite intelligent (pour éléments situés sur la droite des cartes/colonnes) */
+  .ui-tooltip-align-right::after {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateY(-4px) !important;
+    text-align: left !important;
+    max-width: 260px !important;
+  }
+
+  .ui-tooltip-align-right::before {
+    left: auto !important;
+    right: 12px !important;
+    transform: translateY(-4px) !important;
+  }
+
+  .ui-tooltip-align-right:hover::after,
+  .ui-tooltip-align-right:hover::before {
+    transform: translateY(0) !important;
+  }
+
+  /* Alignement à gauche intelligent */
+  .ui-tooltip-align-left::after {
+    left: 0 !important;
+    right: auto !important;
+    transform: translateY(-4px) !important;
+    text-align: left !important;
+    max-width: 260px !important;
+  }
+
+  .ui-tooltip-align-left::before {
+    left: 12px !important;
+    right: auto !important;
+    transform: translateY(-4px) !important;
+  }
+
+  .ui-tooltip-align-left:hover::after,
+  .ui-tooltip-align-left:hover::before {
+    transform: translateY(0) !important;
+  }
+
+  /* Tooltips dans les tableaux de données (Roster) : S'affichent vers le haut pour éviter le rognage de défilement */
+  .table-wrapper .ui-tooltip::after {
+    top: auto !important;
+    bottom: calc(100% + 8px) !important;
+    transform: translateX(-50%) translateY(-4px) !important;
+  }
+
+  .table-wrapper .ui-tooltip::before {
+    top: auto !important;
+    bottom: calc(100% + 2px) !important;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%) !important;
+    transform: translateX(-50%) translateY(-4px) !important;
+  }
+
+  .table-wrapper .ui-tooltip:hover::after,
+  .table-wrapper .ui-tooltip:hover::before {
+    transform: translateX(-50%) translateY(0) !important;
+  }
 }
 
 [data-theme="dark"] .student-support-pill {

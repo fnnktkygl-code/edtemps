@@ -91,6 +91,8 @@ export function StudentDetailModal({
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-light)", padding: "18px 24px", background: "var(--bg-card)", flexShrink: 0 }}>
                     <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
                       <div
+                        className="ui-tooltip"
+                        data-tooltip="Couleur d'identification visuelle unique attribuée à l'élève pour le repérage"
                         style={{
                           width: "48px",
                           height: "48px",
@@ -104,7 +106,9 @@ export function StudentDetailModal({
                           fontSize: "1.1rem",
                           boxShadow: "var(--shadow-sm)",
                           flexShrink: 0,
+                          cursor: "help",
                         }}
+                        title={anonymous ? `Identifiant visuel unique (${inspectStudent.initials})` : `Identifiant visuel unique (${inspectStudent.displayName})`}
                       >
                         {inspectStudent.initials}
                       </div>
