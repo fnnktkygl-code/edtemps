@@ -1,5 +1,5 @@
 import type { DispatchWeights } from "@edtemps/domain";
-import { Scale, Lock, CheckCircle2, FileText, Sparkles, Undo2, Redo2 } from "lucide-react";
+import { Scale, Lock, CheckCircle2, FileText, Sparkles, Undo2, Redo2, FileDown, Package, AlertTriangle, Info, Target, Trophy, BarChart3, Zap, HeartHandshake, Lightbulb, Check, ClipboardList, SlidersHorizontal, Wand2, Pencil, ArrowRight, TriangleAlert, OctagonAlert, X, FolderOpen, GraduationCap } from "lucide-react";
 import { api } from "../../api";
 import type { Classroom, Dataset, Scenario, Student } from "../../types";
 import { getAvatarColor, nameOf } from "../../utils/format";
@@ -140,7 +140,7 @@ export function KanbanTab({
                       gap: "6px",
                     }}
                   >
-                    📥 CSV
+                    <FileDown size={14} aria-hidden="true" /> CSV
                   </a>
 
                   <a
@@ -160,7 +160,7 @@ export function KanbanTab({
                       gap: "6px",
                     }}
                   >
-                    📦 PRONOTE JSON
+                    <Package size={14} aria-hidden="true" /> PRONOTE JSON
                   </a>
                 </div>
               </div>
@@ -212,8 +212,8 @@ export function KanbanTab({
                         }}
                       >
                         {ruleAuditList.some((a) => a.isViolated)
-                          ? `⚠️ ${ruleAuditList.filter((a) => a.isViolated).length} Conflit de Séparation (Survoler pour détails)`
-                          : `✅ ${ruleAuditList.length}/${ruleAuditList.length} Règles Respectées ℹ️`}
+                          ? <><AlertTriangle size={12} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {ruleAuditList.filter((a) => a.isViolated).length} Conflit de Séparation (Survoler pour détails)</>
+                          : <><CheckCircle2 size={12} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {ruleAuditList.length}/{ruleAuditList.length} Règles Respectées <Info size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /></>}
                       </span>
                     )}
                     <button
@@ -290,10 +290,10 @@ export function KanbanTab({
                       const isBest = scenario.id === bestScenarioId;
                       const meta =
                         index === 0
-                          ? { title: "Scénario A — 🎯 Équilibre Global", desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "🎯 Équilibre Global", color: isBest ? "var(--button-success-bg)" : "var(--text-muted)" }
+                          ? { title: <><Target size={13} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Scénario A — Équilibre Global</>, desc: "Meilleur compromis entre parité F/M et hétérogénéité des niveaux scolaires.", badge: isBest ? <><Trophy size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Recommandé (Meilleur score)</> : <><Target size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Équilibre Global</>, color: isBest ? "var(--button-success-bg)" : "var(--text-muted)" }
                           : index === 1
-                            ? { title: "Scénario B — 📊 Focus Mixité Scolaire", desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "⚡ Option Hétérogénéité", color: isBest ? "var(--button-success-bg)" : "var(--primary-brand)" }
-                            : { title: "Scénario C — 🤝 Focus Accompagnements", desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? "🏆 Recommandé (Meilleur score)" : "💡 Option Équilibre PAP", color: isBest ? "var(--button-success-bg)" : "var(--card-info-border)" };
+                            ? { title: <><BarChart3 size={13} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Scénario B — Focus Mixité Scolaire</>, desc: "Harmonise strictement les moyennes générales (écart inter-classes ≤ 0.3 pt).", badge: isBest ? <><Trophy size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Recommandé (Meilleur score)</> : <><Zap size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Option Hétérogénéité</>, color: isBest ? "var(--button-success-bg)" : "var(--primary-brand)" }
+                            : { title: <><HeartHandshake size={13} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Scénario C — Focus Accompagnements</>, desc: "Dispersion optimale des élèves à besoins (PAP/PPS) sur l'ensemble des classes.", badge: isBest ? <><Trophy size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Recommandé (Meilleur score)</> : <><Lightbulb size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Option Équilibre PAP</>, color: isBest ? "var(--button-success-bg)" : "var(--card-info-border)" };
 
                       return (
                         <button
@@ -323,7 +323,7 @@ export function KanbanTab({
                                 style={{ fontSize: "0.70rem", color: "var(--primary-brand)", fontWeight: 800, marginTop: "4px", textDecoration: "underline", cursor: "help", display: "inline-block" }}
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                ℹ️ Origine des métriques
+                                <Info size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Origine des métriques
                               </span>
                             </div>
                           </div>
@@ -338,34 +338,34 @@ export function KanbanTab({
                               data-tooltip={`Équilibre Parité F/M (Poids ${weights.genderBalance}/10) : ${scenario.metrics.genderBalance}%`}
                               style={{ background: weights.genderBalance === 0 ? "var(--bg-subtle)" : "var(--card-success-bg)", color: weights.genderBalance === 0 ? "var(--text-muted)" : "var(--card-success-text)", border: `1px solid ${weights.genderBalance === 0 ? "var(--border-light)" : "var(--card-success-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              ⚖️ Parité {weights.genderBalance === 0 ? "Ignorée" : `${scenario.metrics.genderBalance}%`}
+                              <Scale size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Parité {weights.genderBalance === 0 ? "Ignorée" : `${scenario.metrics.genderBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Hétérogénéité des Niveaux (Poids ${weights.academicBalance}/10) : ${scenario.metrics.academicBalance}%`}
                               style={{ background: weights.academicBalance === 0 ? "var(--bg-subtle)" : "var(--card-highlight-bg)", color: weights.academicBalance === 0 ? "var(--text-muted)" : "var(--card-highlight-text)", border: `1px solid ${weights.academicBalance === 0 ? "var(--border-light)" : "var(--card-highlight-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              📊 Niveaux {weights.academicBalance === 0 ? "Ignorés" : `${scenario.metrics.academicBalance}%`}
+                              <BarChart3 size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Niveaux {weights.academicBalance === 0 ? "Ignorés" : `${scenario.metrics.academicBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Accompagnements PAP/PPS (Poids ${weights.supportBalance}/10) : ${scenario.metrics.supportBalance}%`}
                               style={{ background: weights.supportBalance === 0 ? "var(--bg-subtle)" : "var(--card-warning-bg)", color: weights.supportBalance === 0 ? "var(--text-muted)" : "var(--card-warning-text)", border: `1px solid ${weights.supportBalance === 0 ? "var(--border-light)" : "var(--card-warning-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              🤝 PAP {weights.supportBalance === 0 ? "Ignoré" : `${scenario.metrics.supportBalance}%`}
+                              <HeartHandshake size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> PAP {weights.supportBalance === 0 ? "Ignoré" : `${scenario.metrics.supportBalance}%`}
                             </span>
                             <span
                               className="ui-tooltip"
                               data-tooltip={`Regroupement d'Options (Poids ${weights.optionBalance}/10) : ${scenario.metrics.optionBalance}%`}
                               style={{ background: weights.optionBalance === 0 ? "var(--bg-subtle)" : "var(--card-purple-bg)", color: weights.optionBalance === 0 ? "var(--text-muted)" : "var(--card-purple-text)", border: `1px solid ${weights.optionBalance === 0 ? "var(--border-light)" : "var(--card-purple-border)"}`, padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700, cursor: "help" }}
                             >
-                              🎓 Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}% respectées`}
+                              <GraduationCap size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Options {weights.optionBalance === 0 ? "Ignorées" : `${scenario.metrics.optionBalance}% respectées`}
                             </span>
                           </div>
 
                           <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "10px", marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <span className={scenario.state === "APPROVED" ? "chip approved" : "chip"}>
-                              {scenario.state === "APPROVED" ? "✓ Validé & Scellé" : "📋 En cours de relecture"}
+                              {scenario.state === "APPROVED" ? <><CheckCircle2 size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Validé & Scellé</> : <><ClipboardList size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> En cours de relecture</>}
                             </span>
                             <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--primary-brand)" }}>
                               {selected?.id === scenario.id ? "Actif ▸" : "Examiner ▸"}
@@ -395,7 +395,7 @@ export function KanbanTab({
                     <aside className="inspector">
                       {/* EN-TÊTE & SÉLECTEUR RAPIDE DE SCÉNARIO */}
                       <div>
-                        <span className="eyebrow">🎛️ PANNEAU D'INSPECTION & AJUSTEMENT</span>
+                        <span className="eyebrow" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}><SlidersHorizontal size={12} aria-hidden="true" /> PANNEAU D'INSPECTION & AJUSTEMENT</span>
                         <div style={{ marginTop: "6px" }}>
                           <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
                             Scénario actuellement examiné :
@@ -422,10 +422,10 @@ export function KanbanTab({
                           disabled={busy || selected.state === "APPROVED"}
                           style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", fontWeight: 800, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.25, textAlign: "center" }}
                         >
-                          {selected.state === "APPROVED" ? "✓ Scénario Validé & Officialisé" : "🔒 Valider Humainement & Officialiser"}
+                          {selected.state === "APPROVED" ? <><CheckCircle2 size={14} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Scénario Validé & Officialisé</> : <><Lock size={14} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Valider Humainement & Officialiser</>}
                         </button>
                         <p className="hint" style={{ margin: "6px 0 0", textAlign: "center", fontSize: "0.76rem", color: "var(--text-muted)", lineHeight: 1.3 }}>
-                          ⚖️ <strong>Art. 6.1.e RGPD & CNIL</strong> : Décision humaine traçable dans le journal d'audit.
+                          <Scale size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> <strong>Art. 6.1.e RGPD & CNIL</strong> : Décision humaine traçable dans le journal d'audit.
                         </p>
                       </div>
 
@@ -433,10 +433,10 @@ export function KanbanTab({
                       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                           <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 800, color: "var(--text-main)", whiteSpace: "nowrap" }}>
-                            📊 Diagnostic de Conformité
+                            <BarChart3 size={14} aria-hidden="true" style={{ marginRight: "5px", verticalAlign: "-2px" }} />Diagnostic de Conformité
                           </h4>
                           <span className="chip" style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "3px 8px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap" }}>
-                            ✓ Contraintes Dures OK
+                            <Check size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> Contraintes Dures OK
                           </span>
                         </div>
 
@@ -452,7 +452,7 @@ export function KanbanTab({
                       <div style={{ background: "var(--card-highlight-bg)", border: "1px solid var(--card-highlight-border)", padding: "14px", borderRadius: "var(--radius-md)", display: "flex", flexDirection: "column", gap: "8px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                           <span style={{ fontWeight: 800, color: "var(--card-highlight-text)", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
-                            🪄 Assistant Rééquilibrage
+                            <Wand2 size={13} aria-hidden="true" /> Assistant Rééquilibrage
                           </span>
                           <span style={{ background: "var(--emerald-accent)", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", fontSize: "0.72rem", fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             🇫🇷 Mistral AI
@@ -473,7 +473,7 @@ export function KanbanTab({
 
                       {/* FICHE & TRANSFERT MANUEL D'ÉLÈVE */}
                       <div className="transfer-card">
-                        <h4 style={{ margin: "0 0 8px", fontSize: "0.92rem", fontWeight: 800 }}>✏️ Fiche & Transfert d'Élève</h4>
+                        <h4 style={{ margin: "0 0 8px", fontSize: "0.92rem", fontWeight: 800, display: "flex", alignItems: "center", gap: "6px" }}><Pencil size={14} aria-hidden="true" /> Fiche & Transfert d'Élève</h4>
 
                         <label htmlFor="student" style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
                           Examiner un élève de la cohorte :
@@ -512,7 +512,7 @@ export function KanbanTab({
                                       disabled={busy || selected.state === "APPROVED"}
                                       onClick={() => requestMove(selectedStudentId!, classroom.id)}
                                     >
-                                      <span>➡️ {classroom.label}</span>
+                                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><ArrowRight size={12} aria-hidden="true" /> {classroom.label}</span>
                                       <small style={{ fontSize: "0.72rem", opacity: 0.8 }}>({currentCount}/{classroom.maxSize} él.)</small>
                                     </button>
                                   );
@@ -602,15 +602,15 @@ export function KanbanTab({
                               <div style={{ marginTop: "8px" }}>
                                 {totalCount < classroom.minSize ? (
                                   <span style={{ background: "var(--card-warning-bg)", color: "var(--card-warning-text)", border: "1px solid var(--card-warning-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                                    🟠 Sous-effectif · {classroom.minSize - totalCount} manquant{classroom.minSize - totalCount > 1 ? "s" : ""}
+                                    <TriangleAlert size={12} aria-hidden="true" /> Sous-effectif · {classroom.minSize - totalCount} manquant{classroom.minSize - totalCount > 1 ? "s" : ""}
                                   </span>
                                 ) : totalCount > classroom.maxSize ? (
                                   <span style={{ background: "var(--card-purple-bg)", color: "var(--card-purple-text)", border: "1px solid var(--card-purple-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                                    🔴 Sur-effectif · {totalCount - classroom.maxSize} en trop
+                                    <OctagonAlert size={12} aria-hidden="true" /> Sur-effectif · {totalCount - classroom.maxSize} en trop
                                   </span>
                                 ) : (
                                   <span style={{ background: "var(--card-success-bg)", color: "var(--card-success-text)", border: "1px solid var(--card-success-border)", padding: "3px 10px", borderRadius: "20px", fontSize: "0.76rem", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                                    🟢 Effectif conforme
+                                    <CheckCircle2 size={12} aria-hidden="true" /> Effectif conforme
                                   </span>
                                 )}
                               </div>
@@ -638,7 +638,7 @@ export function KanbanTab({
                               {/* Ligne de Synthèse : ⚖️ Parité | ∅ Moyenne | ✦ Accompagnements & Besoins */}
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 700, marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-light)", whiteSpace: "nowrap" }}>
                                 <span className="ui-tooltip" data-tooltip={`Parité filles / garçons : ${countF} Filles et ${countM} Garçons`} style={{ whiteSpace: "nowrap", cursor: "help" }}>
-                                  ⚖️ <strong>{countF}F</strong>/<strong>{countM}G</strong>
+                                  <Scale size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> <strong>{countF}F</strong>/<strong>{countM}G</strong>
                                 </span>
                                 <span className="ui-tooltip" data-tooltip={`Moyenne générale calculée pour ${classroom.label} : ${avg} / 20`} style={{ whiteSpace: "nowrap", cursor: "help" }}>
                                   ∅ <strong style={{ color: "var(--primary-brand)", fontFamily: "var(--font-mono)" }}>{avg}/20</strong>
@@ -660,7 +660,7 @@ export function KanbanTab({
                                   }}
                                   onClick={() => setOpenSupportModalClassId(openSupportModalClassId === classroom.id ? null : classroom.id)}
                                 >
-                                  ✦ <strong>{supportCount}</strong> besoins ℹ️
+                                  <HeartHandshake size={11} aria-hidden="true" style={{ verticalAlign: "-1px" }} /> <strong>{supportCount}</strong> besoins <Info size={10} aria-hidden="true" style={{ verticalAlign: "-1px" }} />
                                 </button>
                               </div>
 
@@ -679,12 +679,12 @@ export function KanbanTab({
                                   }}
                                 >
                                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", fontWeight: 800 }}>
-                                    <span>📋 Aménagements ({classroom.label})</span>
+                                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}><ClipboardList size={13} aria-hidden="true" /> Aménagements ({classroom.label})</span>
                                     <button
-                                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: "var(--text-muted)" }}
+                                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "inline-flex", alignItems: "center" }}
                                       onClick={() => setOpenSupportModalClassId(null)}
                                     >
-                                      ✕
+                                      <X size={14} aria-hidden="true" />
                                     </button>
                                   </div>
 
@@ -793,7 +793,7 @@ export function KanbanTab({
                                       </div>
                                     </div>
 
-                                    {/* Actions : 🔍 Fiche & ⇄ Déplacer */}
+                                    {/* Actions : Fiche & Déplacer */}
                                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
                                       <button
                                         className="icon-btn-subtle ui-tooltip"
@@ -802,9 +802,9 @@ export function KanbanTab({
                                           e.stopPropagation();
                                           setInspectStudent(student);
                                         }}
-                                        style={{ padding: "3px 6px", fontSize: "0.75rem", borderRadius: "var(--radius-sm)" }}
+                                        style={{ padding: "3px 6px", borderRadius: "var(--radius-sm)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
                                       >
-                                        🔍
+                                        <FolderOpen size={13} aria-hidden="true" />
                                       </button>
 
                                       {selected.state !== "APPROVED" && (
@@ -845,9 +845,12 @@ export function KanbanTab({
                                             fontWeight: 800,
                                             lineHeight: 1.2,
                                             cursor: "help",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "3px",
                                           }}
                                         >
-                                          ⚠️ Incompatibilité
+                                          <TriangleAlert size={10} aria-hidden="true" /> Incompatibilité
                                         </span>
                                       )}
                                       {student.coLocateGroupId && (
@@ -863,9 +866,12 @@ export function KanbanTab({
                                             fontWeight: 800,
                                             lineHeight: 1.2,
                                             cursor: "help",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "3px",
                                           }}
                                         >
-                                          🤝 Binôme
+                                          <HeartHandshake size={10} aria-hidden="true" /> Binôme
                                         </span>
                                       )}
                                       {student.supportFlags.map((flag) => (
