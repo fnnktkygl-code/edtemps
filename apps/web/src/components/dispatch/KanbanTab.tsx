@@ -742,7 +742,7 @@ export function KanbanTab({
                                       <span className="drag-handle" style={{ color: "var(--text-light)", cursor: "grab", fontSize: "0.85rem", flexShrink: 0 }} title="Glisser-déposer">::</span>
 
                                       <div
-                                        className="ui-tooltip ui-tooltip-top"
+                                        className="ui-tooltip ui-tooltip-card-avatar"
                                         data-tooltip={anonymous ? `Identifiant visuel unique de l'élève (${student.initials})` : `Identifiant visuel unique (${student.displayName})`}
                                         style={{
                                           width: "28px",
