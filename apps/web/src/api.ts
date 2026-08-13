@@ -92,13 +92,23 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 function getCached<T>(key: string): T | null {
   const memory = memoryCache.get(key);
   if (memory && Date.now() - memory.timestamp < CACHE_TTL_MS) {
-    return memory.data as T;
+    const data = memory.data as Record<string, unknown>;
+    if (data && Array.isArray(data.students) && data.students.some((s: { displayName?: string }) => s.displayName && /\s[A-Z]\.$/.test(s.displayName))) {
+      memoryCache.delete(key);
+    } else {
+      return memory.data as T;
+    }
   }
   if (typeof localStorage !== "undefined") {
     try {
       const raw = localStorage.getItem(`cache_${key}`);
       if (raw) {
         const parsed = JSON.parse(raw) as CacheEntry<T>;
+        const data = parsed.data as Record<string, unknown>;
+        if (data && Array.isArray(data.students) && data.students.some((s: { displayName?: string }) => s.displayName && /\s[A-Z]\.$/.test(s.displayName))) {
+          localStorage.removeItem(`cache_${key}`);
+          return null;
+        }
         if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
           memoryCache.set(key, parsed as CacheEntry<unknown>);
           return parsed.data;

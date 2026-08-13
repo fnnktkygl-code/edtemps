@@ -203,7 +203,12 @@ export default function App() {
       try {
         const parsedDs = JSON.parse(savedDatasetStr) as Dataset;
         const parsedScens = JSON.parse(savedScenariosStr) as Scenario[];
-        if (parsedDs && parsedDs.students && parsedDs.students.length > 0 && parsedScens && parsedScens.length > 0) {
+        const isStale = parsedDs?.students?.some((s) => s.displayName && /\s[A-Z]\.$/.test(s.displayName));
+        if (isStale) {
+          localStorage.removeItem("edtemps_savedDataset");
+          localStorage.removeItem("edtemps_savedScenarios");
+          localStorage.removeItem("edtemps_selectedScenarioId");
+        } else if (parsedDs && parsedDs.students && parsedDs.students.length > 0 && parsedScens && parsedScens.length > 0) {
           setDatasetState(parsedDs);
           setActiveDataset(parsedDs);
           setScenariosState(parsedScens);
