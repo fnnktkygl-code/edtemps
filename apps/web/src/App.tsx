@@ -759,22 +759,56 @@ export default function App() {
 
     const diffs: string[] = [];
     if (inspectStudent.gender !== editStudentForm.gender) {
-      diffs.push(`Sexe: ${inspectStudent.gender} → ${editStudentForm.gender}`);
+      diffs.push(`Sexe: ${inspectStudent.gender === "F" ? "Fille ♀" : "Garçon ♂"} → ${editStudentForm.gender === "F" ? "Fille ♀" : "Garçon ♂"}`);
     }
+
+    // Detailed subject grade differences
+    if (inspectStudent.subjectGrades || editStudentForm.subjectGrades) {
+      const oldGrades = inspectStudent.subjectGrades || [];
+      const newGrades = editStudentForm.subjectGrades || [];
+
+      const oldMap = new Map(oldGrades.map((g) => [g.subject, g.score]));
+      const newMap = new Map(newGrades.map((g) => [g.subject, g.score]));
+
+      const subjectDiffs: string[] = [];
+      newMap.forEach((score, subject) => {
+        const oldScore = oldMap.get(subject);
+        if (oldScore === undefined) {
+          subjectDiffs.push(`+${subject}: ${score.toFixed(1)}/20`);
+        } else if (oldScore !== score) {
+          subjectDiffs.push(`${subject}: ${oldScore.toFixed(1)} → ${score.toFixed(1)}/20`);
+        }
+      });
+
+      oldMap.forEach((oldScore, subject) => {
+        if (!newMap.has(subject)) {
+          subjectDiffs.push(`-${subject} (supprimée)`);
+        }
+      });
+
+      if (subjectDiffs.length > 0) {
+        diffs.push(`Notes: ${subjectDiffs.join(", ")}`);
+      }
+    }
+
     if (inspectStudent.levelAverage !== editStudentForm.levelAverage) {
       diffs.push(`Moyenne: ${inspectStudent.levelAverage.toFixed(1)} → ${editStudentForm.levelAverage.toFixed(1)}/20`);
     }
-    if (JSON.stringify(inspectStudent.supportFlags.slice().sort()) !== JSON.stringify(editStudentForm.supportFlags.slice().sort())) {
-      diffs.push(`Dispositifs: [${inspectStudent.supportFlags.join(",")}] → [${editStudentForm.supportFlags.join(",")}]`);
-    }
-    if (JSON.stringify(inspectStudent.options.slice().sort()) !== JSON.stringify(editStudentForm.options.slice().sort())) {
-      diffs.push(`Options: [${inspectStudent.options.join(",")}] → [${editStudentForm.options.join(",")}]`);
-    }
+
+    // Support flags (PAP, PPS, PAI, PPRE, ULIS)
+    const addedFlags = editStudentForm.supportFlags.filter((f) => !inspectStudent.supportFlags.includes(f));
+    const removedFlags = inspectStudent.supportFlags.filter((f) => !editStudentForm.supportFlags.includes(f));
+    if (addedFlags.length > 0) diffs.push(`Accompagnements: +[${addedFlags.join(",")}]`);
+    if (removedFlags.length > 0) diffs.push(`Accompagnements: -[${removedFlags.join(",")}]`);
+
+    // Options & Langues
+    const addedOptions = editStudentForm.options.filter((o) => !inspectStudent.options.includes(o));
+    const removedOptions = inspectStudent.options.filter((o) => !editStudentForm.options.includes(o));
+    if (addedOptions.length > 0) diffs.push(`Options: +[${addedOptions.join(",")}]`);
+    if (removedOptions.length > 0) diffs.push(`Options: -[${removedOptions.join(",")}]`);
+
     if (inspectStudent.teacherComments !== editStudentForm.teacherComments) {
       diffs.push(`Appréciation mise à jour`);
-    }
-    if (JSON.stringify(inspectStudent.subjectGrades) !== JSON.stringify(editStudentForm.subjectGrades)) {
-      diffs.push(`Notes par matière modifiées`);
     }
 
     const summary = diffs.length > 0 ? diffs.join(" | ") : "Mise à jour des informations de l'élève";
@@ -799,6 +833,12 @@ export default function App() {
     const updatedStudents = dataset.students.map((s) => (s.id === editStudentForm.id ? editStudentForm : s));
     const updatedDataset = { ...dataset, students: updatedStudents };
     setDataset(updatedDataset);
+    setActiveDataset(updatedDataset);
+    setInspectStudent(editStudentForm);
+
+    try {
+      localStorage.setItem("edtemps_savedDataset", JSON.stringify(updatedDataset));
+    } catch {}
 
     setAudit([auditEvent, ...audit]);
     setIsEditingStudent(false);
