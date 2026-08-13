@@ -627,10 +627,11 @@ export function WeightsTab({
                     <select
                       value={ruleType}
                       onChange={(e) => setRuleType(e.target.value as "CONFLICT" | "COLOCATION")}
-                      style={{ width: "100%", minWidth: "240px", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", fontWeight: 700 }}
+                      style={{ width: "100%", minWidth: "280px", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", fontWeight: 700 }}
+                      title="Type de Règle (Séparation ou Association)"
                     >
-                      <option value="CONFLICT">⛔ Incompatibilité (Séparation obligatoire)</option>
-                      <option value="COLOCATION">🤝 Association (Mettre dans la même classe)</option>
+                      <option value="CONFLICT">⛔ Incompatibilité (Séparer)</option>
+                      <option value="COLOCATION">🤝 Association (Même classe)</option>
                     </select>
                   </div>
 

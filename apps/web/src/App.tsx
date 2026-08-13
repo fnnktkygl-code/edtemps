@@ -195,6 +195,12 @@ export default function App() {
   const [audit, setAudit] = useState<AuditEvent[]>([]);
 
   useEffect(() => {
+    const cacheVersion = localStorage.getItem("edtemps_cacheVersion");
+    if (cacheVersion !== "v5") {
+      localStorage.clear();
+      localStorage.setItem("edtemps_cacheVersion", "v5");
+    }
+
     const savedDatasetStr = localStorage.getItem("edtemps_savedDataset");
     const savedScenariosStr = localStorage.getItem("edtemps_savedScenarios");
     const savedSelectedId = localStorage.getItem("edtemps_selectedScenarioId");

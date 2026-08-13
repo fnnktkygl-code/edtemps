@@ -70,10 +70,8 @@ describe("KanbanTab", () => {
     renderKanbanTab({ anonymous: true });
 
     expect(screen.queryByText("Camille Dubois")).not.toBeInTheDocument();
-    // "CD" apparaît à la fois sur l'avatar (toujours en initiales) et sur le
-    // nom de l'élève (en initiales seulement en mode anonyme) : les deux
-    // occurrences attendues confirment que le nom complet n'est plus affiché.
-    expect(screen.getAllByText("CD").length).toBeGreaterThanOrEqual(2);
+    // Les initiales "CD" apparaissent proprement pour l'élève sans doublon
+    expect(screen.getByText("CD")).toBeInTheDocument();
   });
 
   it("signale un sous-effectif quand la classe est sous le minimum", () => {

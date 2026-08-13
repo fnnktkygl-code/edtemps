@@ -756,12 +756,12 @@ export function KanbanTab({
                                         }}
                                         title={anonymous ? `Élève ${student.initials}` : student.displayName}
                                       >
-                                        {anonymous ? student.initials : <User size={13} aria-hidden="true" />}
+                                        {anonymous ? <Lock size={12} aria-hidden="true" /> : <User size={13} aria-hidden="true" />}
                                       </div>
 
-                                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", minWidth: 0, flex: 1, overflow: "hidden" }}>
+                                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", minWidth: 0, flex: 1 }}>
                                         <span
-                                          style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text-main)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}
+                                          style={{ fontWeight: 700, fontSize: "0.83rem", color: "var(--text-main)", lineHeight: 1.2, wordBreak: "break-word", flexShrink: 1 }}
                                           title={nameOf(student, anonymous)}
                                         >
                                           {nameOf(student, anonymous)}
