@@ -191,7 +191,7 @@ export function RosterTab({
                                   {nameOf(student, anonymous)}
                                 </td>
                                 <td style={{ padding: "10px 14px" }}>
-                                  <span className="chip" style={{ padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
+                                  <span className="chip" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px", whiteSpace: "nowrap", padding: "3px 8px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
                                     {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
                                   </span>
                                 </td>
@@ -278,7 +278,7 @@ export function RosterTab({
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", fontSize: "0.78rem" }}>
-                              <span className="chip" style={{ padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
+                              <span className="chip" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px", whiteSpace: "nowrap", padding: "2px 8px", borderRadius: "12px", fontWeight: 800, background: student.gender === "F" ? "var(--badge-female-bg)" : "var(--badge-male-bg)", color: student.gender === "F" ? "var(--badge-female-text)" : "var(--badge-male-text)", border: `1px solid ${student.gender === "F" ? "var(--badge-female-border)" : "var(--badge-male-border)"}` }}>
                                 {student.gender === "F" ? "♀ Fille" : "♂ Garçon"}
                               </span>
                               <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>

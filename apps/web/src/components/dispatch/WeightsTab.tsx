@@ -607,7 +607,7 @@ export function WeightsTab({
                 </div>
 
                 {/* Formulaire d'ajout rapide de règle */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", alignItems: "end", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", alignItems: "end", background: "var(--bg-subtle)", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, marginBottom: "3px", color: "var(--text-muted)" }}>Élève A</label>
                     <select
@@ -627,7 +627,7 @@ export function WeightsTab({
                     <select
                       value={ruleType}
                       onChange={(e) => setRuleType(e.target.value as "CONFLICT" | "COLOCATION")}
-                      style={{ width: "100%", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", fontWeight: 700 }}
+                      style={{ width: "100%", minWidth: "240px", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)", background: "var(--bg-card)", fontWeight: 700 }}
                     >
                       <option value="CONFLICT">⛔ Incompatibilité (Séparation obligatoire)</option>
                       <option value="COLOCATION">🤝 Association (Mettre dans la même classe)</option>

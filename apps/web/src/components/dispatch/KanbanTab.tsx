@@ -1,5 +1,5 @@
 import type { DispatchWeights } from "@edtemps/domain";
-import { Scale, Lock, CheckCircle2, FileText, Sparkles, Undo2, Redo2, FileDown, Package, AlertTriangle, Info, Target, Trophy, BarChart3, Zap, HeartHandshake, Lightbulb, Check, ClipboardList, SlidersHorizontal, Wand2, Pencil, ArrowRight, TriangleAlert, OctagonAlert, X, FolderOpen, GraduationCap } from "lucide-react";
+import { Scale, Lock, CheckCircle2, FileText, Sparkles, Undo2, Redo2, FileDown, Package, AlertTriangle, Info, Target, Trophy, BarChart3, Zap, HeartHandshake, Lightbulb, Check, ClipboardList, SlidersHorizontal, Wand2, Pencil, ArrowRight, TriangleAlert, OctagonAlert, X, FolderOpen, GraduationCap, User } from "lucide-react";
 import { api } from "../../api";
 import type { Classroom, Dataset, Scenario, Student } from "../../types";
 import { getAvatarColor, nameOf } from "../../utils/format";
@@ -754,9 +754,9 @@ export function KanbanTab({
                                           fontSize: "0.74rem",
                                           flexShrink: 0,
                                         }}
-                                        title={`Initiales : ${student.initials}`}
+                                        title={anonymous ? `Élève ${student.initials}` : student.displayName}
                                       >
-                                        {student.initials}
+                                        {anonymous ? student.initials : <User size={13} aria-hidden="true" />}
                                       </div>
 
                                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", minWidth: 0, flex: 1, overflow: "hidden" }}>

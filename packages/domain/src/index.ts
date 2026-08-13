@@ -885,7 +885,7 @@ export function createSyntheticDemoInputCustom(studentCount = 70, classCount = 3
 
     return {
       id: `student-${idx + 1}`,
-      displayName: `${firstName} ${lastInitial}`,
+      displayName: `${firstName} ${lastName}`,
       initials: `${firstName.slice(0, 1)}.${lastInitial}`,
       gender,
       levelAverage,
